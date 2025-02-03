@@ -1,11 +1,47 @@
 # -*- coding: utf-8 -*-
 """
-Last modified on Feb 01 2025
+Created on Mon Jan 27 15:56:23 2025
 
-@author: Hermann Zeyen <hermann.zeyen@universite-paris-saclay.fr>
-         Universite Paris-Saclay, France
+@author: Hermann
 """
+import sys
+import os
 import numpy as np
+import matplotlib.pyplot as plt
+from PyQt5 import QtWidgets
+
+dir0 = r"E:\Daten\Magnetics\test_mag_topo"
+os.chdir(dir0)
+
+app = QtWidgets.QApplication(sys.argv)
+
+
+class Earth_mag():
+    """
+
+    Class stores the components of the Earth's magnetic field and the direction
+    (co)sines
+
+    """
+
+    def __init__(self, intensity, inclination, declination):
+        self.f = intensity
+        self.inc = inclination
+        self.dec = declination
+        self.earth_components()
+
+    def earth_components(self):
+        self.cde = np.cos(np.radians(self.dec))
+        self.sde = np.sin(np.radians(self.dec))
+        self.cie = np.cos(np.radians(self.inc))
+        self.sie = np.sin(np.radians(self.inc))
+        self.cdci = self.cde*self.cie
+        self.sdci = self.sde*self.cie
+        self.eh = self.f*self.cie
+        self.ex = self.f*self.cdci
+        self.ey = self.f*self.sdci
+        self.ez = self.f*self.sie
+        return True
 
 
 class Okabe():
@@ -174,7 +210,7 @@ class Okabe():
                                         np.copy(zfa_pt))
                     if not np.isfinite(anom):
                         print(f"face {ifac}, row {ir}, col {ic}: {anom}")
-                        continue
+                        sys.exit()
                     carte[ir, ic] = carte[ir, ic]+anom
         return carte
 
@@ -384,3 +420,215 @@ class Okabe():
         else:
             t += (ym*c-xm*s) * np.log(rprim)
         return t
+
+
+def read_synthetic_model():
+    """
+    Read synthetic model.
+    The file should have an extension .txt, .dat or .mod
+    The model is composed of rectangular prisms with faces parallel to axis.
+    The format of the file is as follows:
+
+    - No header line
+    - One line per prism to be calculated containing 7 to 11 values each:
+      xmin, xmax, ymin, ymax, zmin, zmax, sus, rem_s, rem_i, rem_d, rho
+
+    - xmin, xmax: minimum and maximum x_coordinates (E-W) of prism [m]
+    - ymin, ymax: minimum and maximum y_coordinates (N-S) of prism [m]
+    - zmin, zmax: minimum and maximum z_coordinates (positive down) of
+      prism [m]
+    - sus: susceptibility [SI units]
+    - rem_s: intensity of remanent magnetization [A/m]
+    - rem_i: inclination of remanent magnetization [degrees]
+    - rem_d: declination of remanent magnetization [degrees]
+    - rho: density of prism [kg/m3]
+
+    Returns
+    -------
+    x : numpy float array of shape (n_prisms, 2)
+        X-coordinates of prisms.
+    y : numpy float array of shape (n_prisms, 2)
+        Y-coordinates of prisms.
+    z : numpy float array of shape (n_prisms, 2)
+        Z-coordinates of prisms.
+    sus : numpy float array of shape (n_prisms)
+        Susceptibilities of prisms.
+    rem : numpy float array of shape (n_prisms)
+        Remanence intensities of prisms.
+    rem_i : numpy float array of shape (n_prisms)
+        Remanence inclinations of prisms.
+    rem : numpy float array of shape (n_prisms)
+        Remanence declinations of prisms.
+    rho : numpy float array of shape (n_prisms)
+        Densities of prisms.
+
+    """
+    file = list(
+        QtWidgets.QFileDialog.getOpenFileName(
+            None, "Select model file", "",
+            filter="txt/dat/mod (*.txt *.dat *.mod) ;; all (*.*)"))
+    if len(file) == 0:
+        print("No file chosen, program finishes")
+        return None, None, None, None, None, None, None, None
+    if len(file[0]) < 1:
+        print("read_synthetic_model: No files read")
+        return None, None, None, None, None, None, None, None
+    xmin = []
+    xmax = []
+    ymin = []
+    ymax = []
+    zmin = []
+    zmax = []
+    sus = []
+    rem = []
+    rem_i = []
+    rem_d = []
+    rho = []
+    with open(file[0], "r") as fi:
+        lines = fi.readlines()
+    for line in lines:
+        val = line.split()
+        ncol = len(val)
+        if ncol < 7:
+            answer = QtWidgets.QMessageBox.warning(
+                None,
+                "Warning",
+                "Synthetic model file does not have enough columns:\n"
+                + f"At least 7 columns are needed, {ncol} found.\n"
+                + "Synthetic modeling aborted.",
+                QtWidgets.QMessageBox.Close, QtWidgets.QMessageBox.Ignore)
+            return None, None, None, None, None, None, None, None
+        if ncol < 11:
+            if ncol == 7:
+                text = "Remanence and density are set to zero."
+            else:
+                text = "Density is set to zero."
+            answer = QtWidgets.QMessageBox.warning(
+                None,
+                "Warning",
+                "Synthetic model file has only {ncol} columns:\n"
+                + f"{text}\nPress Ignore to accept or Abort to abandon.",
+                QtWidgets.QMessageBox.Ignore | QtWidgets.QMessageBox.Abort,
+                QtWidgets.QMessageBox.Ignore)
+            if answer == QtWidgets.QMessageBox.Abort:
+                return None, None, None, None, None, None, None, None
+        xmin.append(float(val[0]))
+        xmax.append(float(val[1]))
+        ymin.append(float(val[2]))
+        ymax.append(float(val[3]))
+        zmin.append(float(val[4]))
+        zmax.append(float(val[5]))
+        sus.append(float(val[6]))
+        if ncol > 7:
+            rem.append(float(val[7]))
+            if ncol > 8:
+                rem_i.append(float(val[8]))
+                if ncol > 9:
+                    rem_d.append(float(val[9]))
+                    if ncol > 10:
+                        rho.append(float(val[10]))
+                    else:
+                        rho.append(0.0)
+                else:
+                    rem_d.append(0.0)
+                    rho.append(0.0)
+            else:
+                rem_i.append(0.0)
+                rem_d.append(0.0)
+                rho.append(0.0)
+        else:
+            rem.append(0.0)
+            rem_i.append(0.0)
+            rem_d.append(0.0)
+            rho.append(0.0)
+        nprism = len(xmin)
+        x = np.zeros((nprism, 2))
+        x[:, 0] = np.array(xmin)
+        x[:, 1] = np.array(xmax)
+        y = np.zeros((nprism, 2))
+        y[:, 0] = np.array(ymin)
+        y[:, 1] = np.array(ymax)
+        z = np.zeros((nprism, 2))
+        z[:, 0] = np.array(zmin)
+        z[:, 1] = np.array(zmax)
+    return x, y, z, np.array(sus), np.array(rem), np.array(rem_i), \
+        np.array(rem_d), np.array(rho)
+
+
+def store_gxf(file, data, x0, y0, dx, dy):
+    """
+    store gridded data in GXF format
+
+    Parameters
+    ----------
+    file : str
+        File name.
+    data : 2D numpy float array with shape (nrows, ncolumns)
+        Gridded data to be stored.
+    x0 : float
+        Minimum X coordinate [m].
+    y0 : float
+        Minimum Y coordinate [m].
+    dx : float
+        Grid step in X direction [m].
+    dy : float
+        Grid step in Y direction [m].
+
+    Returns
+    -------
+    None.
+
+    """
+    cols = data.shape[1]
+    rows = data.shape[0]
+    with open(file, "w") as fo:
+        fo.write(f"#TITLE\n\n#POINTS\n{cols}\n#ROWS\n{rows}\n#SENSE\n1\n")
+        fo.write(f"#XORIGIN\n{x0}\n#YORIGIN\n{y0}\n#ROTATION\n0\n")
+        fo.write(f"#PTSEPARATION\n{dx}\n#RWSEPARATION\n{dy}\n#TRANSFORM\n")
+        fo.write("1 0\n#UNIT_LENGTH\nm, 1\n#MAP_PROJECTION\nUTM31\n")
+        fo.write("#DUMMY\n-1e32\n\n\n#GRID\n")
+        for iy in range(rows):
+            nc = 0
+            for ix in range(cols):
+                if np.isnan(data[iy, ix]):
+                    fo.write("-1e32 ")
+                else:
+                    fo.write(f"{data[iy, ix]:0.3f} ")
+                nc += 1
+                if nc == 8 or ix == cols-1:
+                    fo.write("\n")
+                    nc = 0
+
+
+earth = Earth_mag(50000., 90., 0.)
+xp, yp, zz, sus, rem, rem_i, rem_d, rho = read_synthetic_model()
+zp = np.zeros(8)
+zp[:2] = -zz[0][0]
+zp[2:4] = zp[:2]+0.
+zp[4:] = -zz[0][1]
+# typ = "M"
+typ = "G"
+prism = Okabe(xp[0], yp[0], zp, sus[0], rem[0], rem_i[0], rem_d[0], rho[0],
+              earth, typ=typ)
+x0 = 0.
+x1 = 15.
+dx = 0.5
+y0 = 0.
+y1 = 15.
+dy = 0.5
+x = np.arange(x0, x1+dx/2., dx)
+y = np.arange(y0, y1+dy/2., dy)
+nx = len(x)
+ny = len(y)
+calc = np.zeros((nx, ny))
+calc += prism.calc_ano(calc, x0, x1, dx, y0, y1, dy, 0.)
+
+fig, ax = plt.subplots(1, 1, figsize=(10, 15))
+pl = ax.imshow(np.flip(calc, axis=0), cmap="rainbow", extent=[x0, x1, y0, y1])
+ax.set_xlabel("Easting[m]")
+ax.set_ylabel("Northing [m]")
+ax.set_title("Synthetic model Okabe")
+if typ == "M":
+    store_gxf("Okabe_mag.gxf", calc, x0, y0, dx, dy)
+else:
+    store_gxf("Okabe_grav.gxf", calc, x0, y0, dx, dy)

@@ -613,7 +613,7 @@ def interpol_line(data, nsensor, i_line=0, dx=0.2, xmin=0.0, xmax=0.0, k=3):
     return sensor_inter, x_inter, y_inter, dmin, dmax
 
 
-def interpol_2D(data_c, dx=0.2, dy=0.2):
+def interpol_2D(data_c, dx=0.2, dy=0.2, fill_hole=False):
     """
     Routine interpolates data on all lines onto a regular grid. No
     extrapolation is done, i.e. if at the beginning or the end of a line
@@ -630,6 +630,11 @@ def interpol_2D(data_c, dx=0.2, dy=0.2):
         Sampling step in meters in x-direction. The default is 0.2.
     dx : float, optional
         Sampling step in meters in y-direction. The default is 0.2.
+    fill_hole : bool, optional. Default False
+        If True, internal missing grid points are interpolated, however not
+        external ones (misisng points at the edge of the grid).
+        If False, only small holes (up to 3 grid points) are interpolated,
+        others are associated np.nan
 
     Returns
     -------
@@ -652,6 +657,10 @@ def interpol_2D(data_c, dx=0.2, dy=0.2):
         y_coordinates of the rows of s1_inter and s2_inter
 
     """
+    if fill_hole:
+        n_hole = 1000000
+    else:
+        n_hole = 3
     data = data_c.data
     keys = []
     for key in data.keys():
@@ -824,7 +833,7 @@ def interpol_2D(data_c, dx=0.2, dy=0.2):
         t_inter[n1:n2, i] = f(p2_inter[n1:n2])
 # Check whether there are big holes in data along the line (>3*line distance)
         if len(index) > 1:
-            hole = np.where(pos_ind[1:]-pos_ind[:-1] > 3)[0]
+            hole = np.where(pos_ind[1:]-pos_ind[:-1] > n_hole)[0]
             if len(hole > 0):
                 for ih, h in enumerate(hole):
                     n1 = int((pos[pos_ind[hole[0]]]-p2_inter[0])/dp2)+1
@@ -846,7 +855,7 @@ def interpol_2D(data_c, dx=0.2, dy=0.2):
             f = interpolate.interp1d(pi, s2[i1:i2], kind="quadratic")
             s2_inter[n1:n2, i] = f(p2_inter[n1:n2])
             if len(index) > 1:
-                hole = np.where(pos_ind[1:]-pos_ind[:-1] > 3)[0]
+                hole = np.where(pos_ind[1:]-pos_ind[:-1] > n_hole)[0]
                 if len(hole > 0):
                     for ih, h in enumerate(hole):
                         n1 = int((pos[pos_ind[hole[0]]]-p2_inter[0])/dp2)

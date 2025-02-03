@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pymagra"
+dynamic = ["version"]
+requires-python = ">=3.8"
+
+description = "Data treatment for potential fields"
+authors = [{ name = "Hermann ZEYEN", email = "hermann.zeyen@universite-paris-saclay.fr" }]
+
+dependencies = [
+    "pathlib",
+    "datetime",
+    "scikit-learn",
+    "numpy",
+    "matplotlib",
+]
+# The following packages should be included as dependencies, but give errors...
+#   "signal",
+#   "copy",
+#   "mpl_toolkits",
+
+classifiers = [
+    'Development Status :: 3 - Alpha',
+    'Intended Audience :: Science/Research',
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: BSD License',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Topic :: Software Development',
+    'Topic :: Scientific/Engineering',
+    'Typing :: Typed',
+    'Operating System :: Microsoft :: Windows',
+    'Operating System :: POSIX',
+    'Operating System :: Unix',
+    'Operating System :: MacOS',
+]
+
+[project.scripts]
+pymagra = "Pymagra.__main__:execute_script"
+
+[tool.setuptools]
+packages = ["Pymagra", "Pymagra.in_out", "Pymagra.plotting", "Pymagra.utilities", "Pymagra.data", "Pymagra.inversion"]
+include-package-data = false
+
+[tool.setuptools.package-data]
+"*" = ["*.ui", "*.py"]
+
+[tool.setuptools.dynamic]
+version = { attr = "Pymagra.version.__version__" }

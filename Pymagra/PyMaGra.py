@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-last modified on Dec 02, 2024
+last modified on Feb 01, 2024
 
 @author: Hermann Zeyen <hermann.zeyen@universite-paris-saclay.fr>
          University Paris-Saclay, France
@@ -1610,12 +1610,18 @@ class Main(QtWidgets.QWidget):
             z.append(np.ones_like(xx) * self.data.data["height2"])
             data.append(s2)
         if self.data.topo_flag:
-            inv = inversion(data, x, y, z, topo_int=self.data.topo_interpol,
-                            earth=earth, data_type=data_type, line_pos=yy,
-                            direction=direction)
+            # inv = inversion(data, x, y, z, topo_int=self.data.topo_interpol,
+            #                 earth=earth, data_type=data_type, line_pos=yy,
+            #                 direction=direction)
+            inv = inversion(self.data, data, x, y, z, earth=earth,
+                            data_type=data_type, line_pos=yy,
+                            direction=direction, dim=2)
         else:
-            inv = inversion(data, x, y, z, earth=earth, data_type=data_type,
-                            line_pos=yy, direction=direction)
+            # inv = inversion(data, x, y, z, earth=earth, data_type=data_type,
+            #                 line_pos=yy, direction=direction)
+            inv = inversion(self.data, data, x, y, z, earth=earth,
+                            data_type=data_type, line_pos=yy,
+                            direction=direction, dim=2)
 # Get area of initial prisms and extract data to be inverted
         ret = inv.get_area2D()
         if not ret:
@@ -1678,8 +1684,10 @@ class Main(QtWidgets.QWidget):
                 x.append(xx)
                 y.append(yy)
                 z.append(np.ones_like(yy) * (self.data.data["height2"]))
-            inv = inversion(data, x, y, z, topo_int=None, earth=earth,
-                            data_type=data_type)
+            # inv = inversion(data, x, y, z, topo_int=None, earth=earth,
+            #                 data_type=data_type)
+            inv = inversion(self.data, data, x, y, z, earth=earth,
+                            data_type=data_type, dim=3)
 # Define inversion parameters
             ret = inv.get_inversion_parameters(data_type)
             if not ret:

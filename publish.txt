@@ -1,0 +1,11 @@
+cd docs
+./make html
+cd ..
+REM Change version in Pymagra/__version__.py
+python -m build
+REM delete old versions in ./dist
+twine upload dist/*
+git rm -rf --cached .
+git add .
+git commit _m "any_comment"
+git push origin main

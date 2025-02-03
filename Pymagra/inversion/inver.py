@@ -28,8 +28,8 @@ class inversion():
     class controlling inversion of data sets
     """
 
-    def __init__(self, data, x, y, z, topo_int=None, earth=None, data_type="m",
-                 line_pos=None, direction=None):
+    def __init__(self, data_class, data, x, y, z, topo_int=None, earth=None,
+                 data_type="m", line_pos=None, direction=None, dim=3):
         """
         Initialization of inversion.
 
@@ -57,6 +57,7 @@ class inversion():
         direction : str, optional. Default: None
 
         """
+        self.data_class = data_class
         self.data_shape = data[0].shape
         self.data1_shape = data[0].shape
         self.data = data[0].flatten()
@@ -75,12 +76,12 @@ class inversion():
             self.topo_flag = False
         else:
             self.topo_flag = True
-        self.dim = 2
+        self.dim = dim
         if y[0] is None:
             self.y = np.zeros_like(self.x)
         else:
             self.y = y[0].flatten()
-            self.dim = 3
+            # self.dim = 3
         # self.sensor1_data = self.n_data
 # If only one data set is to be inverted, set values of second one to None
         if len(data) == 1:
@@ -570,6 +571,19 @@ class inversion():
             sens = "Easting"
         else:
             sens = "Northing"
+# Plot misfit evolution
+        self.fig_mis2 = newWindow(f"{txt} model", 1000, 750, 15, 15)
+        self.fig_mis2.fig.tight_layout(w_pad=15, h_pad=2)
+        ax_mis = self.fig_mis2.fig.add_subplot()
+        ax_mis.plot(np.arange(len(self.std_data_rel)), self.std_data_rel*100.)
+        ax_mis.set_title(title, fontsize=14)
+        ax_mis.set_xlabel("Iteration #", fontsize=12)
+        ax_mis.set_ylabel("Relative RMS misfit [%]", fontsize=12)
+        ax_mis.set_xlim([0, len(self.RMS_misfit)-1])
+        self.fig_mis2.show()
+        fil = os.path.join(self.folder, file+"misfit.png")
+        self.fig_mis2.fig.savefig(fil)
+
         while True:
             self.fig_inv2 = newWindow(f"{txt} model", 2000, 1500, 15, 15)
             self.fig_inv2.fig.tight_layout(w_pad=15, h_pad=2)
@@ -674,6 +688,7 @@ class inversion():
             while True:
                 event = self.fig_inv2.get_event()
                 self.fig_inv2.close()
+                self.fig_mis2.close()
                 if event.name == "key_press_event":
                     if event.key == "enter":
                         return False
@@ -1451,6 +1466,14 @@ class inversion():
             xdata_max = self.xprism_max - self.zprism_max
             n1 = np.where(self.x[:ndata] >= xdata_min)[0][0]
             n2 = np.where(self.x[:ndata] <= xdata_max)[0][-1]+1
+            for i in range(n1, n2):
+                if np.isfinite(self.data[i]):
+                    break
+            n1 = i
+            for i in range(n2-1, n1-1, -1):
+                if np.isfinite(self.data[i]):
+                    break
+            n2 = i+1
             n1 = max(n1, int(self.data_reduction/2))
             x = self.x[n1:n2:self.data_reduction]
             y = self.y[n1:n2:self.data_reduction]
@@ -1462,6 +1485,14 @@ class inversion():
             if self.n_sensor == 2:
                 n1 = np.where(self.x2[:ndata] >= xdata_min)[0][0]
                 n2 = np.where(self.x2[:ndata] <= xdata_max)[0][-1]+1
+                for i in range(n1, n2):
+                    if np.isfinite(self.data2[i]):
+                        break
+                n1 = i
+                for i in range(n2-1, n1-1, -1):
+                    if np.isfinite(self.data2[i]):
+                        break
+                n2 = i+1
                 n1 = max(n1, int(self.data_reduction/2))
                 x = np.concatenate((x, self.x2[n1:n2:self.data_reduction]))
                 y = np.concatenate((y, self.y2[n1:n2:self.data_reduction]))
@@ -1598,6 +1629,7 @@ class inversion():
             self.mod_yshape = len(self.y_prism)-1
         else:
             self.y_prism = np.array([self.yprism_min, self.yprism_max])
+            self.mod_yshape = 1
             # self.y_prism_topo = self.y_prism+
             # self.mod_yshape = 1dd
 # Define prisms of initial model

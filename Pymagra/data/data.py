@@ -1297,11 +1297,12 @@ class DataContainer:
 # grid points becomes too large
         while True:
             results, okButton = dialog(
-                ["dx [m]", "dy [m]"], ["e", "e"], [ddx, ddy],
-                "Interpolation parameters")
+                ["dx [m]", "dy [m]", "fill holes"], ["e", "e", "c"],
+                [ddx, ddy, 0], "Interpolation parameters")
             if okButton:
                 self.dx = float(results[0])
                 self.dy = float(results[1])
+                self.hole_flag = int(results[2] > -1)
             else:
                 print("\nInterpolation cancelled")
                 return False
@@ -1330,11 +1331,12 @@ class DataContainer:
         if self.grad_data:
             (self.sensor1_inter, self.sensor2_inter, self.grad_inter,
              self.x_inter, self.y_inter, self.z_inter, self.t_inter) =\
-                u.interpol_2D(self, dx=self.dx, dy=self.dy)
+                u.interpol_2D(self, dx=self.dx, dy=self.dy,
+                              fill_hole=self.hole_flag)
         else:
             self.sensor1_inter, _, _, self.x_inter, self.y_inter, \
-                self.z_inter, self.t_inter = u.interpol_2D(self, dx=self.dx,
-                                                           dy=self.dy)
+                self.z_inter, self.t_inter = u.interpol_2D(
+                    self, dx=self.dx, dy=self.dy, fill_hole=self.hole_flag)
         self.mask1 = np.isnan(self.sensor1_inter)
         self.sensor1_fill = u.extrapolate(
             self.sensor1_inter, self.x_inter, self.y_inter)
