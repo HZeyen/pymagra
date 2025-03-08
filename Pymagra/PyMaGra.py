@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-last modified on Feb 01, 2024
+last modified on Feb 20, 2024
 
 @author: Hermann Zeyen <hermann.zeyen@universite-paris-saclay.fr>
          University Paris-Saclay, France
@@ -383,17 +383,18 @@ class Main(QtWidgets.QWidget):
                 self.config_flag = True
                 with open(fconfig, "r") as fi:
                     lines = fi.readlines()
-                self.title_text = lines[1][:-1]
-                self.line_dec = float(lines[2])
-                self.height_sens1 = float(lines[3])
-                self.height_sens2 = float(lines[4])
-                self.sensor_disposition = int(lines[5])
-                self.strength = float(lines[6])
-                self.inclination = float(lines[7])
-                self.declination = float(lines[8])
-                if len(lines) > 9:
+                self.file_type = lines[1][:-1]
+                self.title_text = lines[2][:-1]
+                self.line_dec = float(lines[3])
+                self.height_sens1 = float(lines[4])
+                self.height_sens2 = float(lines[5])
+                self.sensor_disposition = int(lines[6])
+                self.strength = float(lines[7])
+                self.inclination = float(lines[8])
+                self.declination = float(lines[9])
+                if len(lines) > 10:
                     tcorr_flag = True
-                    tcorr = float(lines[9])
+                    tcorr = float(lines[10])
             else:
                 self.config_flag = False
             self.n_blocks += 1
@@ -432,7 +433,7 @@ class Main(QtWidgets.QWidget):
                 self.w.plotGradient.setEnabled(False)
 # Read BRGM aeromagnetic data
             elif ft[i] == "BRGM":
-                self.dat[-1].read_BRGM_flight(f)
+                self.dat[-1].read_BRGM_flight(f, self.title_text)
                 self.gradient_flag = False
                 self.w.fill.setEnabled(True)
                 self.w.plotGradient.setEnabled(False)
@@ -1240,6 +1241,17 @@ class Main(QtWidgets.QWidget):
             contains the coordinates of tha data pointsalong the chosen line
         pos_line : float
             position of the chosen line
+        topo : 1D numpy float array
+            Topography along the line if given. Positive downwards, i.e., in
+            general topography is zero, if not given, or negative
+        z1 : 1D numpy float array
+            Height of receiver 1 along the line. Constant value equal to the
+            height given in file *.config if no topography given. Else, it is
+            topography plus the height given or the height of the receiver
+            above sea level if given in the data file. Positive downwards.
+        z2 : 1D numpy float array
+            Height of receiver 2 along the line (z1 plus the height difference
+            given in file *.config). If only one sensor exists, z2 = z1.
         s1 : 1D numpy float array
             Measured data along the line of sensor 1
         s2 : 1D numpy float array
@@ -1252,22 +1264,26 @@ class Main(QtWidgets.QWidget):
         """
         direction = ""
         if self.inter_flag:
-            self.w.setHelp(
-                "Click left mouse button to choose line in Y "
-                + "direction or right button for X-direction"
-            )
+            self.w.setHelp("Click left mouse button to choose line in Y "
+                           + "direction or right button for X-direction")
         else:
-            self.w.setHelp("Click mouse button to choose a line")
-        # Wait for mouse click to choose line to be plotted first
+            if self.direction == 0:
+                self.w.setHelp("Click mouse button to choose a line in Y"
+                               + "direction")
+            else:
+                self.w.setHelp("Click mouse button to choose a line in X"
+                               + "direction")
+# Wait for mouse click to choose line to be plotted first
         while True:
             event = self.w.get_mouse_click(self.fig)
             if event.name == "button_press_event":
                 if event.inaxes:
                     break
-        pos, pos_line, s1, s2, direction = self.data.plot_line(plot_flag,
-                                                               event)
+        pos, pos_line, topo, z1, z2, s1, s2, direction = self.data.plot_line(
+            plot_flag, event)
         self.plotActual()
-        return pos, pos_line, s1, s2, direction
+        self.w.setHelp(" ")
+        return pos, pos_line, topo, z1, z2, s1, s2, direction
 
     def changeColorScale(self):
         """
@@ -1593,8 +1609,13 @@ class Main(QtWidgets.QWidget):
         y = []
         z = []
         data_type = self.data_types[self.actual_plotted_file][0]
-        xx, yy, s1, s2, direction = self.plotLine(plot_flag=False)
-        zz = np.ones_like(xx) * self.data.data["height"]
+        xx, yy, topo_line, z_line1, z_line2, s1, s2, direction = \
+            self.plotLine(plot_flag=False)
+        if self.data.topo_flag:
+            zz = z_line1
+        else:
+            topo_line = np.zeros_like(xx)
+            zz = np.ones_like(xx) * self.data.data["height"]
         if direction in ("N", "S", 0.0, 180.0):
             file = f"Inver2D_line_{int(yy)}m-E"
         else:
@@ -1603,35 +1624,31 @@ class Main(QtWidgets.QWidget):
         data.append(s1)
         x.append(xx)
         y.append(None)
-        z.append(zz)
+        if self.data.topo_flag:
+            z.append(zz)
+        else:
+            z.append(-zz)
         if s2[0] is not None:
             x.append(xx)
             y.append(None)
-            z.append(np.ones_like(xx) * self.data.data["height2"])
+            if self.data.topo_flag:
+                z.append(z_line2)
+            else:
+                z.append(-z_line2)
             data.append(s2)
-        if self.data.topo_flag:
-            # inv = inversion(data, x, y, z, topo_int=self.data.topo_interpol,
-            #                 earth=earth, data_type=data_type, line_pos=yy,
-            #                 direction=direction)
-            inv = inversion(self.data, data, x, y, z, earth=earth,
-                            data_type=data_type, line_pos=yy,
-                            direction=direction, dim=2)
-        else:
-            # inv = inversion(data, x, y, z, earth=earth, data_type=data_type,
-            #                 line_pos=yy, direction=direction)
-            inv = inversion(self.data, data, x, y, z, earth=earth,
-                            data_type=data_type, line_pos=yy,
-                            direction=direction, dim=2)
-# Get area of initial prisms and extract data to be inverted
-        ret = inv.get_area2D()
-        if not ret:
-            return
+        inv = inversion(self.data, data, x, y, z, topo=topo_line,
+                        earth=earth, data_type=data_type, line_pos=yy,
+                        direction=direction, dim=2)
 # Define inversion parameters
         ret = inv.get_inversion_parameters(data_type)
         if not ret:
             return
 # Set overall data and parameter variances
         ret = inv.get_variances()
+        if not ret:
+            return
+# Get area of initial prisms and extract data to be inverted
+        ret = inv.get_area2D()
         if not ret:
             return
         while True:
@@ -1678,12 +1695,12 @@ class Main(QtWidgets.QWidget):
             xx, yy = np.meshgrid(self.data.x_inter, self.data.y_inter)
             x.append(xx)
             y.append(yy)
-            z.append(np.ones_like(y) * self.data.data["height"])
+            z.append(self.data.z_fill)
             if self.data.data["grad_data"]:
                 data.append(self.data.sensor2_inter)
                 x.append(xx)
                 y.append(yy)
-                z.append(np.ones_like(yy) * (self.data.data["height2"]))
+                z.append(self.data.z_fill+self.data.data["d_sensor"])
             # inv = inversion(data, x, y, z, topo_int=None, earth=earth,
             #                 data_type=data_type)
             inv = inversion(self.data, data, x, y, z, earth=earth,
@@ -1844,6 +1861,10 @@ class Main(QtWidgets.QWidget):
         else:
             height1 = 0.
             height2 = 0.
+        if np.isclose(xmin, xmax) or np.isclose(ymin, ymax):
+            dim = 2
+        else:
+            dim = 3
         earth = deepcopy(self.earth)
         earth.dec -= self.data.data["line_declination"]
         xx = np.arange(xmin, xmax + dx / 2.0, dx)
@@ -1866,10 +1887,16 @@ class Main(QtWidgets.QWidget):
             zdat.append(np.ones_like(xd) * height2)
         self.sPrism = PP(earth)
         for i in range(nprism):
+            if "m" in data_type.lower():
+                typ = "M"
+            else:
+                typ = "G"
             self.sPrism.add_prism(
-                x[i], y[i], z[i], sus[i], rem[i], rem_i[i], rem_d[i], rho[i])
-        inv = inversion(data, xdat, ydat, zdat, earth=earth,
-                        data_type=data_type)
+                x[i], y[i], z[i], sus[i], rem[i], rem_i[i], rem_d[i], rho[i],
+                typ=typ)
+        topo = np.zeros_like(xdat[0])
+        inv = inversion(self.data, data, xdat, ydat, zdat, earth=earth,
+                        topo=topo, data_type=data_type, dim=dim)
         inv.mPrism = self.sPrism
         inv.params = np.zeros(nprism + 1)
         if "m" in data_type:
@@ -1892,13 +1919,20 @@ class Main(QtWidgets.QWidget):
         inv.run_inversion()
         dat = DataContainer(0)
         if height1 == height2:
-            dat.store_gxf("synthetic_data.gxf", inv.data_mod.reshape(d_shape),
-                          xmin, ymin, dx, dy)
+            dat.store_gxf(os.path.join(inv.folder, "synthetic_data.gxf"),
+                          inv.data_mod.reshape(d_shape), xmin, ymin, dx, dy)
         else:
-            data1 = inv.data_mod[:ndat1].reshape(d_shape)
-            data2 = inv.data_mod[ndat1:].reshape(d_shape)
-            dat.write_dat("synthetic_data.dat", data1, xx, yy, data2=data2)
-            with open("synthetic_data.config", "w") as fo:
+            dat.inter_flag = True
+            dat.sensor1_inter = inv.data_mod[:ndat1].reshape(d_shape)
+            dat.sensor2_inter = inv.data_mod[ndat1:].reshape(d_shape)
+            dat.z_inter = zdat[0]
+            dat.x_inter = xx
+            dat.y_inter = yy
+            dat.grad_data = True
+            dat.write_dat(os.path.join(inv.folder, "synthetic_data.dat"), True)
+            with open(os.path.join(inv.folder, "synthetic_data.config"), "w")\
+                    as fo:
+                fo.write("Geometrics\n")
                 fo.write(f"{data_type}\n")
                 fo.write("synthetic model\n")
                 fo.write(f'{self.dat[-1].data["line_declination"]}\n')

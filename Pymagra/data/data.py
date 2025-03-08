@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Last modified Dec 02, 2024
+Last modified Feb 24, 2025
 
 @author: Hermann Zeyen <hermann.zeyen@universite-paris-saclay.fr>
          University Paris-Saclay, France
@@ -10,11 +10,10 @@ Contains class DataContainerto treat and plot potential fiel data.
 
 import sys
 from copy import deepcopy
+import gc
 from datetime import datetime
 from PyQt5 import QtWidgets
 import numpy as np
-from scipy import interpolate
-
 from ..in_out.dialog import dialog
 from ..in_out import io
 from ..in_out import communication as comm
@@ -60,7 +59,7 @@ class DataContainer:
          windows
        - tilt : Calculate and plot tilt angles
        - analytic_signal : Calculate plot and invert analytic signal data
-       - continuation : Continue data to another measurement height
+       - continuation : Continue data to another measurement
        - delete_data : Mute data of a single line between user-given
          coordinates
        - get_linedata : Get all data along a line from different measurement
@@ -430,10 +429,24 @@ class DataContainer:
         None.
 
         """
+        if original_fill:
+            now = datetime.now()
+            h = now.hour
+            m = now.minute
+            s = 0.
+            ye = now.year
+            mo = now.month
+            d = now.day
 # If data have been interpolated onto a rehular grid, their structure should
 # have changed (number of samples, number of lines etc.). Therefore, the full
 # space gdata is reconstructed. Time are set to time of data creation.
         if self.inter_flag:
+            if original_fill:
+                self.gdata.year = [ye]
+                self.gdata.month = [mo]
+                self.gdata.day = [d]
+                self.gdata.hour = [h]
+                self.gdata.minute = [m]
             x = []
             y = []
             z = []
@@ -475,6 +488,8 @@ class DataContainer:
                         s1.append(self.sensor1_inter[iy, ix])
                         if self.grad_data:
                             s2.append(self.sensor2_inter[iy, ix])
+                        else:
+                            s2.append(0.)
                         line.append(iy)
                         mark.append(0)
                         year.append(ye)
@@ -520,7 +535,7 @@ class DataContainer:
             self.gdata.day = np.array(day, dtype=int)
             self.gdata.hour = np.array(hour, dtype=int)
             self.gdata.minute = np.array(minute, dtype=int)
-            self.gdata.second = np.array(second, dtype=int)
+            self.gdata.second = np.array(second, dtype=float)
 # If data are not interpolated onto a regular grid, it is supposed that their
 # structure did not change, only the values may have changed due to diural
 # corrections or others.
@@ -534,13 +549,6 @@ class DataContainer:
                 self.gdata.hour = np.array([], dtype=int)
                 self.gdata.minute = np.array([], dtype=int)
                 self.gdata.second = np.array([], dtype=int)
-                now = datetime.now()
-                h = now.hour
-                m = now.minute-1
-                s = 0.
-                ye = now.year
-                mo = now.month
-                d = now.day
             for key, val in self.data.items():
                 if original_fill:
                     h, m, s = u.next_minute(h, m, s)
@@ -600,7 +608,7 @@ class DataContainer:
         self.prepare_gdata()
         self.gdata.write_stn(file)
 
-    def write_dat(self, file):
+    def write_dat(self, file, original_fill=False):
         """
         Wrapper to write data in Geometrics MagMap2000 .dat format.
 
@@ -608,13 +616,16 @@ class DataContainer:
         ----------
         file : str
             File name where to write data.
+        original_fill : bool, optional. Default: False
+            If True, gdata is fully initiated for non gridded data, i.e.,
+            not only data arrays are updated, but also coordinates and times.
 
         Returns
         -------
         None.
 
         """
-        self.prepare_gdata()
+        self.prepare_gdata(original_fill=original_fill)
         self.gdata.write_dat(file)
 
     def read_txt(self, file, height1=None, height2=None, dec=None, title=None):
@@ -989,7 +1000,8 @@ class DataContainer:
             Number of flight line (same as line if line < 100000.)
         """
         if not title:
-            ret, self.title = comm.get_geometry(file, title="Magnetic")
+            ret, self.title = comm.get_geometry(file, dx=1000, topo=True,
+                                                title="Magnetic")
             if not ret:
                 print("Program aborted")
                 sys.exit()
@@ -1003,7 +1015,9 @@ class DataContainer:
         t = []
         height = []
         v = []
+        x_line = []
         c2 = 0
+        self.x = np.array([])
         with open(file, "r", encoding="utf-8") as fi:
             lines = fi.readlines()
         for _, line in enumerate(lines):
@@ -1016,7 +1030,7 @@ class DataContainer:
                 if nl == 0:
                     continue
                 self.sensor1.extend(v)
-                self.x.extend(x)
+                self.x = np.concatenate((self.x, np.array(x)))
                 self.y.extend(y)
                 self.z.extend(height)
                 self.topo.extend(t)
@@ -1029,7 +1043,9 @@ class DataContainer:
                 self.segments[nl1]["d"] = [self.segments[nl1]["dy"]]
                 self.segments[nl1]["median1"] = np.nanmedian(v)
                 self.segments[nl1]["median2"] = 0.
-                self.segments[nl1]["x"] = np.round(np.nanmedian(x), -3)
+                self.segments[nl1]["x"] = np.round(np.nanmedian(x), -2)
+                self.x[c1:c2] = self.segments[nl1]["x"]
+                x_line.append(self.segments[nl1]["x"])
                 self.segments[nl1]["y"] = np.nanmedian(y)
                 self.segments[nl1]["mask"] = True
                 self.segments[nl1]["block"] = self.n_block
@@ -1044,13 +1060,13 @@ class DataContainer:
                 v = []
             else:
                 val = line.split()
-                x.append(np.round(float(val[0]), -3))
+                x.append(np.round(float(val[0]), -2))
                 y.append(float(val[1]))
                 v.append(float(val[14]))
                 t.append(float(val[6]))
-                height.append(float(val[4]))
+                height.append(float(val[4])+t[-1])
         self.sensor1.extend(v)
-        self.x.extend(x)
+        self.x = np.concatenate((self.x, x))
         self.y.extend(y)
         self.z.extend(height)
         self.topo.extend(t)
@@ -1076,7 +1092,9 @@ class DataContainer:
         self.segments[nl]["d"] = [self.segments[nl]["dx"]]
         self.segments[nl]["median1"] = np.nanmedian(v)
         self.segments[nl]["median2"] = 0.
-        self.segments[nl]["x"] = np.round(np.nanmedian(x), 3)
+        self.segments[nl]["x"] = np.round(np.nanmedian(x), -2)
+        self.x[c1:c2] = self.segments[nl]["x"]
+        x_line.append(self.segments[nl1]["x"])
         self.segments[nl]["y"] = np.round(np.nanmedian(y), 3)
         self.segments[nl]["mask"] = True
         self.segments[nl]["block"] = self.n_block
@@ -1084,6 +1102,10 @@ class DataContainer:
         self.segments[nl]["pos"] = self.segments[nl]["x"]
         self.segments[nl]["direction"] = 0.
         self.segments[nl]["sensor"] = 1
+        x_line = np.array(x_line)
+        dx_line = np.median(abs(x_line[1:]-x_line[:-1]))
+        for key, val in self.segments.items():
+            val["dx"] = dx_line
     # Store original data to arrays xxx_ori
         self.sensor1_ori = np.copy(self.sensor1)
         self.time = np.arange(len(self.x))
@@ -1100,10 +1122,6 @@ class DataContainer:
         self.prepare_gdata(original_fill=True)
         del self.segments
         self.topo = -self.topo
-        self.topo_interpol = interpolate.LinearNDInterpolator(
-            list(zip(self.x, self.y)), self.topo)
-        self.z_interpol = interpolate.LinearNDInterpolator(
-            list(zip(self.x, self.y)), self.z)
         self.topo_flag = True
 
         # return self.data
@@ -1152,7 +1170,8 @@ class DataContainer:
         n2 = self.segments[i_line]["mark_samples"][-1]
         if self.grad_data:
             return (self.sensor1[n1:n2], self.sensor2[n1:n2], self.x[n1:n2],
-                    self.y[n1:n2], self.z[n1:n2], self.time[n1:n2],
+                    self.y[n1:n2], self.z[n1:n2], self.topo[n1:n2],
+                    self.time[n1:n2],
                     self.segments[i_line]["mask"],
                     self.segments[i_line]["direction"],
                     self.segments[i_line]["sensor"],
@@ -1161,7 +1180,8 @@ class DataContainer:
                     self.segments[i_line]["block"])
         dum = np.array([0])
         return (self.sensor1[n1:n2], dum, self.x[n1:n2], self.y[n1:n2],
-                self.z[n1:n2], self.time[n1:n2], self.segments[i_line]["mask"],
+                self.z[n1:n2], self.topo[n1:n2], self.time[n1:n2],
+                self.segments[i_line]["mask"],
                 self.segments[i_line]["direction"],
                 self.segments[i_line]["sensor"],
                 self.segments[i_line]["median1"],
@@ -1202,13 +1222,15 @@ class DataContainer:
         """
         data = {}
         for i, _ in self.segments.items():
-            s1, s2, x, y, z, t, m, d, s, med1, med2, block = self.get_line(i)
+            s1, s2, x, y, z, topo, t, m, d, s, med1, med2, block = \
+                self.get_line(i)
             data[i] = {}
             data[i]["s1"] = s1
             data[i]["s2"] = s2
             data[i]["x"] = x
             data[i]["y"] = y
             data[i]["z"] = z
+            data[i]["topo"] = topo
             data[i]["time"] = t
             data[i]["mask"] = m
             data[i]["direction"] = d
@@ -1298,7 +1320,7 @@ class DataContainer:
         while True:
             results, okButton = dialog(
                 ["dx [m]", "dy [m]", "fill holes"], ["e", "e", "c"],
-                [ddx, ddy, 0], "Interpolation parameters")
+                [ddx, ddy, 1], "Interpolation parameters")
             if okButton:
                 self.dx = float(results[0])
                 self.dy = float(results[1])
@@ -1330,16 +1352,19 @@ class DataContainer:
         self.inter_flag = True
         if self.grad_data:
             (self.sensor1_inter, self.sensor2_inter, self.grad_inter,
-             self.x_inter, self.y_inter, self.z_inter, self.t_inter) =\
+             self.x_inter, self.y_inter, self.z_inter, self.t_inter,
+             self.topo_inter) =\
                 u.interpol_2D(self, dx=self.dx, dy=self.dy,
                               fill_hole=self.hole_flag)
         else:
             self.sensor1_inter, _, _, self.x_inter, self.y_inter, \
-                self.z_inter, self.t_inter = u.interpol_2D(
+                self.z_inter, self.t_inter, self.topo_inter = u.interpol_2D(
                     self, dx=self.dx, dy=self.dy, fill_hole=self.hole_flag)
         self.mask1 = np.isnan(self.sensor1_inter)
         self.sensor1_fill = u.extrapolate(
             self.sensor1_inter, self.x_inter, self.y_inter)
+        self.z_fill = u.extrapolate(
+            self.z_inter, self.x_inter, self.y_inter)
         if self.data["grad_data"]:
             self.mask2 = np.isnan(self.sensor2_inter)
             self.sensor2_fill = u.extrapolate(
@@ -1910,15 +1935,21 @@ class DataContainer:
             if button == 1:
                 lin = np.argmin(np.abs(self.x_inter-xm))
                 s1 = self.sensor1_inter[:, lin]
+                topo_line = self.topo_inter[:, lin]
+                z_line1 = self.z_inter[:, lin]
                 pos = self.y_inter
                 line_positions = self.x_inter
                 index_sort = np.argsort(pos)
                 s1 = s1[index_sort]
+                topo_line = topo_line[index_sort]
+                z_line1 = z_line1[index_sort]
                 if self.grad_data:
                     s2 = self.sensor2_inter[:, lin]
                     s2 = s2[index_sort]
+                    z_line2 = z_line1-self.data["height"]+self.data["height2"]
                 else:
                     s2 = np.array([None])
+                    z_line2 = np.copy(z_line1)
                 pos = pos[index_sort]
                 pos_line = self.x_inter[lin]
                 direction = "N"
@@ -1926,10 +1957,14 @@ class DataContainer:
             else:
                 lin = np.argmin(np.abs(self.y_inter-ym))
                 s1 = self.sensor1_inter[lin, :]
+                topo_line = self.topo_inter[lin, :]
+                z_line1 = self.z_inter[lin, :]
                 pos = self.x_inter
                 line_positions = self.y_inter
                 index_sort = np.argsort(pos)
                 s1 = s1[index_sort]
+                topo_line = topo_line[index_sort]
+                z_line1 = z_line1[index_sort]
                 if self.grad_data:
                     s2 = self.sensor2_inter[lin, :]
                     s2 = s2[index_sort]
@@ -1938,6 +1973,28 @@ class DataContainer:
                 pos = pos[index_sort]
                 pos_line = self.y_inter[lin]
                 direction = "E"
+            # if direction in ("N", "S", 0., 180.):
+            #     if self.topo_flag:
+            #         topo_line = self.topo_interpol(
+            #             (np.ones_like(pos)*pos_line, pos))
+            #         z_line1 = topo_line - self.z_interpol(
+            #             (np.ones_like(pos)*pos_line, pos))
+            #     else:
+            #         topo_line = np.zeros_like(pos)
+            #         z_line1 = topo_line-self.data["height"]
+            #         if self.grad_data:
+            #             z_line2 = topo_line-self.data["height2"]
+            # else:
+            #     if self.topo_flag:
+            #         topo_line = self.topo_interpol(
+            #             (pos, np.ones_like(pos)*pos_line))
+            #         z_line1 = topo_line - self.z_interpol(
+            #             (pos, np.ones_like(pos)*pos_line))
+            #     else:
+            #         topo_line = np.zeros_like(pos)
+            #         z_line1 = topo_line-self.data["height"]
+            #         if self.grad_data:
+            #             z_line1 = topo_line-self.data["height2"]
 # Do the same if original data are to be used
         else:
             key0 = list(self.data.keys())[0]
@@ -1959,6 +2016,8 @@ class DataContainer:
             pos_line = line_positions[lin]
             line_keys = []
             pos = []
+            topo_line = []
+            z_line1 = []
             s1 = []
             if self.grad_data:
                 s2 = []
@@ -1969,29 +2028,54 @@ class DataContainer:
                     if np.isclose(np.nanmedian(val["x"]),
                                   pos_line):
                         pos += list(val["y"])
-                        s1 += list(val["s1"])
-                        if self.grad_data:
-                            s2 += list(val["s2"])
-                        line_keys.append(k)
+                    else:
+                        continue
                 else:
                     if np.isclose(np.median(val["y"]),
                                   pos_line):
                         pos += list(val["x"])
-                        s1 += list(val["s1"])
-                        if self.grad_data:
-                            s2 += list(val["s2"])
-                        line_keys.append(k)
+                    else:
+                        continue
+                s1 += list(val["s1"])
+                topo_line += list(val["topo"])
+                z_line1 += list(val["z"])
+                if self.grad_data:
+                    s2 += list(val["s2"])
+                    # z_line2 += list(val("z"))
+                line_keys.append(k)
             index_sort = np.argsort(pos)
             s1 = np.array(s1)
             s1 = s1[index_sort]
+            topo_line = np.array(topo_line)
+            topo_line = topo_line[index_sort]
+            z_line1 = np.array(z_line1)
+            z_line1 = z_line1[index_sort]
             if self.grad_data:
                 s2 = np.array(s2)
                 s2 = s2[index_sort]
+                # z_line2 = np.array(z_line2)
+                # z_line2 = z_line2[index_sort]
             else:
                 s2 = np.array([None])
+                # z_line2 = np.array([None])
             pos = np.array(pos)[index_sort]
-        return pos, pos_line, s1, s2, lin, direction, index_sort, line_keys, \
-            line_positions
+            # if self.topo_flag:
+            #     topo_line = self.topo(
+            #         (np.ones_like(pos)*pos_line, pos))
+            #     z_line1 = topo_line - self.z_interpol(
+            #         (np.ones_like(pos)*pos_line, pos))
+            # else:
+            #     topo_line = np.zeros_like(pos)
+            #     z_line1 = topo_line-self.data["height"]
+            #     if self.grad_data:
+            #         z_line2 = topo_line-self.data["height2"]
+        if self.grad_data:
+            z_line2 = z_line1-self.data["height2"]\
+                + self.data["height"]
+        else:
+            z_line2 = np.copy(z_line1)
+        return pos, pos_line, topo_line, z_line1, z_line2, s1, s2, lin, \
+            direction, index_sort, line_keys, line_positions
 
     def plot_line(self, plot_flag, event0):
         """
@@ -2040,20 +2124,26 @@ class DataContainer:
         xm = event0.xdata
         ym = event0.ydata
         button = event0.button
+        fig_line_flag = False
 # Get data along the chosen line
         while True:
-            pos, pos_line, s1, s2, lin, direction, index_sort, line_keys, \
-                line_positions = self.get_linedata(xm, ym, button)
+            pos, pos_line, topo_line, z_line1, z_line2, s1, s2, lin, \
+                direction, index_sort, line_keys, line_positions = \
+                self.get_linedata(xm, ym, button)
             lmax = len(line_positions)-1
 # If plot_flag is False, return line data
             if not plot_flag:
-                return pos, pos_line, s1, s2, direction
+                return pos, pos_line, topo_line, z_line1, z_line2, s1, s2, \
+                    direction
 # If read_flag is True, plot the line and wait for keyboard or mouse event
 # Create figure for line plot in floating window
-            self.fig_line = newWindow("Single line", 1500, 1100)
+            if not fig_line_flag:
+                self.fig_line = newWindow("Single line", 1500, 1100)
+                # fig_line_flag = True
 # If 2 sensors have been read in, create two subplots, if not, only one.
             if self.grad_data:
                 self.ax_line = self.fig_line.fig.subplots(2, 1)
+                ax = None
             else:
                 ax = self.fig_line.fig.subplots(1, 1)
 # For simpler programming in the following part, copy single axis into a list
@@ -2098,7 +2188,8 @@ class DataContainer:
                 if event.key == "enter":
                     self.fig_line.close()
                     del self.fig_line
-                    return pos, pos_line, s1, s2, direction
+                    return pos, pos_line, topo_line, z_line1, z_line2, s1, \
+                        s2, direction
                 if event.key == "right":
                     next_flag = 1
                 elif event.key == "left":
@@ -2182,5 +2273,11 @@ class DataContainer:
                     xm = line_positions[lin]
                 else:
                     ym = line_positions[lin]
+            # self.fig_line.fig.clf()
+            # del self.ax_line, ax
             self.fig_line.close()
             del self.fig_line
+            gc.collect()
+        # self.fig_line.close()
+        # del self.fig_line
+        # gc.collect()

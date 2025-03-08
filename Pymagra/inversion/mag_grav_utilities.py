@@ -284,11 +284,14 @@ def mag_color_map(vmn, vmx, cif=2):
 # minimum from maximum rounded value
     while True:
         fac = 10**c
-        vmin = np.ceil(vmn*fac)/fac
-        vmax = np.floor(vmx*fac)/fac
+        av = np.round((vmn+vmx)/2., c)
+        vmin = np.ceil((vmn-av)*fac)/fac
+        vmax = np.floor((vmx-av)*fac)/fac
         if vmax > vmin:
             break
         c += 1
+    vmin += av
+    vmax += av
     if np.isclose(vmax, vmin):
         vmin -= 0.5
         vmax += 0.5

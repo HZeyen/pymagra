@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Last modified on Nov 08, 2024
+Last modified on Feb 20, 2025
 
 @author: Hermann Zeyen University Paris-Saclay, France
 """
@@ -765,7 +765,8 @@ class Geometrics:
                 else:
                     if n_lines > 0:
                         fo.write(f"3{x:14.3f}{y:13.3f} {time} {date}"
-                                 + f"{ndat:11d}{line:12d}{mark+1:12d}  36\n")
+                                 + f"{ndat:11d}{line:12d}{int(mark)+1:12d}  "
+                                 + "36\n")
                     x = float(val[col_x])
                     y = float(val[col_y])
                     time = val[col_t]
@@ -778,10 +779,10 @@ class Geometrics:
                     else:
                         mark = 0
                     fo.write(f"3{x:14.3f}{y:13.3f} {time} {date}"
-                             + f"{mark:11d}{line:12d}{izero:12d}   5\n")
+                             + f"{int(mark):11d}{line:12d}{izero:12d}   5\n")
                     ndat = 1
             fo.write(f"3{x:14.3f}{y:13.3f} {time} {date}"
-                     + f"{ndat:11d}{line:12d}{mark+1:12d}  36\n")
+                     + f"{ndat:11d}{line:12d}{int(mark)+1:12d}  36\n")
         self.read_stn("temp.stn", n_block, h1_sensor, h2_sensor, dispo)
 
     def write_stn(self, file):

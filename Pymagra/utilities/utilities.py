@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Last modified on Dec 02, 2024
+Last modified on Feb 21, 2025
 
 @author: Hermann Zeyen <hermann.zeyen@universite-paris-saclay.fr>
          Université Paris-Saclay, France
@@ -628,7 +628,7 @@ def interpol_2D(data_c, dx=0.2, dy=0.2, fill_hole=False):
         data to be interpolated
     dx : float, optional
         Sampling step in meters in x-direction. The default is 0.2.
-    dx : float, optional
+    dy : float, optional
         Sampling step in meters in y-direction. The default is 0.2.
     fill_hole : bool, optional. Default False
         If True, internal missing grid points are interpolated, however not
@@ -655,6 +655,7 @@ def interpol_2D(data_c, dx=0.2, dy=0.2, fill_hole=False):
         x_coordinates of the columns of s1_inter and s2_inter
     y_inter : 1D numpy float array
         y_coordinates of the rows of s1_inter and s2_inter
+    topo_inter
 
     """
     if fill_hole:
@@ -662,6 +663,9 @@ def interpol_2D(data_c, dx=0.2, dy=0.2, fill_hole=False):
     else:
         n_hole = 3
     data = data_c.data
+    if data_c.topo_flag:
+        topo = data_c.topo
+        z = data_c.z
     keys = []
     for key in data.keys():
         if isinstance(key, (str)):
@@ -731,12 +735,14 @@ def interpol_2D(data_c, dx=0.2, dy=0.2, fill_hole=False):
     s1int = np.zeros_like(posx)
     s2int = np.zeros_like(posx)
     tim = np.zeros_like(posx)
+    tint = np.zeros_like(posx)
     posx[:, :] = np.nan
     zint[:, :] = np.nan
+    tint[:, :] = np.nan
     s1int[:, :] = np.nan
     s2int[:, :] = np.nan
     for iline, lpos in enumerate(line_positions):
-        x = pos = z = t = s1 = s2 = np.array([])
+        x = pos = z = t = s1 = s2 = topo = np.array([])
         for key, val in data.items():
             if isinstance(key, (str)):
                 break
@@ -753,6 +759,7 @@ def interpol_2D(data_c, dx=0.2, dy=0.2, fill_hole=False):
             z = np.concatenate((z, val["z"]))
             t = np.concatenate((t, val["time"]))
             s1 = np.concatenate((s1, val["s1"]))
+            topo = np.concatenate((topo, val["topo"]))
             if nsensor == 2:
                 s2 = np.concatenate((s2, val["s2"]))
         pos, pos_ind = np.unique(pos, return_index=True)
@@ -760,20 +767,23 @@ def interpol_2D(data_c, dx=0.2, dy=0.2, fill_hole=False):
         z = z[pos_ind]
         s1 = s1[pos_ind]
         t = t[pos_ind]
+        topo = topo[pos_ind]
         index = np.where(np.isfinite(s1))[0]
         pi = pos[index]
         pm = pos.min()
         n1 = np.where(p_inter >= pm)[0][0]
         pm = pos.max()
         n2 = np.where(p_inter <= pm)[0][-1] + 1
-        f = interpolate.interp1d(pi, s1[index], kind="quadratic")
+        f = interpolate.interp1d(pi, s1[index], kind="linear")
         s1int[n1:n2, iline] = f(p_inter[n1:n2])
         f = interpolate.interp1d(pi, x[index], kind="linear")
         posx[n1:n2, iline] = f(p_inter[n1:n2])
-        f = interpolate.interp1d(pi, z[index], kind="quadratic")
+        f = interpolate.interp1d(pi, z[index], kind="linear")
         zint[n1:n2, iline] = f(p_inter[n1:n2])
         f = interpolate.interp1d(pi, t[index], kind="linear")
         tim[n1:n2, iline] = f(p_inter[n1:n2])
+        f = interpolate.interp1d(pi, topo[index], kind="linear")
+        tint[n1:n2, iline] = f(p_inter[n1:n2])
 
 # Check whether there are big holes in data along the line (>10*step size)
         hole = np.where(abs(pi[1:]-pi[:-1]) > 10.*dp)[0]
@@ -784,6 +794,7 @@ def interpol_2D(data_c, dx=0.2, dy=0.2, fill_hole=False):
                 s1int[n1:n2, iline] = np.nan
                 posx[n1:n2, iline] = np.nan
                 zint[n1:n2, iline] = np.nan
+                tint[n1:n2, iline] = np.nan
         if nsensor == 2:
             s2 = s2[pos_ind]
             index = np.where(np.isfinite(s2))[0]
@@ -792,7 +803,7 @@ def interpol_2D(data_c, dx=0.2, dy=0.2, fill_hole=False):
             n1 = np.where(p_inter >= pm)[0][0]
             pm = pi.max()
             n2 = np.where(p_inter <= pm)[0][-1] + 1
-            f = interpolate.interp1d(pi, s2[index], kind="quadratic")
+            f = interpolate.interp1d(pi, s2[index], kind="linear")
             s2int[n1:n2, iline] = f(p_inter[n1:n2])
             hole = np.where(abs(pi[1:]-pi[:-1]) > 10.*dp)[0]
             if len(hole > 0):
@@ -807,6 +818,8 @@ def interpol_2D(data_c, dx=0.2, dy=0.2, fill_hole=False):
     s2_inter = np.zeros_like(z_inter)
     s2_inter[:, :] = np.nan
     t_inter = np.zeros_like(z_inter)
+    topo_inter = np.zeros_like(z_inter)
+    topo_inter[:, :] = np.nan
     for i in range(len(p_inter)):
         pos, pos_ind = np.unique(posx[i, :], return_index=True)
         s1 = s1int[i, :][pos_ind]
@@ -823,23 +836,42 @@ def interpol_2D(data_c, dx=0.2, dy=0.2, fill_hole=False):
         n2 = np.where(p2_inter <= pm)[0][-1] + 1
         pi = pi[index]
         s1 = s1[index]
-        f = interpolate.interp1d(pi, s1[i1:i2], kind="quadratic")
+        n = i2-i1
+        if n < 3:
+            f = interpolate.interp1d(pi, s1[i1:i2], kind="linear")
+        else:
+            # f = interpolate.interp1d(pi, s1[i1:i2], kind="quadratic")
+            f = interpolate.interp1d(pi, s1[i1:i2], kind="linear")
         s1_inter[n1:n2, i] = f(p2_inter[n1:n2])
         z = zint[i, :]
         z = z[pos_ind]
-        f = interpolate.interp1d(pi, z[i1:i2], kind="quadratic")
+        if n < 3:
+            f = interpolate.interp1d(pi, z[i1:i2], kind="linear")
+        else:
+            f = interpolate.interp1d(pi, z[i1:i2], kind="linear")
         z_inter[n1:n2, i] = f(p2_inter[n1:n2])
-        f = interpolate.interp1d(pi, t[i1:i2], kind="quadratic")
+        if n < 3:
+            f = interpolate.interp1d(pi, t[i1:i2], kind="linear")
+        else:
+            f = interpolate.interp1d(pi, t[i1:i2], kind="linear")
         t_inter[n1:n2, i] = f(p2_inter[n1:n2])
+        top = tint[i, :]
+        top = top[pos_ind]
+        if n < 3:
+            f = interpolate.interp1d(pi, top[i1:i2], kind="linear")
+        else:
+            f = interpolate.interp1d(pi, top[i1:i2], kind="linear")
+        topo_inter[n1:n2, i] = f(p2_inter[n1:n2])
 # Check whether there are big holes in data along the line (>3*line distance)
         if len(index) > 1:
             hole = np.where(pos_ind[1:]-pos_ind[:-1] > n_hole)[0]
             if len(hole > 0):
                 for ih, h in enumerate(hole):
-                    n1 = int((pos[pos_ind[hole[0]]]-p2_inter[0])/dp2)+1
-                    n2 = int((pos[pos_ind[hole[0]]+1]-p2_inter[0])/dp2)
+                    n1 = int((pos[pos_ind[h]]-p2_inter[0])/dp2)+1
+                    n2 = int((pos[pos_ind[h]+1]-p2_inter[0])/dp2)
                     s1_inter[n1:n2, i] = np.nan
                     z_inter[n1:n2, i] = np.nan
+                    topo_inter[n1:n2, i] = np.nan
         if nsensor == 2:
             s2 = s2int[i, :][pos_ind]
             index = np.where(np.isfinite(s2))[0]
@@ -852,7 +884,10 @@ def interpol_2D(data_c, dx=0.2, dy=0.2, fill_hole=False):
             n2 = np.where(p2_inter <= pm)[0][-1] + 1
             pi = pi[index]
             s2 = s2[index]
-            f = interpolate.interp1d(pi, s2[i1:i2], kind="quadratic")
+            if n < 3:
+                f = interpolate.interp1d(pi, s2[i1:i2], kind="linear")
+            else:
+                f = interpolate.interp1d(pi, s2[i1:i2], kind="linear")
             s2_inter[n1:n2, i] = f(p2_inter[n1:n2])
             if len(index) > 1:
                 hole = np.where(pos_ind[1:]-pos_ind[:-1] > n_hole)[0]
@@ -865,14 +900,15 @@ def interpol_2D(data_c, dx=0.2, dy=0.2, fill_hole=False):
         s1_inter = s1_inter.T
         z_inter = z_inter.T
         t_inter = t_inter.T
+        topo_inter = topo_inter.T
         if nsensor == 2:
             s2_inter = s2_inter.T
     if nsensor == 2:
         grad_inter = (s2_inter-s1_inter)/data["d_sensor"]
         return s1_inter, s2_inter, grad_inter, x_inter, y_inter, z_inter, \
-            t_inter
+            t_inter, topo_inter
     dum = 0
-    return s1_inter, dum, dum, x_inter, y_inter, z_inter, t_inter
+    return s1_inter, dum, dum, x_inter, y_inter, z_inter, t_inter, topo_inter
 
 
 def extrapolate(d, x, y):

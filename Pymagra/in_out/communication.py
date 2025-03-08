@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Last modified on Nov 10, 2024
+Last modified on Feb 24, 2025
 
 @author: Hermann Zeyen <hermann.zeyen@gmail.com>
          Université Paris-Saclay
@@ -10,7 +10,8 @@ import numpy as np
 from .dialog import dialog
 
 
-def get_geometry(file, h1=None, h2=None, dispo=None, dec=None, title=""):
+def get_geometry(file, h1=None, h2=None, dispo=None, dec=None, dx=None,
+                 topo=False, title=""):
     """
     Asks for measurement geometry information
 
@@ -31,6 +32,10 @@ def get_geometry(file, h1=None, h2=None, dispo=None, dec=None, title=""):
     dec : float
         Proposal for direction of Y axis with respect to North [degrees].
         If None, this input is not asked for.
+    dx : float
+        Proposal for distance between flight lines (BRGM format only)
+    topo : bool
+        If True, ask whether topography should be used
 
     """
     labels = [file]
@@ -55,6 +60,14 @@ def get_geometry(file, h1=None, h2=None, dispo=None, dec=None, title=""):
         labels.append("Direction of Y-axis [degrees from N to E]")
         types.append("e")
         values.append(dec)
+    if dx is not None:
+        labels.append("Average flight line distance [m]")
+        types.append("e")
+        values.append(dx)
+    if topo:
+        labels.append("Use topography")
+        types.append("c")
+        values.append(1)
     labels.append("Title text")
     types.append("e")
     values.append(title)
@@ -79,6 +92,12 @@ def get_geometry(file, h1=None, h2=None, dispo=None, dec=None, title=""):
     if dec is not None:
         i += 1
         ret.append(float(results[i]))
+    if dx is not None:
+        i += 1
+        ret.append(float(results[i]))
+    if topo:
+        i += 1
+        ret.append(int(results[i]) > -1)
     i += 1
     ret.append(results[i])
     return ret

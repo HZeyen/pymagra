@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Last modified on Feb 01 2025
+Last modified on Feb 25 2025
 
 @author: Hermann Zeyen <hermann.zeyen@universite-paris-saclay.fr>
          Universite Paris-Saclay, France
@@ -52,27 +52,34 @@ class Okabe():
 
     def __init__(self, x, y, z, sus, rem, rem_i, rem_d, rho, earth, typ="M"):
         self.earth = earth
-        self.GM = typ.upper()
+        self.data_type = typ
+        if "M" in typ.upper():
+            self.GM = "M"
+        else:
+            self.GM = "G"
         self.galile = 6.674e-6
 # No idea why in the following magnetization calculation the Earth's field
-# must be divided by 2 and not by my_0*10**9 (my0 = 4pi*10**-7 and 10**9
-# because of the Earth's field being fiven in nT). Comparison of results
-# with analytical formula for a sphere and with Plouff's program gave this
-# factor of 200*pi.
-        if np.isclose(rem, 0.):
-            # rem = sus*earth.f/(400*np.pi)
-            rem = sus*earth.f*0.5
-            rem_i = earth.inc
-            rem_d = earth.dec
+# must be divided by 1000. Comparison of results with analytical formula for a
+# sphere and with Plouff's program gave this factor.
+        self.sus = sus/(4*np.pi)
+        self.rem = rem
+        self.inc = np.radians(rem_i)
+        self.dec = np.radians(rem_d)
+        self.rho = rho
         self.rk = np.zeros(3)
         self.rim = np.zeros(3)
+        if np.isclose(rem, 0.):
+            self.sus2rem(sus)
+        # self.rem = rem
+        # self.rem_i = rem_i
+        # self.rem_d = rem_d
         self.rim = np.array([earth.cdci, earth.sdci, earth.sie])
         self.xfac = np.zeros(3)
         self.yfac = np.zeros(3)
         self.zfac = np.zeros(3)
-        self.ini_okb(rem, rem_d, rem_i, rho)
-        self.corps = np.zeros((5, 1))
-        self.corps[:, 0] = np.array([rem, rem_d, rem_i, rho, 12])
+        # self.ini_okb(rem, rem_d, rem_i, rho)
+        # self.corps = np.zeros((5, 1))
+        # self.corps[:, 0] = np.array([rem, rem_d, rem_i, rho, 12])
         self.ncorps = 1
         self.x_face = np.zeros((4, 12))
         self.y_face = np.zeros((4, 12))
@@ -113,9 +120,92 @@ class Okabe():
         self.x_face[:, 11] = np.array([x[0], x[0], x[0], x[0]])
         self.y_face[:, 11] = np.array([y[0], y[0], y[1], y[0]])
         self.z_face[:, 11] = np.array([z[4], z[0], z[3], z[4]])
+        self.x = x
+        self.y = y
+        self.z = z
+        self.der_flag_mag = False
+        self.der_flag_grav = False
+        self.x_neigh = []
+        self.y_neigh = []
+        self.z_neigh = []
+        self.typ = "O"
 
-    def calc_ano(self, carte, x1, x2, dx, y1, y2, dy, alti):
+    def setsus(self, sus):
         """
+        Define susceptibility of body and convert to magnetization
+
+        Parameters
+        ----------
+        sus : float
+            Susceptibility of body in SI units
+        """
+        self.sus = sus
+        self.sus2rem(sus)
+
+    def getsus(self):
+        """
+        Return susceptibility of body
+
+        Returns
+        -------
+        sus : float
+            Susceptibility of body in SI units
+        """
+        return self.sus
+
+    def setrem(self, rem):
+        self.rem = rem
+        self.ini_okb(self.rem, self.rem_d, self.rem_i, self.rho)
+
+    def sus2rem(self, sus):
+        """
+        Calculate remanent magnetization in A/m given susceptibility and
+        parameters of Earth's magnetic field'
+        """
+        self.rem = sus*self.earth.f
+        self.rem_i = self.earth.inc
+        self.rem_d = self.earth.dec
+        self.ini_okb(self.rem, self.rem_d, self.rem_i, self.rho)
+
+    def grav_prism(self, xp, yp, zp):
+        """
+        Calculate gravity effect of a prism at one point
+
+        Parameters
+        ----------
+        xp : float
+            X position of measurement point (easting).
+        yp : float
+            Y position of measurement point (northing).
+        zp : float
+            Height of measurement point (positive downward).
+
+        Returns
+        -------
+        float
+            Gravity effect of body at point (xp, yp, zp).
+
+        """
+        return self.calc_ano(xp, yp, zp)
+
+    def calc_ano(self, xp, yp, alti):
+        """
+        Calculation of gravity or magnetic effect of a body
+
+        Parameters
+        ----------
+        xp : float
+            X position of measurement point (easting).
+        yp : float
+            Y position of measurement point (northing).
+        alti : float
+            Height of measurement point (positive downward).
+
+        Returns
+        -------
+        c : float
+            Calculated effect of body at point (xp, yp, zp).
+
          convention du rangement dans la matrice "carte"
 
                 carte(0, nrow-1)              carte(nrow-1,ncol-1)
@@ -154,29 +244,23 @@ class Okabe():
          |___________________________________________________________________|
         """
 
-        nrow, ncol = carte.shape
-        carte[:, :] = 0.
         np_fac, nfac = self.x_face.shape
+        c = 0.
         for ifac in range(nfac):
             self.xfac = self.x_face[:, ifac]
             self.yfac = self.y_face[:, ifac]
             self.zfac = self.z_face[:, ifac]
 
-            zfa_pt = alti-self.zfac
-            for ir in range(nrow):
-                yp = y1 + ir*dy
-                yfa_pt = self.yfac-yp
-                for ic in range(ncol):
-                    xp = x1 + ic*dx
-                    xfa_pt = self.xfac-xp
+            zfa_pt = self.zfac-alti
+            yfa_pt = self.yfac-yp
+            xfa_pt = self.xfac-xp
 # ATTN au passage de coord. ( x <-> y )    ???
-                    anom = -self.Okabe1(np.copy(yfa_pt), np.copy(xfa_pt),
-                                        np.copy(zfa_pt))
-                    if not np.isfinite(anom):
-                        print(f"face {ifac}, row {ir}, col {ic}: {anom}")
-                        continue
-                    carte[ir, ic] = carte[ir, ic]+anom
-        return carte
+            anom = -self.Okabe1(yfa_pt, xfa_pt, zfa_pt)
+            if not np.isfinite(anom):
+                print(f"face {ifac}, point ({xp}, {yp}): {anom}")
+                continue
+            c += anom
+        return c
 
     def ini_okb(self, aim, deca, dipa, rho):
 
@@ -309,24 +393,25 @@ class Okabe():
 
     def Okbmag(self, x, y, z):
         """
-        ATTN: l'entree (X,Y,Z) est detruite
-        ---------------------------------------------------------------------
-         Calcul de l'anomalie magnetrique creee par une facette de "Nsom"
-         sommets COPLANAIRES au point origine (0,0,0).
-        ---------------------------------------------------------------------
-      DIMENSION X(51),Y(51),Z(51)
-      Real*8 Resul,Deps
-      Character*1 GM
-      Common/Cosdr/Rk(3),Rim(3),Aim,Contra,GM
-      Common /Keps/ Deps,Eps
-      """
+        Calculation of magnetic anomaly produced by one face with "Nsom"
+        sides within a common plane at origin (0,0,0).
+
+        Parameters
+        ----------
+        x, y, z : numpy float 1D arrays
+            coordinates of the face ordered counterclock-wise
+
+        Returns
+        -------
+        Magnetic effect of the face
+        """
 # FERMETURE DU POLIGONE
         if len(x) < 3:
             return 0.0
         cosp, sinp, coste, sinte = self.rotation3D(x, y, z)
         cmpeff = self.rim[0]*sinp*coste + self.rim[1]*sinp*sinte +\
             self.rim[2]*cosp
-        if abs(cmpeff) <= 0.:
+        if np.isclose(cmpeff, 0.):
             return 0.0
 # Rotation des axes magnetiques
         xt = self.rk[0]

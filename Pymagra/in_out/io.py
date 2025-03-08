@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Last modified on Jan 14, 2025
+Last modified on Feb 20, 2025
 
 @author: Hermann Zeyen <hermann.zeyen@universite-paris-saclay.fr>
          University Paris-Saclay, France
@@ -64,16 +64,16 @@ def get_files(dir0=None, ftype=None):
             "\nNo file chosen, program finishes\n\n"
             + "You probably must close the Spyder console before restarting")
         sys.exit("No file chosen")
-    # Sort chosen file names
+# Sort chosen file names
     files[0].sort()
-    # Check data formats
-    # Set working folder as folder of the first selected file
+# Check data formats
+# Set working folder as folder of the first selected file
     if ftype != "base":
         dir0 = os.path.dirname(files[0][0])
         os.chdir(dir0)
         print(f"Set working folder to: {dir0}")
 
-    # Loop over file names and store valid file names into list data_files
+# Loop over file names and store valid file names into list data_files
     data_files = []
     file_types = []
     data_types = []
@@ -85,23 +85,28 @@ def get_files(dir0=None, ftype=None):
             continue
         if file_ext not in valid_extensions:
             continue
-        file_types.append(ftypes[np.where(valid_extensions == file_ext)[0][0]])
+#        file_types.append(ftypes[np.where(valid_extensions == file_ext)[0][0]])
         data_files.append(f)
         fconfig = os.path.basename(f)
         j = fconfig.rfind(".")
-        # Check whether there is a configuration file for each data file
+# Check whether there is a configuration file for each data file
         if j > 0:
             fconfig = fconfig[:j] + ".config"
         else:
             fconfig += ".config"
-        # If there is, read its content
+# If there is, read its content
         if os.path.isfile(fconfig):
             with open(fconfig, "r") as fc:
+                file_types.append(fc.readline()[:-1].upper())
                 data_types.append(fc.readline()[:-1])
             file_conf.append(True)
         else:
             file_conf.append(False)
             data_types.append("")
+            n_ftype = np.where(valid_extensions == file_ext)[0][0]
+            if n_ftype == len(ftypes)-1:
+                n_ftype = 0
+            file_types.append(ftypes[n_ftype])
     if len(data_files) == 0:
         _ = QtWidgets.QMessageBox.critical(
             None, "Error", "No valid data files given\n\n"
@@ -128,6 +133,12 @@ def get_files(dir0=None, ftype=None):
             else:
                 values.append("1")
             types.append("r")
+            labels.append("\nfile type:")
+            values.append(None)
+            types.append("l")
+            labels.append(ftypes[:-1])
+            types.append("r")
+            values.append(n_ftype+1)
         if len(labels) > 0:
             results, ok_button = dialog(labels, types, values,
                                         title="data types")
@@ -140,6 +151,8 @@ def get_files(dir0=None, ftype=None):
                     continue
                 ir += 2
                 data_types[i] = dtypes[int(results[ir])]
+                ir += 2
+                file_types[i] = ftypes[int(results[ir])]
     return data_files, file_types, data_types, dir0
 
 
@@ -278,7 +291,7 @@ def read_synthetic_model():
             answer = QtWidgets.QMessageBox.warning(
                 None,
                 "Warning",
-                "Synthetic model file has only {ncol} columns:\n"
+                f"Synthetic model file has only {ncol} columns:\n"
                 + f"{text}\nPress Ignore to accept or Abort to abandon.",
                 QtWidgets.QMessageBox.Ignore | QtWidgets.QMessageBox.Abort,
                 QtWidgets.QMessageBox.Ignore)

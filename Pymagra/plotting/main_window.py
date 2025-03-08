@@ -618,7 +618,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
                 break
         x = np.array(x)
         y = np.array(y)
-        if y.max() > 100000.:
+        if y.max() > 10000.:
             x *= 0.001
             y *= 0.001
             dfac = 0.001
@@ -952,7 +952,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         ax = []
         ddx = data.x_inter.max() - data.x_inter.min()
         ddy = data.y_inter.max() - data.y_inter.min()
-        if data.y_inter.max() > 100000.:
+        if data.y_inter.max() > 10000.:
             x = np.copy(data.x_inter)*0.001
             y = np.copy(data.y_inter)*0.001
             dfac = 0.001

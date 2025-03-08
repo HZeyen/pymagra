@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Last modified: Nov 22, 2024
+Last modified: Mar 06, 2025
 
 @author: Hermann Zeyen
         University Paris-Saclay
@@ -44,7 +44,9 @@ Contains two classes:
 """
 
 from . import mag_grav_utilities as utils
+from copy import deepcopy
 from ..in_out.earth import Earth_mag as Earth
+from .okabe import Okabe
 import numpy as np
 
 
@@ -95,7 +97,7 @@ class Prism(Earth):
 
     """
 
-    def __init__(self, x, y, z, sus, rem, inc, dec, dens, earth):
+    def __init__(self, x, y, z, sus, rem, inc, dec, dens, earth, typ="M"):
         """
         x: numpy float 1D array of size 2
                 coordinates of W and E faces
@@ -114,10 +116,14 @@ class Prism(Earth):
         dens: float
                 density [kg/m3]
         earth: object of type Earth_mag found in file mag_grav_utilities.py
+        typ : str, optional; Default: "M"
+            Data type be calculated, may be "M" or "G" for magnetic or
+            gravity data
         """
 # Susceptibility is transformed to cgs units which is used in function
 # mag_prism
         self.G = 6.67e-6
+        self.data_type = typ
         self.sus = sus/(4*np.pi)
         self.rem = rem
         self.inc = np.radians(inc)
@@ -139,6 +145,34 @@ class Prism(Earth):
         self.x_neigh = []
         self.y_neigh = []
         self.z_neigh = []
+        self.typ = "P"
+
+    def setsus(self, sus):
+        """
+        Define susceptibility of body and convert to cgs units
+
+        Parameters
+        ----------
+        sus : float
+            Susceptibility of body in SI units
+        """
+        self.sus = sus/(4*np.pi)
+        self.comps()
+
+    def getsus(self):
+        """
+        Return susceptibility of body converted ti SI units
+
+        Returns
+        -------
+        sus : float
+            Susceptibility of body in SI units
+        """
+        return self.sus*4.*np.pi
+
+    def setrem(self, rem):
+        self.rem = rem
+        self.comps()
 
     def comps(self):
         """
@@ -186,10 +220,10 @@ class Prism(Earth):
 # TODO:
 # What happens if calculation point is located within the body or at least
 # between the two limits (beside the body)?
-        # ht = np.float64(abs(self.z[0]-zp))
-        # hb = np.float64(abs(self.z[1]-zp))
-        ht = np.float64(abs(self.z[0]+zp))
-        hb = np.float64(abs(self.z[1]+zp))
+        ht = np.float64(abs(self.z[0]-zp))
+        hb = np.float64(abs(self.z[1]-zp))
+        # ht = np.float64(abs(self.z[0]+zp))
+        # hb = np.float64(abs(self.z[1]+zp))
         if hb < ht:
             sgh = -1.
             h = np.array([hb, ht])
@@ -337,9 +371,6 @@ class Prism(Earth):
                    2.*z*(np.arctan(atan_z)+sum_pi))
         return g*self.rho*self.G
 
-    # def okabe(self):
-        
-
     def change_props(self, sus=None, rem=None, inc=None, dec=None, dens=None):
         """
         Change properties of a prism for each entry that is not None
@@ -372,8 +403,7 @@ class Prism(Earth):
             self.dec = np.radians(dec)
         if dens is not None:
             self.rho = dens
-        self.tx, self.ty, self.tz = utils.magnetization_components(
-            sus, rem, dec, inc, self.earth)
+        self.comps()
 
     def change_coor(self, xmin=None, xmax=None, ymin=None, ymax=None,
                     zmin=None, zmax=None):
@@ -437,20 +467,26 @@ class Prism_calc(Prism, Earth):
 
     """
 
-    def __init__(self, e, min_size_x=0., min_size_y=0., min_size_z=0.):
+    def __init__(self, e, min_size_x=0., min_size_y=0., min_size_z=0.,
+                 topo=None, dim=3, direction="N"):
         """
         Initialize dictionary of prisms used for magnetic and gravity
         calculation
 
         Parameters
         ----------
-        e: Obejct of class Earth_mag (found in file mag_grav_utilities.py)
+        e: Object of class Earth_mag (found in file mag_grav_utilities.py)
         min_size_x : float
             Minimum allowed size of prisms in X direction (E-W).
         min_size_y : float
             Minimum allowed size of prisms in Y direction (N-S).
         min_size_z : float
             Minimum allowed size of prisms in Z direction.
+        topo : object of scipy.interpolate, optional; default = None
+        dim : int, optional, default = 3
+            Dimension of inversion
+        direction : str, optional, default = "N"
+            direction of the data line (important for 2D calculations)
 
         Returns
         -------
@@ -474,17 +510,28 @@ class Prism_calc(Prism, Earth):
         self.min_size_y = min_size_y
         self.min_size_z = min_size_z
         self.earth = e
+        self.data_type = ""
+        self.topo_flag = topo is not None
+        self.topo = topo
+        self.dim = dim
+        self.direction = direction
 
-    def add_prism(self, xpr, ypr, zpr, sus, rem, rinc, rdec, rho):
+    def add_prism(self, xpr, ypr, zpr, sus, rem, rinc, rdec, rho, typ="M"):
         """
         Add a prism with its properties to the dictionary.
         The key of this new prism will be self.n_max+1
 
-        For the explanation of input parameters see Prism.__init__
+        For the explanation of input parameters see Prism.__init__ with
+        correspondances: (x, xpr), (y, ypr), (z, zpr)
         """
         self.n_max += 1
-        self.prisms[self.n_max] = Prism(xpr, ypr, zpr, sus, rem, rinc, rdec,
-                                        rho, self.earth)
+        if len(zpr) == 8:
+            self.prisms[self.n_max] = Okabe(xpr, ypr, zpr, sus, rem, rinc,
+                                            rdec, rho, self.earth, typ)
+            self.prisms[self.n_max].typ = "O"
+        else:
+            self.prisms[self.n_max] = Prism(xpr, ypr, zpr, sus, rem, rinc,
+                                            rdec, rho, self.earth, typ)
         self.n_prisms += 1
         if self.n_prisms == 1:
             return
@@ -569,12 +616,18 @@ class Prism_calc(Prism, Earth):
             delx = 0.
             dely = 0.
             delz = 0.
+            delt = 0.
             for key, val in self.prisms.items():
-                dex, dey, dez = val.mag_prism(xp[i], yp[i], zp[i])
-                delx += dex
-                dely += dey
-                delz += dez
-            delh, delt = utils.compon(delx, dely, delz, self.earth)
+                if self.typ == "O":
+                    delx = dely = delz = delh = 0.
+                    delt += val.calc_ano(xp[i], yp[i], zp[i])
+                else:
+                    dex, dey, dez = val.mag_prism(xp[i], yp[i], zp[i])
+                    delx += dex
+                    dely += dey
+                    delz += dez
+            if self.typ == "P":
+                delh, delt = utils.compon(delx, dely, delz, self.earth)
             self.v[i, 0] += delx
             self.v[i, 1] += dely
             self.v[i, 2] += delz
@@ -613,30 +666,29 @@ class Prism_calc(Prism, Earth):
             val.sus_der = np.zeros(n_points)
             val.rem_der = np.zeros(n_points)
             rem = val.rem
-            sus = val.sus
+            sus = val.getsus()
             if sus_inv:
-                val.rem = 0.
-                val.sus = 1.
-                val.comps()
+                val.setsus(1.)
                 for i in range(n_points):
-                    dex, dey, dez = val.mag_prism(xp[i], yp[i], zp[i])
-                    deh, det = utils.compon(dex, dey, dez, self.earth)
-                    self.prisms[key].sus_der[i] = det
+                    if val.typ == "O":
+                        self.prisms[key].sus_der[i] = val.calc_ano(
+                            xp[i], yp[i], zp[i])
+                    else:
+                        dex, dey, dez = val.mag_prism(xp[i], yp[i], zp[i])
+                        deh, det = utils.compon(dex, dey, dez, self.earth)
+                        self.prisms[key].sus_der[i] = det
                 val.rem = rem
-                val.sus = sus
-                self.prisms[key].comps()
+                val.setsus(sus)
                 self.prisms[key].der_flag_mag = True
             if rem_inv:
                 val.sus = 0.
-                val.rem = 1.
-                val.comps()
+                val.setrem(1.)
                 for i in range(n_points):
                     dexr, deyr, dezr = val.mag_prism(xp[i], yp[i], zp[i])
                     deh, det = utils.compon(dex, dey, dez, self.earth)
                     self.prisms[key].rem_der[i] = det
-                val.sus = sus
-                val.rem = rem
-                self.prisms[key].comps()
+                val.setsus(sus)
+                val.setrem(rem)
                 self.prisms[key].der_flag_mag = True
             print(f"Prism {key+1}: Magnetic derivative calculated")
         return True
@@ -843,8 +895,8 @@ class Prism_calc(Prism, Earth):
         keys = np.array(list(self.prisms.keys()))
 # Check whether neighbouring block in X direction exists
         for i, key in enumerate(keys):
-            z_fac[i] = (self.prisms[key].z[0] + self.prisms[key].z[1])\
-                / (2*depth_ref)
+            z_fac[i] = abs(self.prisms[key].z.min() +
+                           self.prisms[key].z.max()) / (2*depth_ref)
 # Determine numbers of neighbouring blocks in dictionary
             if len(self.prisms[key].x_neigh) > 0:
                 for kk in self.prisms[key].x_neigh:
@@ -866,7 +918,7 @@ class Prism_calc(Prism, Earth):
 
 # If inversion is done for at least two different parameter types, set the
 #    smmothing parameters for the second parameter type
-        z_fac[:] = 1.
+        # z_fac[:] = 1.
         n0 = 0
         n1 = self.n_prisms
         if sus_inv:
@@ -890,7 +942,7 @@ class Prism_calc(Prism, Earth):
                 S[:, i+n0] *= z_fac[i]
         return S
 
-    def get_max_prisms(self, data, deriv, max_lim=0.1, width=10):
+    def get_max_prisms(self, data, deriv, index_data, max_lim=0.1, width=10):
         """
         Find maxima in the matrix data defined as points that are larger than
         all other points in an area if width points around. For maxima with
@@ -911,6 +963,9 @@ class Prism_calc(Prism, Earth):
             Frechet matrix linking data to parameters (if several classes of
             data and/or parameters are used, pass only the part corresponding
             to one data/parameter class, i.e. pass a partial Frechet matrix)
+        index_data: 1D numpy int array
+            Indices which connect finite (non-nan) data of the flattened data
+            set with the indices in the derivative matrix
         max_lim : float, optional Default is 0.1
             Prisms having the strongest influence on data values larger than
             the formula given above will be split.
@@ -945,6 +1000,7 @@ class Prism_calc(Prism, Earth):
                 i = pos[0]
             else:
                 i = pos[0]*nx + pos[1]
+            i = np.where(index_data == i)[0][0]
             p = np.argmax(abs(deriv[i, :]))
             key = keys[p]
             xpmn = self.prisms[key].x[0]
@@ -1014,6 +1070,8 @@ class Prism_calc(Prism, Earth):
 
 
         """
+        dtyp = self.prisms[key].data_type
+        typ = self.prisms[key].typ
         sus_act = self.prisms[key].sus*4.*np.pi
         rem_act = self.prisms[key].rem
         rho_act = self.prisms[key].rho
@@ -1025,9 +1083,14 @@ class Prism_calc(Prism, Earth):
         ypmn = self.prisms[key].y[0]
         ypmx = self.prisms[key].y[1]
         dy_act = ypmx-ypmn
-        zpmn = self.prisms[key].z[0]
-        zpmx = self.prisms[key].z[1]
+        if self.prisms[key].typ == "P":
+            zpmn = self.prisms[key].z[0]
+            zpmx = self.prisms[key].z[1]
+        else:
+            zpmn = self.prisms[key].z[0:4].min()
+            zpmx = self.prisms[key].z[4:].max()
         dz_act = zpmx-zpmn
+        dz_p = dz_act/2.
         dx_p = dx_act/2.
         if dx_p < self.min_size_x:
             xp0 = [xpmn]
@@ -1042,23 +1105,232 @@ class Prism_calc(Prism, Earth):
         else:
             yp0 = [ypmn, ypmn+dy_p]
             yp1 = [ypmn+dy_p, ypmx]
-        dz_act = zpmx-zpmn
-        dz_p = dz_act/2.
         if dz_p < self.min_size_z:
             zp0 = [zpmn]
             zp1 = [zpmx]
         else:
             zp0 = [zpmn, zpmn+dz_p]
             zp1 = [zpmn+dz_p, zpmx]
-        self.remove_prism(key)
+        coor = []
+        tflag = False
+        if typ == "O":
+            if self.dim == 2:
+                t0 = np.round(self.topo(xpmn), 1)
+                if np.isclose(self.prisms[key].z[0], t0):
+                    tflag = True
+                coor.append(np.round(self.topo((xpmn+xpmx)/2.), 1))
+                coor.append(coor[0])
+                coor.append(self.prisms[key].z[0])
+                coor.append(self.prisms[key].z[3])
+                coor.append(coor[0])
+            else:
+                t0 = np.round(self.topo(xpmn, ypmn), 1)
+                if np.isclose(self.prisms[key].z[0], t0):
+                    tflag = True
+                coor.append(np.round(self.topo((xpmn+xpmx)/2., ypmn), 1))
+                coor.append(np.round(self.topo((xpmn+xpmx)/2., ypmx), 1))
+                coor.append(np.round(self.topo(xpmn, (ypmn+ypmx)/2.), 1))
+                coor.append(np.round(self.topo(xpmx, (ypmn+ypmx)/2.), 1))
+                coor.append(np.round(self.topo((xpmn+xpmx)/2., (ypmn+ypmx)/2.),
+                                     1))
+            zz = self.prisms[key].z
+            if self.dim == 2 and self.direction in ("N", "S", 0., 180.):
+                zzz = np.copy(zz)
+                zz[1] = zzz[3]
+                zz[3] = zzz[1]
+                zz[5] = zzz[7]
+                zz[7] = zzz[5]
+            if tflag:
+                z_dt = coor[0]
+                z_ut = coor[1]
+                z_lt = coor[2]
+                z_rt = coor[3]
+                z_ct = coor[4]
+            else:
+                z_dt = np.round((zz[0]+zz[1])/2., 1)
+                z_ut = np.round((zz[2]+zz[3])/2., 1)
+                z_lt = np.round((zz[0]+zz[3])/2., 1)
+                z_rt = np.round((zz[1]+zz[2])/2., 1)
+                z_ct = np.round(np.mean(zz[:4]), 1)
+            z_db = np.round((zz[4]+zz[5])/2., 1)
+            z_ub = np.round((zz[6]+zz[7])/2., 1)
+            z_lb = np.round((zz[4]+zz[7])/2., 1)
+            z_rb = np.round((zz[5]+zz[6])/2., 1)
+            z_cb = np.round(np.mean(zz[4:]), 1)
+            z_dm = np.round((z_dt+z_db)/2., 1)
+            z_um = np.round((z_ut+z_ub)/2., 1)
+            z_lm = np.round((z_lt+z_lb)/2., 1)
+            z_rm = np.round((z_rt+z_rb)/2., 1)
+            z_cm = np.round((z_ct+z_cb)/2., 1)
+            z_0m = np.round((zz[0]+zz[4])/2., 1)
+            z_1m = np.round((zz[1]+zz[5])/2., 1)
+            z_2m = np.round((zz[2]+zz[6])/2., 1)
+            z_3m = np.round((zz[3]+zz[7])/2., 1)
+# Calculate top and bottom coordinates of new prisms if top is not on
+# topography. If top is equal to topography, replace first four values of the
+# corresponding prism by topography.
+            ztop = []
+            if len(xp0) == 1:
+                if len(yp0) == 1:
+                    if len(zp0) == 1:
+                        ztop.append(list(zz))
+                    else:
+                        ztop.append(list(zz[:4])+list((zz[:4]+zz[4:])/2.))
+                        ztop.append(list((zz[:4]+zz[4:])/2.)+list(zz[4:]))
+                else:
+                    if len(zp0) == 1:
+                        ztop.append([zz[0], zz[1], z_rt, z_lt, zz[4], zz[5],
+                                     z_rb, z_lb])
+                        ztop.append([])
+                        ztop.append([z_lt, z_rt, zz[2], zz[3], z_lb, z_rb,
+                                     zz[6], zz[7]])
+                    else:
+                        ztop.append([zz[0], zz[1], z_rt, z_lt, z_0m, z_1m,
+                                     z_rm, z_lm])
+                        ztop.append([z_0m, z_1m, z_rm, z_lm, zz[4], zz[5],
+                                     z_rb, z_lb])
+                        ztop.append([z_lt, z_rt, zz[2], zz[3], z_lm, z_rm,
+                                     z_2m, z_3m])
+                        ztop.append([z_lm, z_rm, z_2m, z_3m, z_lb, z_rb, zz[6],
+                                     zz[7]])
+            else:
+                if len(yp0) == 1:
+                    if len(zp0) == 1:
+                        ztop.append([zz[0], z_dt, z_ut, zz[3], zz[4], z_db,
+                                     z_ub, zz[7]])
+                        ztop.append([])
+                        ztop.append([])
+                        ztop.append([])
+                        ztop.append([z_dt, zz[1], zz[2], z_ut, z_db, zz[5],
+                                     zz[6], z_ub])
+                    else:
+                        ztop.append([zz[0], z_dt, z_ut, zz[3], z_0m, z_dm,
+                                     z_um, z_3m])
+                        ztop.append([(zz[0]+zz[4])/2., z_dm, z_um, z_3m, zz[4],
+                                     z_db, z_ub, zz[7]])
+                        ztop.append([])
+                        ztop.append([])
+                        ztop.append([z_dt, zz[1],  zz[2], z_ut, z_dm, z_1m,
+                                     z_2m, z_um])
+                        ztop.append([z_dm, z_1m, z_2m, z_um, z_db, zz[5],
+                                     zz[6], z_ub])
+                else:
+                    if len(zp0) == 1:
+                        ztop.append([zz[0], z_dt, z_ct, z_lt, zz[4], z_db,
+                                     z_cb, z_lb])
+                        ztop.append([])
+                        ztop.append([z_lt, z_ct, z_ut, zz[3], z_lb, z_cb, z_ub,
+                                     zz[7]])
+                        ztop.append([])
+                        ztop.append([z_dt, zz[1], z_rt, z_ct, z_db, zz[5],
+                                     z_rb, z_cb])
+                        ztop.append([])
+                        ztop.append([z_ct, z_rt, zz[2], z_ut, z_cb, z_rb,
+                                     zz[6], z_ub])
+                        ztop.append([])
+                    else:
+                        ztop.append([zz[0], z_dt, z_ct, z_lt, z_0m, z_dm, z_cm,
+                                    z_lm])
+                        ztop.append([z_0m, z_dm, z_cm, z_lm, zz[4], z_db, z_cb,
+                                     z_lb])
+                        ztop.append([z_lt, z_ct, z_ut, zz[3], z_lm, z_cm, z_um,
+                                     z_3m])
+                        ztop.append([z_lm, z_cm, z_um, z_3m, z_lb, z_cb, z_ub,
+                                     zz[7]])
+                        ztop.append([z_dt, zz[1], z_rt, z_ct, z_dm, z_1m, z_rm,
+                                    z_cm])
+                        ztop.append([z_dm, z_1m, z_rm, z_cm, z_db, zz[5], z_rb,
+                                     z_cb])
+                        ztop.append([z_ct, z_rt, zz[2], z_ut, z_cm, z_rm, z_2m,
+                                    z_um])
+                        ztop.append([z_cm, z_rm, z_2m, z_um, z_cb, z_rb, zz[6],
+                                     z_ub])
+            if self.dim == 2 and self.direction in ("N", "S", 0., 180.):
+                zzz = deepcopy(ztop)
+                ztop[0][1] = zzz[0][3]
+                ztop[0][3] = zzz[0][1]
+                ztop[0][5] = zzz[0][7]
+                ztop[0][7] = zzz[0][5]
+                if len(zp0) > 1:
+                    ztop[1][1] = zzz[1][3]
+                    ztop[1][3] = zzz[1][1]
+                    ztop[1][5] = zzz[1][7]
+                    ztop[1][7] = zzz[1][5]
+                if len(xp0) > 1:
+                    ztop[4][1] = zzz[4][3]
+                    ztop[4][3] = zzz[4][1]
+                    ztop[4][5] = zzz[4][7]
+                    ztop[4][7] = zzz[4][5]
+                    if len(zp0) > 1:
+                        ztop[5][1] = zzz[5][3]
+                        ztop[5][3] = zzz[5][1]
+                        ztop[5][5] = zzz[5][7]
+                        ztop[5][7] = zzz[5][5]
+
         key_add = []
         for ix in range(len(xp0)):
             xpr = np.array([xp0[ix], xp1[ix]])
             for iy in range(len(yp0)):
                 ypr = np.array([yp0[iy], yp1[iy]])
+                if self.topo_flag:
+                    tflag = False
+                    if self.dim == 2:
+                        t = np.round(self.topo(xpr), 1)
+                        top = np.array([t[0], t[0], t[1], t[1]])
+                        if ix == 0:
+                            if np.isclose(self.prisms[key].z[0], t[0]):
+                                tflag = True
+                        else:
+                            if np.isclose(self.prisms[key].z[-1], t[1]):
+                                tflag = True
+                    else:
+                        x = np.array([xpr[0], xpr[1], xpr[1], xpr[0]])
+                        y = np.array([ypr[0], ypr[0], ypr[1], ypr[1]])
+                        top = np.round(self.topo(x, y), 1)
+                        if ix == 0:
+                            if iy == 0:
+                                if np.isclose(self.prisms[key].z[0], top[0]):
+                                    tflag = True
+                            else:
+                                if np.isclose(self.prisms[key].z[3], top[3]):
+                                    tflag = True
+                        else:
+                            if iy == 0:
+                                if np.isclose(self.prisms[key].z[1], top[1]):
+                                    tflag = True
+                            else:
+                                if np.isclose(self.prisms[key].z[2], top[2]):
+                                    tflag = True
                 for iz in range(len(zp0)):
-                    zpr = np.array([zp0[iz], zp1[iz]])
-                    self.add_prism(xpr, ypr, zpr, sus_act, rem_act, inc_act,
-                                   dec_act, rho_act)
+                    k = ix*4+iy*2+iz
+                    if typ == "P":
+                        zpr = np.array([zp0[iz], zp1[iz]])
+                        self.add_prism(xpr, ypr, zpr, sus_act, rem_act,
+                                       inc_act, dec_act, rho_act, typ=dtyp)
+                    else:
+                        # if len(zp0) == 2:
+                        # if tflag:
+                        #     ztop[k][:4] = top
+                        zpr = np.array(ztop[k])
+                        #     if iz == 0:
+                        #         if tflag:
+                        #             zpr = list(top)
+                        #         else:
+                        #             if ix == 0:
+                        #                 z1 = 
+                        #             zpr = [self.prism[key].
+                        #             +\
+                        #                 list((top + self.prisms[key].z[4:])/2.)
+                        #     else:
+                        #             zpr = list((top + self.prisms[key].z[4:])/
+                        #                        2.)\
+                        #                 + list(self.prisms[key].z[4:])
+                        #     zpr = np.array(zpr)
+                        # else:
+                        #     zpr = np.copy(self.prisms[key].z)
+                        #     zpr[:4] = top
+                    self.add_prism(xpr, ypr, zpr, sus_act, rem_act,
+                                   inc_act, dec_act, rho_act, typ=dtyp)
                     key_add.append(self.n_max)
+        self.remove_prism(key)
         return key_add
