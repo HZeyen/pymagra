@@ -20,9 +20,9 @@ if __name__ == "__main__":
     dir0 = r"E:\Daten\Fontaines_Salées_BRGM"
     # dir0 = r"D:\Tadjikistan\ZolIZard"
     # dir0 = r"E:\Daten\Magnetics\test_mag_topo"
-    dir0 = r"E:\Daten\Magnetics\test_mag_inver\syn_simple1"
-    dir0 = r"E:\Daten\Magnetics\test_mag_inver"
-    dir0 = r"E:\Daten\Magnetik\Beaver Creek"
+    # dir0 = r"E:\Daten\Magnetics\test_mag_inver\syn_simple1"
+    # dir0 = r"E:\Daten\Magnetics\test_mag_inver"
+    # dir0 = r"E:\Daten\Magnetik\Beaver Creek"
 
     os.chdir(dir0)
 

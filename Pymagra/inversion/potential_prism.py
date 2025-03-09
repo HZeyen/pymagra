@@ -1099,7 +1099,7 @@ class Prism_calc(Prism, Earth):
             xp0 = [xpmn, xpmn+dx_p]
             xp1 = [xpmn+dx_p, xpmx]
         dy_p = dy_act/2.
-        if dy_p < self.min_size_y:
+        if dy_p < self.min_size_y or self.dim == 2:
             yp0 = [ypmn]
             yp1 = [ypmx]
         else:
@@ -1329,8 +1329,8 @@ class Prism_calc(Prism, Earth):
                         # else:
                         #     zpr = np.copy(self.prisms[key].z)
                         #     zpr[:4] = top
-                    self.add_prism(xpr, ypr, zpr, sus_act, rem_act,
-                                   inc_act, dec_act, rho_act, typ=dtyp)
+                        self.add_prism(xpr, ypr, zpr, sus_act, rem_act,
+                                       inc_act, dec_act, rho_act, typ=dtyp)
                     key_add.append(self.n_max)
         self.remove_prism(key)
         return key_add

@@ -780,7 +780,7 @@ class inversion():
                     self.fig_2D.close()
                     if event.key == "enter":
                         return False
-                    if event.key in ("s", "S"):
+                    if event.key in ("e", "E"):
                         self.equal_flag = not self.equal_flag
                         break
                     elif event.key in ("r", "R"):
@@ -1301,7 +1301,7 @@ class inversion():
             lab.set_fontsize(12)
         self.fig_2D.setHelp(
             "Press ENTER to finish; press r to continue iterations; "
-            + "press s to toggle between equal scale and filling window "
+            + "press e to toggle between equal scale and filling window "
             + "for model axis; press c to toggle between linear and log "
             + "color scale. If no reaction, move mouse a little bit")
         self.fig_2D.show()
