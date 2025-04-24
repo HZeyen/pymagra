@@ -10,8 +10,9 @@ import numpy as np
 from .dialog import dialog
 
 
-def get_geometry(file, h1=None, h2=None, dispo=None, dec=None, dx=None,
-                 topo=False, title=""):
+def get_geometry(
+    file, h1=None, h2=None, dispo=None, dec=None, dx=None, topo=False, title=""
+):
     """
     Asks for measurement geometry information
 
@@ -71,8 +72,7 @@ def get_geometry(file, h1=None, h2=None, dispo=None, dec=None, dx=None,
     labels.append("Title text")
     types.append("e")
     values.append(title)
-    results, ok_button = dialog(labels, types, values,
-                                title="Geometry parameters")
+    results, ok_button = dialog(labels, types, values, title="Geometry parameters")
     if not ok_button:
         ret = [False]
         for _ in types:
@@ -82,10 +82,10 @@ def get_geometry(file, h1=None, h2=None, dispo=None, dec=None, dx=None,
     i = 0
     if h1 is not None:
         i += 1
-        ret.append(float(results[i]))
+        ret.append(-float(results[i]))
     if h2 is not None:
         i += 1
-        ret.append(float(results[i]))
+        ret.append(-float(results[i]))
     if dispo is not None:
         i += 1
         ret.append(int(results[i]))
@@ -115,18 +115,22 @@ def get_time_correction():
     """
     results, okButton = dialog(
         ["GPS time (hh:mm:ss)", "Magnetometer time"],
-        ["e", "e"], ["00:00:00.0", "00:00:00.0"],
-        "Times")
+        ["e", "e"],
+        ["00:00:00.0", "00:00:00.0"],
+        "Times",
+    )
     if not okButton:
         print("Time correction aborted")
         return None
     GPS_time = results[0].split(":")
     mag_time = results[1].split(":")
-    GPS_seconds = (int(GPS_time[0])*60.+int(GPS_time[1]))*60.\
-        + float(GPS_time[2])
-    mag_seconds = (int(mag_time[0])*60.+int(mag_time[1]))*60.\
-        + float(mag_time[2])
-    return GPS_seconds-mag_seconds
+    GPS_seconds = (int(GPS_time[0]) * 60.0 + int(GPS_time[1])) * 60.0 + float(
+        GPS_time[2]
+    )
+    mag_seconds = (int(mag_time[0]) * 60.0 + int(mag_time[1])) * 60.0 + float(
+        mag_time[2]
+    )
+    return GPS_seconds - mag_seconds
 
 
 def get_justify_indices(glob=False):
@@ -151,8 +155,7 @@ def get_justify_indices(glob=False):
         types.append("r")
         values.append(1)
 
-    results, okButton = dialog(labels, types, values,
-                               "Justification parameters")
+    results, okButton = dialog(labels, types, values, "Justification parameters")
     if okButton:
         ret = [True, results[1]]
         if glob:
@@ -183,10 +186,17 @@ def clip_parameters():
 
     """
     results, okButton = dialog(
-        ["Lower fixed clip value", "Upper fixed clip value",
-         "Lower percentile", "upper percentile", "histogram"],
-        ["e", "e", "e", "e", "c"], [None, None, 0.01, None, None],
-        "Clipping parameters")
+        [
+            "Lower fixed clip value",
+            "Upper fixed clip value",
+            "Lower percentile",
+            "upper percentile",
+            "histogram",
+        ],
+        ["e", "e", "e", "e", "c"],
+        [None, None, 0.01, None, None],
+        "Clipping parameters",
+    )
     histo = False
     if okButton:
         min_fix = None
@@ -205,7 +215,7 @@ def clip_parameters():
             percent_down = None
         if max_fix:
             percent_up = None
-# If extreme values should be chosen manually in histogram, do this now
+        # If extreme values should be chosen manually in histogram, do this now
         if results[4] == 0:
             histo = True
         return True, min_fix, max_fix, percent_down, percent_up, histo
@@ -233,13 +243,16 @@ def get_spector1D(direction, max_len):
         Half_width for determination of local maximum
     """
     results, okButton = dialog(
-        ["Direction of analysis",
-         ["N-S", "E-W"],
-         "Half width for maxima determination",
-         f"Window length (not yet used)\nmax in X: {max_len[1]} in "
-         + f"Y: {max_len[0]}"],
+        [
+            "Direction of analysis",
+            ["N-S", "E-W"],
+            "Half width for maxima determination",
+            f"Window length (not yet used)\nmax in X: {max_len[1]} in "
+            + f"Y: {max_len[0]}",
+        ],
         ["l", "r", "e", "e"],
-        [None, direction + 1, 1, max_len[direction]])
+        [None, direction + 1, 1, max_len[direction]],
+    )
     if okButton:
         return True, int(results[1]), int(results[2])
     return False, None, None
@@ -272,18 +285,25 @@ def get_spector2D(window_len, step, n_Nys):
     """
     n_Ny = np.min(n_Nys)
     results, okButton = dialog(
-        ["Window length [m]",
-         "  Attention: there must be at least 16 points per window "
-         + "length\n"
-         + "             see below: Nr of FFT coefficients >= 8!",
-         "Step size [m]",
-         "Half width for maxima determination",
-         f"Number of FFT coefficients\nmax in X: {n_Nys[1]}, Y: {n_Nys[0]}"],
+        [
+            "Window length [m]",
+            "  Attention: there must be at least 16 points per window "
+            + "length\n"
+            + "             see below: Nr of FFT coefficients >= 8!",
+            "Step size [m]",
+            "Half width for maxima determination",
+            f"Number of FFT coefficients\nmax in X: {n_Nys[1]}, Y: {n_Nys[0]}",
+        ],
         ["e", "l", "e", "e", "e"],
         [window_len, None, step, 1, n_Ny],
-        "2D FFT parameters")
+        "2D FFT parameters",
+    )
     if okButton:
-        return True, float(results[0]), float(results[2]), int(results[3]), \
-            int(results[4])
+        return (
+            True,
+            float(results[0]),
+            float(results[2]),
+            int(results[3]),
+            int(results[4]),
+        )
     return False, None, None, None, None
-

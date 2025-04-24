@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Last modified: Nov 22 2024
+Last modified: Apr 23, 2025
 
 @author: Hermann Zeyen
 University Paris-Saclay
@@ -20,6 +20,7 @@ University Paris-Saclay
           - earth_components
 
 """
+
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
@@ -31,26 +32,26 @@ def magnetization_components(sus, rem, inc, dec, earth):
     a combination of induced and remanent magnetization.
 
     """
-    tx = 0.
-    ty = 0.
-    tz = 0.
-    if sus != 0. and earth.f > 0.:
-        mag = earth.f*sus
-        tx = mag*earth.cdci
-        ty = mag*earth.sdci
-        tz = mag*earth.sie
-# The factor 100 comes from the fact that the calculated anomaly in A/m must be
-# multiplied by mu0/4pi = 10**-7 and again by 10**9 to pass from T to nT.
+    tx = 0.0
+    ty = 0.0
+    tz = 0.0
+    if sus != 0.0 and earth.f > 0.0:
+        mag = earth.f * sus
+        tx = mag * earth.cdci
+        ty = mag * earth.sdci
+        tz = mag * earth.sie
+    # The factor 100 comes from the fact that the calculated anomaly in A/m must be
+    # multiplied by mu0/4pi = 10**-7 and again by 10**9 to pass from T to nT.
     if rem != 0:
-        rem_gauss = rem*100.
+        rem_gauss = rem * 100.0
         cdr = np.cos(np.radians(dec))
         sdr = np.sin(np.radians(dec))
         cir = np.cos(np.radians(inc))
         sir = np.sin(np.radians(inc))
-        ehr = rem_gauss*cir
-        tx += ehr*cdr
-        ty += ehr*sdr
-        tz += rem_gauss*sir
+        ehr = rem_gauss * cir
+        tx += ehr * cdr
+        ty += ehr * sdr
+        tz += rem_gauss * sir
     return tx, ty, tz
 
 
@@ -73,20 +74,20 @@ def tandet(a, b, t_sum):
             multiple of pi/2 to be added
 
     """
-    q1 = a+b
-    q2 = 1.-a*b
-    if np.isclose(q2, 0.):
-        if q1 < 0.:
-            t_sum -= np.pi/2.
+    q1 = a + b
+    q2 = 1.0 - a * b
+    if np.isclose(q2, 0.0):
+        if q1 < 0.0:
+            t_sum -= np.pi / 2.0
         else:
-            t_sum += np.pi/2.
-        s = 0.
+            t_sum += np.pi / 2.0
+        s = 0.0
     else:
-        s = q1/q2
-        if q2 < 0.:
-            if q1 < 0.:
+        s = q1 / q2
+        if q2 < 0.0:
+            if q1 < 0.0:
                 t_sum -= np.pi
-            elif q1 > 0.:
+            elif q1 > 0.0:
                 t_sum += np.pi
     return s, t_sum
 
@@ -109,32 +110,38 @@ def matrixExtension(data):
 
     """
     ny, nx = data.shape
-    nx_add = int((nx-2)/2)
-    ix_add_right = nx-nx_add-1
+    nx_add = int((nx - 2) / 2)
+    ix_add_right = nx - nx_add - 1
 
-    ny_add = int((ny-2)/2)
-    d = np.zeros((ny+2*ny_add, nx+2*nx_add))
-    iy_add_up = d.shape[0]-ny_add-1
+    ny_add = int((ny - 2) / 2)
+    d = np.zeros((ny + 2 * ny_add, nx + 2 * nx_add))
+    iy_add_up = d.shape[0] - ny_add - 1
 
-    nx_right = nx_add+nx
-    ny_up = ny_add+ny
-    edge = np.mean(np.array(list(data[:, 0])+list(data[0, :])
-                            + list(data[-1, :])+list(data[:, -1])))
+    nx_right = nx_add + nx
+    ny_up = ny_add + ny
+    edge = np.mean(
+        np.array(
+            list(data[:, 0]) + list(data[0, :]) + list(data[-1, :]) + list(data[:, -1])
+        )
+    )
     d[ny_add:ny_up, nx_add:nx_right] = data
-    fac = (np.sin(np.arange(nx_add)*np.pi/(2*nx_add)))**2
+    fac = (np.sin(np.arange(nx_add) * np.pi / (2 * nx_add))) ** 2
     fac2 = np.flip(fac)
     j = -1
     for i in range(ny_add, ny_up):
         j += 1
-        d[i, :nx_add] = fac*(data[j, 1]-edge)*np.flip(data[j, 1:nx_add+1])+edge
-        d[i, nx_right:] = fac2*(data[j, -2]-edge)\
-            * np.flip(data[j, ix_add_right:nx-1])+edge
-    fac = (np.sin(np.arange(ny_add)*np.pi/(2*ny_add)))**2
+        d[i, :nx_add] = (
+            fac * (data[j, 1] - edge) * np.flip(data[j, 1 : nx_add + 1]) + edge
+        )
+        d[i, nx_right:] = (
+            fac2 * (data[j, -2] - edge) * np.flip(data[j, ix_add_right : nx - 1]) + edge
+        )
+    fac = (np.sin(np.arange(ny_add) * np.pi / (2 * ny_add))) ** 2
     fac2 = np.flip(fac)
     for i in range(d.shape[1]):
-        d[:ny_add, i] = fac*(d[1, i]-edge)*np.flip(d[1:ny_add+1, i])+edge
-        d[ny_up:, i] = fac2*(d[-2, i]-edge)*np.flip(d[iy_add_up:-1, i])+edge
-    return d, (ny_add, nx_add), (ny_add+ny, nx_add+nx)
+        d[:ny_add, i] = fac * (d[1, i] - edge) * np.flip(d[1 : ny_add + 1, i]) + edge
+        d[ny_up:, i] = fac2 * (d[-2, i] - edge) * np.flip(d[iy_add_up:-1, i]) + edge
+    return d, (ny_add, nx_add), (ny_add + ny, nx_add + nx)
 
 
 def gradient(data, dx, dy, direction):
@@ -167,8 +174,8 @@ def gradient(data, dx, dy, direction):
     ny2 = corner2[0]
     nx2 = corner2[1]
     ny, nx = d.shape
-    kx = np.fft.fftfreq(nx, dx) * 2.*np.pi
-    ky = np.fft.fftfreq(ny, dy) * 2.*np.pi
+    kx = np.fft.fftfreq(nx, dx) * 2.0 * np.pi
+    ky = np.fft.fftfreq(ny, dy) * 2.0 * np.pi
     if direction.lower() == "x":
         s = np.outer(np.ones_like(ky), kx) * 1j
     elif direction.lower() == "y":
@@ -212,8 +219,8 @@ def integral(data, dx, dy, direction):
     ny2 = corner2[0]
     nx2 = corner2[1]
     ny, nx = d.shape
-    kx = np.fft.fftfreq(nx, dx) * 2.*np.pi
-    ky = np.fft.fftfreq(ny, dy) * 2.*np.pi
+    kx = np.fft.fftfreq(nx, dx) * 2.0 * np.pi
+    ky = np.fft.fftfreq(ny, dy) * 2.0 * np.pi
     if direction.lower() == "x":
         s = np.outer(np.ones_like(ky), kx) * 1j
     elif direction.lower() == "y":
@@ -250,10 +257,10 @@ def compon(dx, dy, dz, earth):
         total field component of the anomaly
 
     """
-# If effect of body is large with respect toe Earth's field, the next three
-# lines should be uncommented and the other two lines commented.
-    dh = dx*earth.cde + dy*earth.sde
-    dt = dx*earth.cdci + dy*earth.sdci + dz*earth.sie
+    # If effect of body is large with respect toe Earth's field, the next three
+    # lines should be uncommented and the other two lines commented.
+    dh = dx * earth.cde + dy * earth.sde
+    dt = dx * earth.cdci + dy * earth.sdci + dz * earth.sie
     return dh, dt
 
 
@@ -280,13 +287,13 @@ def mag_color_map(vmn, vmx, cif=2):
 
     """
     c = cif
-# Find number of ciffers equal to or above cif necessary to distinguish
-# minimum from maximum rounded value
+    # Find number of ciffers equal to or above cif necessary to distinguish
+    # minimum from maximum rounded value
     while True:
         fac = 10**c
-        av = np.round((vmn+vmx)/2., c)
-        vmin = np.ceil((vmn-av)*fac)/fac
-        vmax = np.floor((vmx-av)*fac)/fac
+        av = np.round((vmn + vmx) / 2.0, c)
+        vmin = np.ceil((vmn - av) * fac) / fac
+        vmax = np.floor((vmx - av) * fac) / fac
         if vmax > vmin:
             break
         c += 1
@@ -296,26 +303,39 @@ def mag_color_map(vmn, vmx, cif=2):
         vmin -= 0.5
         vmax += 0.5
     ncol_tot = 1024
-    if vmax <= 0.:
+    if vmax <= 0.0:
         all_colors = plt.cm.Blues_r(np.linspace(0, 1, ncol_tot))
-    elif vmin >= 0.:
+    elif vmin >= 0.0:
         all_colors = plt.cm.Reds(np.linspace(0, 1, ncol_tot))
     else:
-        ncol_neg = int(-ncol_tot*vmin/(vmax-vmin))
-        ncol_pos = ncol_tot-ncol_neg
-# Define blue colormap for negative values
+        ncol_neg = int(-ncol_tot * vmin / (vmax - vmin))
+        ncol_pos = ncol_tot - ncol_neg
+        # Define blue colormap for negative values
         colors_neg = plt.cm.Blues_r(np.linspace(0, 1, ncol_neg))
-# Define red colormap for positive values
+        # Define red colormap for positive values
         colors_pos = plt.cm.Reds(np.linspace(0.05, 1, ncol_pos))
         all_colors = np.vstack((colors_neg, colors_pos))
-    br_map = colors.LinearSegmentedColormap.from_list('blue_red', all_colors)
-    norm = colors.TwoSlopeNorm(vmin=vmin, vcenter=(vmin+vmax)/2, vmax=vmax)
+    br_map = colors.LinearSegmentedColormap.from_list("blue_red", all_colors)
+    norm = colors.TwoSlopeNorm(vmin=vmin, vcenter=(vmin + vmax) / 2, vmax=vmax)
     return br_map, norm
 
 
-def data_plot(data, fig, ax, title="", xtitle="Easting [m]",
-              ytitle="Northing [m]", cmap="rainbow", norm=None, extent=None,
-              cbar_title="", vmin=None, vmax=None, font_ax=12, font_tit=14):
+def data_plot(
+    data,
+    fig,
+    ax,
+    title="",
+    xtitle="Easting [m]",
+    ytitle="Northing [m]",
+    cmap="rainbow",
+    norm=None,
+    extent=None,
+    cbar_title="",
+    vmin=None,
+    vmax=None,
+    font_ax=12,
+    font_tit=14,
+):
     """
     Plots a raster image of regularly gridded data
 
@@ -366,26 +386,58 @@ def data_plot(data, fig, ax, title="", xtitle="Easting [m]",
     """
     if not extent:
         shape_y, shape_x = data.shape
-        extent = [-0.5, shape_x-0.5, 0.5, shape_y-0.5]
+        extent = [-0.5, shape_x - 0.5, 0.5, shape_y - 0.5]
     if not vmin:
-        vmin = data.min()
+        vmin = np.round(data.min(), 1)
     if not vmax:
-        vmax = data.max()
+        vmax = np.round(data.max(), 1)
     if norm:
-        im = ax.imshow(np.flip(data, axis=0), norm=norm, cmap=cmap,
-                       aspect='equal', extent=extent, rasterized=True)
+        im = ax.imshow(
+            np.flip(data, axis=0),
+            norm=norm,
+            cmap=cmap,
+            aspect="equal",
+            extent=extent,
+            rasterized=True,
+        )
     else:
-        im = ax.imshow(np.flip(data, axis=0), cmap=cmap, aspect='equal',
-                       extent=extent, rasterized=True, vmin=vmin, vmax=vmax)
+        im = ax.imshow(
+            np.flip(data, axis=0),
+            cmap=cmap,
+            aspect="equal",
+            extent=extent,
+            rasterized=True,
+            vmin=vmin,
+            vmax=vmax,
+        )
     ax.set_title(title, fontsize=font_tit)
     ax.set_xlabel(xtitle, fontsize=font_ax)
     ax.set_ylabel(ytitle, fontsize=font_ax)
     ax.tick_params(labelsize=font_ax)
-#    cax = ax.inset_axes([0.95, 0.1, 0.05, 0.9])
+    #    cax = ax.inset_axes([0.95, 0.1, 0.05, 0.9])
     cax = ax.inset_axes([1.05, 0.05, 0.05, 0.9], transform=ax.transAxes)
     cbar = fig.colorbar(im, shrink=0.9, cax=cax)
-    cbar.set_label(cbar_title, fontsize=font_ax-2)
-    cbar.ax.tick_params(labelsize=font_ax-2)
+    cbar.set_label(cbar_title, fontsize=font_ax - 2)
+    cbar.ax.tick_params(labelsize=font_ax - 2)
+    cbar.ax.set_ylabel(cbar_title, size=10)
+    cbar.ax.text(
+        0.0,
+        -0.02,
+        f"{vmin}",
+        verticalalignment="top",
+        horizontalalignment="left",
+        transform=cbar.ax.transAxes,
+        fontsize=10,
+    )
+    cbar.ax.text(
+        0.0,
+        1.02,
+        f"{vmax}",
+        verticalalignment="bottom",
+        horizontalalignment="left",
+        transform=cbar.ax.transAxes,
+        fontsize=10,
+    )
     return im, cbar
 
 
@@ -415,37 +467,37 @@ def get_extremes(data, width=5):
     min_pos = []
     if len(data.shape) == 1:
         nx = len(data)
-        for ix in range(width, nx, 2*width):
-            d = data[ix-width:ix+width+1]
+        for ix in range(width, nx, 2 * width):
+            d = data[ix - width : ix + width + 1]
 
             pos = np.where(d == np.nanmax(d))
             xmax = ix + pos[0][0] - width
             dmax = data[xmax]
-            x1 = max(xmax-width, 0)
-            x2 = min(xmax+width, nx)
+            x1 = max(xmax - width, 0)
+            x2 = min(xmax + width, nx)
             dd = data[x1:x2]
             if dd.max() == dmax:
                 max_pos.append((xmax,))
             pos = np.where(d == np.nanmin(d))
             xmin = ix + pos[0][0] - width
-            x1 = max(xmin-width, 0)
-            x2 = min(xmin+width, nx)
+            x1 = max(xmin - width, 0)
+            x2 = min(xmin + width, nx)
             dmin = data[xmin]
             dd = data[x1:x2]
             if dd.min() == dmin:
                 min_pos.append((xmin,))
         return min_pos, max_pos
     ny, nx = data.shape
-    for ix in range(width, nx, 2*width):
-        for iy in range(width, ny, 2*width):
-            d = data[iy-width:iy+width+1, ix-width:ix+width+1]
+    for ix in range(width, nx, 2 * width):
+        for iy in range(width, ny, 2 * width):
+            d = data[iy - width : iy + width + 1, ix - width : ix + width + 1]
             pos = np.where(d == np.nanmax(d))
             ymax = iy + pos[0][0] - width
             xmax = ix + pos[1][0] - width
-            y1 = max(ymax-width, 0)
-            y2 = min(ymax+width, ny)
-            x1 = max(xmax-width, 0)
-            x2 = min(xmax+width, nx)
+            y1 = max(ymax - width, 0)
+            y2 = min(ymax + width, ny)
+            x1 = max(xmax - width, 0)
+            x2 = min(xmax + width, nx)
             dmax = data[ymax, xmax]
             dd = data[y1:y2, x1:x2]
             if dd.max() == dmax:
@@ -454,10 +506,10 @@ def get_extremes(data, width=5):
             pos = np.where(d == np.nanmin(d))
             ymin = iy + pos[0][0] - width
             xmin = ix + pos[1][0] - width
-            y1 = max(ymin-width, 0)
-            y2 = min(ymin+width, ny)
-            x1 = max(xmin-width, 0)
-            x2 = min(xmin+width, nx)
+            y1 = max(ymin - width, 0)
+            y2 = min(ymin + width, ny)
+            x1 = max(xmin - width, 0)
+            x2 = min(xmin + width, nx)
             dmin = data[ymin, xmin]
             dd = data[y1:y2, x1:x2]
             if dd.min() == dmin:

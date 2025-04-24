@@ -30,3 +30,12 @@ docs/Makefile
 /Pymagra/PyMaGra.egg-info
 /Pymagra/utilities/__pycache__
 Example/ReadMe_examples.docx
+/zeyen
+/workflow
+/recipes
+/plotting
+/in_out
+/doc/build
+/doc
+pymagra_old_snippets.py
+/utilities

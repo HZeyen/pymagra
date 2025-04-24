@@ -37,7 +37,7 @@
      <x>0</x>
      <y>0</y>
      <width>1500</width>
-     <height>26</height>
+     <height>31</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -74,6 +74,7 @@
     <addaction name="plotGrid"/>
     <addaction name="plotLineaments"/>
     <addaction name="fill"/>
+    <addaction name="measurement_points"/>
     <addaction name="separator"/>
     <addaction name="zoom"/>
     <addaction name="zoom_Out"/>
@@ -1000,6 +1001,17 @@
    </property>
    <property name="shortcut">
     <string>Shift+X</string>
+   </property>
+  </action>
+  <action name="measurement_points">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Plot measurement points</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+M</string>
    </property>
   </action>
  </widget>

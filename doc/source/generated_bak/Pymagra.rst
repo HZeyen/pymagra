@@ -1,0 +1,6 @@
+﻿Pymagra
+=======
+
+.. automodule:: Pymagra
+
+   

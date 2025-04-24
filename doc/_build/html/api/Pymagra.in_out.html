@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Pymagra.in_out package &#8212; PyMaGra 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="pymagra-in-out-package">
+<h1>Pymagra.in_out package<a class="headerlink" href="#pymagra-in-out-package" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-Pymagra.in_out.dialog">
+<span id="pymagra-in-out-dialog-module"></span><h2>Pymagra.in_out.dialog module<a class="headerlink" href="#module-Pymagra.in_out.dialog" title="Link to this heading">¶</a></h2>
+<p>Created on Sat Jul  6 22:42:58 2024</p>
+<dl class="simple">
+<dt>&#64;author: Hermann Zeyen &lt;<a class="reference external" href="mailto:hermann&#46;zeyen&#37;&#52;&#48;gmail&#46;com">hermann<span>&#46;</span>zeyen<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</dt><dd><p>Université Paris-Saclay</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="Pymagra.in_out.dialog.Dialog">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Pymagra.in_out.dialog.</span></span><span class="sig-name descname"><span class="pre">Dialog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Title'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.dialog.Dialog" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QDialog</span></code></p>
+<p>Created on Tue Sep 13 12:50:26 2022
+&#64;author: Hermann
+General purpose dialog box</p>
+<dl class="simple">
+<dt>Input:</dt><dd><dl class="simple">
+<dt>labels (list, string): labels explaining the different fields</dt><dd><p>For a series of radiobuttons, labels[i] is itself
+a list</p>
+</dd>
+<dt>types (list,string): In the order of “labels”, indicates the type</dt><dd><p>of field the label belongs to. If labels[i] is itself
+a list, this is considered as one single label.
+May be
+‘l’ for label (no dialog entry, only information)
+‘c’ for checkbox
+‘e’ for LineEdit (to enter values)
+‘r’ for radiobutton
+may be capital or not</p>
+</dd>
+<dt>values (list, string, float or int): initial values for LineEdit fields,</dt><dd><p>number of radiobutton activated by default (natural counting).
+for labels, it may be “b” (bold), “i” (italic), or
+anything else (usually None) for standard text
+Ignored for checkbox.
+Optional, default value: None</p>
+</dd>
+<dt>title (string): Title of the dialog window</dt><dd><p>Optional, default value: “Title”</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.in_out.dialog.Dialog.checked">
+<span class="sig-name descname"><span class="pre">checked</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checked</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.dialog.Dialog.checked" title="Link to this definition">¶</a></dt>
+<dd><p>Actions executed if a check box has changed its state.
+if a box has been checked, the function searches the one which was
+checked using self.ckState as indicator (this variable contains the
+state of all check boxes before the click) Its click-order is stored
+and self.ckState is changed. In addition, if the calling function is
+“False_Color”, the explanation text is changed and the color to be
+used for the following clicked item is indicated. If in this case
+the third box is clicked, a message appears that no other box can be
+checked unless one is unchecked. If nevertheless a fourth box is
+checked, the corresponding box is automatically unchecked.
+If a box is unchecked, this is stored in self.ckState and the colors
+indicated are changed if necessary and if function is “False_Color”.</p>
+<section id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>checked<span class="classifier">QtWidget.QCheckBox.checkState</span></dt><dd><p>state of a checkbox after clicking into it</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h3>Returns<a class="headerlink" href="#returns" title="Link to this heading">¶</a></h3>
+<p>None.</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.in_out.dialog.Dialog.on_CancelButton_clicked">
+<span class="sig-name descname"><span class="pre">on_CancelButton_clicked</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.dialog.Dialog.on_CancelButton_clicked" title="Link to this definition">¶</a></dt>
+<dd><p>If Cancel button has been clicked, close Dialogue and set Dbutton to False</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.in_out.dialog.Dialog.on_YesButton_clicked">
+<span class="sig-name descname"><span class="pre">on_YesButton_clicked</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.dialog.Dialog.on_YesButton_clicked" title="Link to this definition">¶</a></dt>
+<dd><p>If Ok button has been clicked, close Dialogue and set Dbutton to True</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Pymagra.in_out.dialog.dialog">
+<span class="sig-prename descclassname"><span class="pre">Pymagra.in_out.dialog.</span></span><span class="sig-name descname"><span class="pre">dialog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Title'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.dialog.dialog" title="Link to this definition">¶</a></dt>
+<dd><p>Wrapper for class Dialog. Two buttons are shown for finishing: Ok and
+Cancel</p>
+<section id="id1">
+<h3>Parameters<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<dl>
+<dt>labels<span class="classifier">list of strings</span></dt><dd><p>Explanatory text put beside the fields foe data entrance.
+If values==None, label is interpreted as information/Warning text
+For a series of radiobuttons or Comboboxes, all corresponding labels
+are given as a list within the list.</p>
+</dd>
+<dt>types<span class="classifier">list of strings (length as labels).</span></dt><dd><dl>
+<dt>Possible values:</dt><dd><p>“c”: to define a check box
+“e”: to define an editable box (lineEdit)
+“l”: To define a simple label, comment text
+‘r’: to define a series of radiobuttons (the corresponding list of</p>
+<blockquote>
+<div><p>labels is considered as one single label for the numbering of
+labels, types and values)</p>
+</div></blockquote>
+<p>“b”: to define a combobox (dropdown menu)</p>
+</dd>
+</dl>
+</dd>
+<dt>values<span class="classifier">list of texts, numbers or Nones (length as labels)</span></dt><dd><dl class="simple">
+<dt>Initial values given to editable fields. Should be None for check boxes</dt><dd><p>should be the number (natural numbering, starting at 1, not at 0)
+of the radiobutton to be activated by default.
+For labels, it may be “b” (bold text), “i” (italic) or anything
+else, including None for standard text</p>
+</dd>
+</dl>
+</dd>
+<dt>title<span class="classifier">str, default: “Title”</span></dt><dd><p>Title of the dialog box.</p>
+</dd>
+</dl>
+</section>
+<section id="id2">
+<h3>Returns<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<dl>
+<dt>results<span class="classifier">list of str</span></dt><dd><p>Response of each data entrance field. Should be transformed to the
+needed data format (int, float…) in the calling function</p>
+<blockquote>
+<div><p>For radiobuttons, the returned value indicates the number of the
+active button (counting starts at 0). For checkboxes, the returned
+value is -1 if the box was not checked and the position at which
+the box was checked (starting at 0) if it has been checked</p>
+</div></blockquote>
+</dd>
+<dt>Dbutton: bool</dt><dd><p>If True, “Apply” button has been pressed to finish dialog, if False
+“Cancel” button has been pressed.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+<section id="module-Pymagra.in_out.geometrics">
+<span id="pymagra-in-out-geometrics-module"></span><h2>Pymagra.in_out.geometrics module<a class="headerlink" href="#module-Pymagra.in_out.geometrics" title="Link to this heading">¶</a></h2>
+<p>Created on Wed Sep  6 2023, 15:12:59
+Last modified on Mon Oct 30 2023</p>
+<p>&#64;author: Hermann Zeyen University Paris-Saclay, France</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="Pymagra.in_out.geometrics.Geometrics">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Pymagra.in_out.geometrics.</span></span><span class="sig-name descname"><span class="pre">Geometrics</span></span><a class="headerlink" href="#Pymagra.in_out.geometrics.Geometrics" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="simple">
+<dt>Methods:</dt><dd><p>__init__
+fill_dict
+read_stn
+write_stn
+clean_data
+line_days
+get_line
+geometrics_lines
+get_segment
+read_base
+write_base</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.in_out.geometrics.Geometrics.append_data">
+<span class="sig-name descname"><span class="pre">append_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">year</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">month</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">day</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hour</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.geometrics.Geometrics.append_data" title="Link to this definition">¶</a></dt>
+<dd><p>Appends date and time information of one segment to global arrays</p>
+<section id="id3">
+<h3>Parameters<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>x: list of float</dt><dd><p>x-coordinate of data points</p>
+</dd>
+<dt>y: list of float</dt><dd><p>y-coordinate of data points</p>
+</dd>
+<dt>d: list of float</dt><dd><p>measured values of sensor 1</p>
+</dd>
+<dt>year: list of int</dt><dd><p>year of acquisition of data points</p>
+</dd>
+<dt>month: list of int</dt><dd><p>month of acquisition of data points</p>
+</dd>
+<dt>day: list of int</dt><dd><p>day of acquisition of data points</p>
+</dd>
+<dt>hour: list of int</dt><dd><p>hour of acquisition of data points</p>
+</dd>
+<dt>minute: list of int</dt><dd><p>minute of acquisition of data points</p>
+</dd>
+<dt>second: list of float</dt><dd><p>second of acquisition of data points</p>
+</dd>
+<dt>time: list of int</dt><dd><p>julian day of data points</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.in_out.geometrics.Geometrics.clean_data">
+<span class="sig-name descname"><span class="pre">clean_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_fix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_fix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percent_down</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percent_up</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.geometrics.Geometrics.clean_data" title="Link to this definition">¶</a></dt>
+<dd><p>Set data to np.nan under certain conditions which may be:</p>
+<blockquote>
+<div><p>min_fix: all data below this value are set to nan
+max_fix: all data above this value are set to nan
+percent_down: The lowermost percentile values are set to nan</p>
+<blockquote>
+<div><p>A value of 0.01 means that all values lower than the
+1% quantile are set to None</p>
+</div></blockquote>
+<dl class="simple">
+<dt>percent_up: The uppermost percentile values are set to nan</dt><dd><p>A value of 0.01 means that all values higher than the
+99% quantile are set to None</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>The operation is done in situ.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.in_out.geometrics.Geometrics.fill_dict">
+<span class="sig-name descname"><span class="pre">fill_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ntracks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mag1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mag2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mark_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx_seg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy_seg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_seg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.geometrics.Geometrics.fill_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Fill in values of dictionary self.segments for a full line.</p>
+<section id="id4">
+<h3>Parameters<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>ntracks<span class="classifier">int</span></dt><dd><dl class="simple">
+<dt>Actual line number (in horizontal configuration, dictionary entrancies</dt><dd><p>ntracks and ntarcks+1 are filled).</p>
+</dd>
+</dl>
+</dd>
+<dt>x1<span class="classifier">list of floats</span></dt><dd><p>X-coordinates for sensor 1 data.</p>
+</dd>
+<dt>y1<span class="classifier">list of floats</span></dt><dd><p>Y-coordinates for sensor 1 data.</p>
+</dd>
+<dt>mag1<span class="classifier">list of floats</span></dt><dd><p>Magnetic data recorded by sensor 1.</p>
+</dd>
+<dt>x2<span class="classifier">list of floats</span></dt><dd><p>X-coordinates for sensor 2 data.</p>
+</dd>
+<dt>y2<span class="classifier">list of floats</span></dt><dd><p>Y-coordinates for sensor 2 data.</p>
+</dd>
+<dt>mag2<span class="classifier">list of floats</span></dt><dd><p>Magnetic data recorded by sensor 1.</p>
+</dd>
+<dt>mark_samples<span class="classifier">list of int</span></dt><dd><p>Number of the sample just after a mark.</p>
+</dd>
+<dt>dx_seg<span class="classifier">list of floats</span></dt><dd><p>Step length in x-direction for every segment.</p>
+</dd>
+<dt>dy_seg<span class="classifier">list of floats</span></dt><dd><p>Step length in y-direction for every segment.</p>
+</dd>
+<dt>d_seg<span class="classifier">list of floats</span></dt><dd><p>Total step length for every segment.</p>
+</dd>
+</dl>
+</section>
+<section id="id5">
+<h3>Returns<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
+<p>None.</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.in_out.geometrics.Geometrics.geometrics_lines">
+<span class="sig-name descname"><span class="pre">geometrics_lines</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.geometrics.Geometrics.geometrics_lines" title="Link to this definition">¶</a></dt>
+<dd><p>Put all data into a simplified dictionary, one entry per line</p>
+<p>No input parameters</p>
+<section id="id6">
+<h3>Returns<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<dl>
+<dt>data: dictionary with one entry per line, key = number of line.</dt><dd><p>Each entry is itself a dictionary containing the following entries:
+“s1”: Numpy float array with data of sensor 1
+“s2”: Numpy float array with data of sensor 2</p>
+<blockquote>
+<div><p>If only data of one single sensor were measured,
+“s2” contains only one zero.</p>
+</div></blockquote>
+<p>“x”:  E-W coordinates of data points
+“y”   N-S coordinates of data points</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.in_out.geometrics.Geometrics.get_line">
+<span class="sig-name descname"><span class="pre">get_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i_line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.geometrics.Geometrics.get_line" title="Link to this definition">¶</a></dt>
+<dd><p>Get data of one single line</p>
+<section id="id7">
+<h3>Parameters<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>i_line<span class="classifier">int, optional</span></dt><dd><p>Number of line to be extracted (counting starts at 0). The default is 0.</p>
+</dd>
+</dl>
+</section>
+<section id="id8">
+<h3>Returns<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>sensor1: numpy float array</dt><dd><p>Data of sensor 1.</p>
+</dd>
+<dt>sensor2: numpy float array</dt><dd><p>Data of sensor 2.</p>
+</dd>
+<dt>x: numpy float array</dt><dd><p>X-coordinate of all data points extracted.</p>
+</dd>
+<dt>y: numpy float array</dt><dd><p>Y-coordinate of all data points extracted.</p>
+</dd>
+<dt>year: numpy int array</dt><dd><p>year of acquisition of all data points extracted.</p>
+</dd>
+<dt>month: numpy int array</dt><dd><p>month of acquisition of all data points extracted.</p>
+</dd>
+<dt>day: numpy int array</dt><dd><p>day of acquisition of all data points extracted.</p>
+</dd>
+<dt>hour: numpy int array</dt><dd><p>hour of acquisition of all data points extracted.</p>
+</dd>
+<dt>minute: numpy int array</dt><dd><p>minute of acquisition of all data points extracted.</p>
+</dd>
+<dt>second: numpy float array</dt><dd><p>second of acquisition of all data points extracted.</p>
+</dd>
+<dt>time: numpy int array</dt><dd><p>second of day of acquisition of all data points extracted.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.in_out.geometrics.Geometrics.get_segment">
+<span class="sig-name descname"><span class="pre">get_segment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i_line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i_seg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.geometrics.Geometrics.get_segment" title="Link to this definition">¶</a></dt>
+<dd><p>Get data of one segment (data between two marks) of a line</p>
+<section id="id9">
+<h3>Parameters<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>i_line<span class="classifier">int, optional</span></dt><dd><p>Number of line to be extracted (counting starts at 0). The default is 0.</p>
+</dd>
+<dt>i_seg<span class="classifier">int, optional</span></dt><dd><p>Number of segment within line to be extracted (counting starts at 0).
+The default is 0.</p>
+</dd>
+</dl>
+</section>
+<section id="id10">
+<h3>Returns<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>sensor1: numpy float array</dt><dd><p>Data of sensor 1.</p>
+</dd>
+<dt>sensor2: numpy float array</dt><dd><p>Data of sensor 2.</p>
+</dd>
+<dt>x: numpy float array</dt><dd><p>X-coordinate of all data points extracted.</p>
+</dd>
+<dt>y: numpy float array</dt><dd><p>Y-coordinate of all data points extracted.</p>
+</dd>
+<dt>year: numpy int array</dt><dd><p>year of acquisition of all data points extracted.</p>
+</dd>
+<dt>month: numpy int array</dt><dd><p>month of acquisition of all data points extracted.</p>
+</dd>
+<dt>day: numpy int array</dt><dd><p>day of acquisition of all data points extracted.</p>
+</dd>
+<dt>hour: numpy int array</dt><dd><p>hour of acquisition of all data points extracted.</p>
+</dd>
+<dt>minute: numpy int array</dt><dd><p>minute of acquisition of all data points extracted.</p>
+</dd>
+<dt>second: numpy float array</dt><dd><p>second of acquisition of all data points extracted.</p>
+</dd>
+<dt>time: numpy int array</dt><dd><p>second of day of acquisition of all data points extracted.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.in_out.geometrics.Geometrics.line_days">
+<span class="sig-name descname"><span class="pre">line_days</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.geometrics.Geometrics.line_days" title="Link to this definition">¶</a></dt>
+<dd><p>Create a dictionary containing for every day of data acquisition the
+numbers of the lines having been measured.</p>
+<section id="id11">
+<h3>Returns<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>self.lines_per_day has as key the number of the day. It is implicitely</dt><dd><p>supposed that the days are unique, i.e. measurements were not done
+over a period longer than a month.
+For every entrance, a list contains the line numbers</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.in_out.geometrics.Geometrics.read_base">
+<span class="sig-name descname"><span class="pre">read_base</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">year</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.geometrics.Geometrics.read_base" title="Link to this definition">¶</a></dt>
+<dd><p>Read data from a base station. It is supposed the base station is a
+Geometrics PPM station. The function recognizes automatically whether
+it is a G-856 (old version) or a G-857 (newer version) instrument</p>
+<p>If other data have already been read in, the new ones are concatenated
+to the existing data. Before leaving the subroutine, data are sorted by
+measurement time. In this way, the order of data storage within a file
+and the order of reading of different files are without importance.</p>
+<section id="id12">
+<h3>Parameters<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>infile<span class="classifier">str</span></dt><dd><p>Name of file containing base station data.</p>
+</dd>
+<dt>year<span class="classifier">int, optional</span></dt><dd><p>If base station data were recorded with a G-856 PPM, the date is
+coded as Julian day without the year of acquisition. In this case,
+the year should be given. If Geometrics G-858 (Cs magnetometer) data
+have been input already, the year of those data may be used and the
+variable may be left “None”. The default is None.</p>
+</dd>
+<dt>Data are stored in the following arrays (usually, they are base station data):</dt><dd><p>self.base : 1D numpy float array contains all base station data
+self.day_base   : 1D numpy int array contains day of acquisition for all data
+self.month_base : 1D numpy int array contains month of acquisition for all data
+self.year_base  : 1D numpy int array contains year of acquisition for all data
+self.hour_base  : 1D numpy int array contains hour of acquisition for all data
+self.minute_base: 1D numpy int array contains minute of acquisition for all data
+self.second_base: 1D numpy float array contains second of acquisition for all data
+self.time_base  : 1D numpy float array contains second within year for all data</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.in_out.geometrics.Geometrics.read_stn">
+<span class="sig-name descname"><span class="pre">read_stn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_block</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_sensor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h_sensor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dispo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.geometrics.Geometrics.read_stn" title="Link to this definition">¶</a></dt>
+<dd><p>Reads a 2-sensor Geometix .stn file
+If other data have already been read from another file, the new ones are
+added to the vectors with new line numbers, even if effectively, the
+measurements may have been done in the prolongation of existing lines.</p>
+<section id="id13">
+<h3>Parameters<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h3>
+<dl>
+<dt>infile<span class="classifier">str</span></dt><dd><p>name of file to be read</p>
+</dd>
+<dt>n_block<span class="classifier">int</span></dt><dd><p>Number of block (file) of this data set within all files to be read</p>
+</dd>
+<dt>d_sensor<span class="classifier">float, optional</span></dt><dd><p>distance between sensors [m]. It is supposed that sensor1 is the
+upper one. If this is not the case, d_sensor must be negative.
+Default: 0.9 m.</p>
+</dd>
+<dt>h_sensor<span class="classifier">float, optional</span></dt><dd><p>Hight of lower sensor (sensor 2) above ground [m]. Default: 0.4 m</p>
+</dd>
+<dt>disop<span class="classifier">int, optional</span></dt><dd><dl class="simple">
+<dt>If two sensors were used, dispo indicates there relative position:</dt><dd><p>If dispo == 0: vertical disposition, sensor 2 above sensor 1
+If dispo == 1: horizontal disposition, sensor 2 to the right of sensor 1</p>
+</dd>
+</dl>
+</dd>
+<dt>Data are stored in the following arrays:</dt><dd><p>self.sensor1 : 1D numpy float array contains all data of sensor 1
+self.sensor2 : 1D numpy float array contains all data of sensor 2
+self.day     : 1D numpy int array contains day of acquisition for all data
+self.month   : 1D numpy int array contains month of acquisition for all data
+self.year    : 1D numpy int array contains year of acquisition for all data
+self.hour    : 1D numpy int array contains hour of acquisition for all data
+self.minute  : 1D numpy int array contains minute of acquisition for all data
+self.second  : 1D numpy float array contains second of acquisition for all data
+self.time    : 1D numpy float array contains seconds of acquisition for all data</p>
+<blockquote>
+<div><p>counted from the beginning of the acquisition year</p>
+</div></blockquote>
+<p>self.x       : 1D numpy float array contains x-coordinates of measurement points
+self.y       : 1D numpy float array contains y-coordinates of measurement points
+self.segments: Dictionary with information for all lines and segments measured</p>
+<blockquote>
+<div><blockquote>
+<div><p>Since all data are stored sequentially, we need to know
+which data belong to which line and it may also be
+necessary to know where marks were set, thus where a
+measured segment starts and ends.
+self.segments.keys() contains line numbers starting at zero
+Every dictionary entrance contains the following lists:</p>
+<blockquote>
+<div><dl>
+<dt>“mark_samples” contains for every mark (starting and</dt><dd><blockquote>
+<div><p>end of line included) the number of
+the sample in self.sensor1 or 2
+recorded just after the mark</p>
+</div></blockquote>
+<dl class="simple">
+<dt>“mask” is initially set to True but may be modified</dt><dd><p>in order to plot only certain lines. If True,
+lines are plotted, else they are excluded from plot</p>
+</dd>
+</dl>
+<p>“median1” : median value of sensor 1 for a line
+“median2” : median value of sensor 2 for a line</p>
+<blockquote>
+<div><p>If sensors are in horizontal configuration,
+both sensors are treated as sensor 1 and
+“median2” has value 0.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>“sensor”<span class="classifier">may be 0 if both sensors are used in vertical</span></dt><dd><p>configuration, 1 or 2 if line has been measured
+by sensor 1 or 2 in horizontal configuration</p>
+</dd>
+<dt>“dx” contains for every segment the sampling step</dt><dd><p>in X direction</p>
+</dd>
+<dt>“dy” contains for every segment the sampling step</dt><dd><p>in y direction</p>
+</dd>
+</dl>
+<p>“d” contains for every segment the sampling step length
+dx, dy and d contain one value less than mark_samples
+“x” median of x-coordinates
+“y” median of y-coordiantes</p>
+<blockquote>
+<div><p>depending on the line direction, “x” or “y” are
+supposed to be the position of the line</p>
+</div></blockquote>
+<p>“pos” coordinate of the line 
+“block” number of block (or file) if several files</p>
+<blockquote>
+<div><p>are read</p>
+</div></blockquote>
+<dl class="simple">
+<dt>“dir” may be “odd” or “even”. First measured line</dt><dd><p>is “odd” (odd or even refers to natural counting)</p>
+</dd>
+<dt>“direction” is “N”, “S”, “W” or “E” depending on the</dt><dd><p>line direction</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
+</div></blockquote>
+<dl>
+<dt>In addition, the following attributes are accessible:</dt><dd><p>self.n_data   : int, total number of data
+self.n_lines : int, number of lines read
+self.direction : int, direction of measurement lines.</p>
+<blockquote>
+<div><p>May be 0 (Y-direction) or 1 (X-direction)</p>
+</div></blockquote>
+<p>self.d_lines : float, distance between measurement lines</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd>
+</dl>
+</section>
+<section id="id14">
+<h3>Returns<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h3>
+<dl>
+<dt>data: dictionary with one entry per line, key = number of line.</dt><dd><p>Each entry is itself a dictionary containing the following entries:
+“s1”: Numpy float array with data of sensor 1
+“s2”: Numpy float array with data of sensor 2</p>
+<blockquote>
+<div><p>If only data of one single sensor were measured,
+“s2” contains only one zero.</p>
+</div></blockquote>
+<p>“x”:  E-W coordinates of data points
+“y”   N-S coordinates of data points</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.in_out.geometrics.Geometrics.write_base">
+<span class="sig-name descname"><span class="pre">write_base</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outfile</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.geometrics.Geometrics.write_base" title="Link to this definition">¶</a></dt>
+<dd><p>Write base station data in G-856 format.
+Parameters
+———-
+outfile : str</p>
+<blockquote>
+<div><p>Name of file where to write the base station data.</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.in_out.geometrics.Geometrics.write_stn">
+<span class="sig-name descname"><span class="pre">write_stn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">day</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">month</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">year</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.geometrics.Geometrics.write_stn" title="Link to this definition">¶</a></dt>
+<dd><p>Writes Geometrics magnetic gradiometer file in ASCII.</p>
+<section id="id15">
+<h3>Parameters<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h3>
+<p>Obligatory parameters:
+file : str</p>
+<blockquote>
+<div><p>File where to store the data.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>data1<span class="classifier">numpy float array [number_of_samples_per_line, number_of_lines]</span></dt><dd><p>Data of sensor 1.</p>
+</dd>
+<dt>x<span class="classifier">numpy float array [number_of_samples_per_line]</span></dt><dd><p>X coordinates of all measured points.</p>
+</dd>
+<dt>y<span class="classifier">numpy float array [number_of_samples_per_line, number_of_lines]</span></dt><dd><p>Y coordinates of all measured points.</p>
+</dd>
+</dl>
+<p>Optional parameters:
+data2 : numpy float array [number_of_samples_per_line, number_of_lines]</p>
+<blockquote>
+<div><p>Data of sensor 2. Optional. Default: np.zeros_like(data1)</p>
+</div></blockquote>
+<dl class="simple">
+<dt>day<span class="classifier">int</span></dt><dd><p>Day of acquisition. Optional. Default: self.day[0]</p>
+</dd>
+<dt>month<span class="classifier">int</span></dt><dd><p>Month of acquisition. Optional. Default: self.month[0]</p>
+</dd>
+<dt>year<span class="classifier">int</span></dt><dd><p>Year of acquisition (2 ciphers). Optional. Default: self.year[0]</p>
+</dd>
+<dt>direction<span class="classifier">int</span></dt><dd><p>If direction == 0: measurements were done in Y direction,
+else in X direction. Optional. Default: self.direction</p>
+</dd>
+</dl>
+</section>
+<section id="id16">
+<h3>Returns<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h3>
+<p>None.</p>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-Pymagra.in_out.io">
+<span id="pymagra-in-out-io-module"></span><h2>Pymagra.in_out.io module<a class="headerlink" href="#module-Pymagra.in_out.io" title="Link to this heading">¶</a></h2>
+<p>Created on Wed Sep  6 2023, 15:12:59
+Last modified on Mon Oct 30 2023</p>
+<dl class="simple">
+<dt>&#64;author: Hermann Zeyen &lt;<a class="reference external" href="mailto:hermann&#46;zeyen&#37;&#52;&#48;universite-paris-saclay&#46;fr">hermann<span>&#46;</span>zeyen<span>&#64;</span>universite-paris-saclay<span>&#46;</span>fr</a>&gt;</dt><dd><p>University Paris-Saclay, France</p>
+</dd>
+</dl>
+<p>Contains functions for data input/output</p>
+<dl>
+<dt>Contains methods:</dt><dd><p>get_files
+read_geography_file
+get_mag_field</p>
+</dd>
+<dt>Contains class data with the following functions:</dt><dd><p>__init__
+read_geometrics
+read_txt
+read_gxf
+read_BRGM_flight
+get_line
+lines
+write_dat</p>
+<p>clean_data
+line_days
+get_segment
+julian2date
+date2julian
+read_base
+write_base
+diurnal_correction
+diurnal_variation
+interpol_line
+interpol_2D
+extrapolate</p>
+</dd>
+</dl>
+<p>#        fill_nans (actually not used)
+#            eliminate_nans (actually not used)</p>
+<blockquote>
+<div><p>justify_lines_median
+justify_lines_gaussian
+matrixExtension
+poleReduction
+plot_geography
+plot_triang
+plot_image
+addMPL
+rmMPL</p>
+</div></blockquote>
+<dl class="py class">
+<dt class="sig sig-object py" id="Pymagra.in_out.io.Data">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Pymagra.in_out.io.</span></span><span class="sig-name descname"><span class="pre">Data</span></span><a class="headerlink" href="#Pymagra.in_out.io.Data" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class contains methods for data management in program PyMaGra</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.in_out.io.Data.get_line">
+<span class="sig-name descname"><span class="pre">get_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i_line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.io.Data.get_line" title="Link to this definition">¶</a></dt>
+<dd><p>Get data of one single line</p>
+<section id="id17">
+<h3>Parameters<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>i_line<span class="classifier">int, optional</span></dt><dd><p>Number of line to be extracted (counting starts at 0). The default is 0.</p>
+</dd>
+</dl>
+</section>
+<section id="id18">
+<h3>Returns<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>sensor1: numpy float array</dt><dd><p>Data of sensor 1.</p>
+</dd>
+<dt>sensor2: numpy float array</dt><dd><p>Data of sensor 2.</p>
+</dd>
+<dt>x: numpy float array</dt><dd><p>X-coordinate of all data points extracted.</p>
+</dd>
+<dt>y: numpy float array</dt><dd><p>Y-coordinate of all data points extracted.</p>
+</dd>
+<dt>z: numpy float array</dt><dd><p>height of lower sensor above ground of all data points.</p>
+</dd>
+<dt>time: numpy int array</dt><dd><p>second of day of acquisition of all data points extracted.</p>
+</dd>
+<dt>mask: bool</dt><dd><p>mask whether data should be plotted (True) or not (False)</p>
+</dd>
+<dt>direction: str</dt><dd><p>may be “N”, “S”, “W” or “E”, indicates the approximate line direction</p>
+</dd>
+<dt>sensor: int</dt><dd><p>if 0, two sensors are used in vertical configuration. 1 if only one
+sensor was used or sensor 1 in horizontal configuration. 2: sensor 2
+in horizontal configuration.</p>
+</dd>
+<dt>median1: float</dt><dd><p>Median value of line for data of sensor1.</p>
+</dd>
+<dt>median2:0 float</dt><dd><p>Median value of line for data of sensor2.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.in_out.io.Data.lines">
+<span class="sig-name descname"><span class="pre">lines</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.io.Data.lines" title="Link to this definition">¶</a></dt>
+<dd><p>Put all data into a simplified dictionary, one entry per line</p>
+<p>No input parameters</p>
+<section id="id19">
+<h3>Returns<a class="headerlink" href="#id19" title="Link to this heading">¶</a></h3>
+<dl>
+<dt>data: dictionary with one entry per line, key = number of line.</dt><dd><p>Each entry is itself a dictionary containing the following entries:
+“s1”: Numpy float array with data of sensor 1
+“s2”: Numpy float array with data of sensor 2</p>
+<blockquote>
+<div><p>If only data of one single sensor were measured,
+“s2” contains only one zero.</p>
+</div></blockquote>
+<p>“x”:  Numpy float array with E-W coordinates of data points
+“y”:  Numpy float array with N-S coordinates of data points
+“grad_flag” bool. True if 2 sensors were used, False if only one sensor
+“mask”: bool, True if line should be plotted, False if excluded from plotting</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.in_out.io.Data.read_BRGM_flight">
+<span class="sig-name descname"><span class="pre">read_BRGM_flight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.io.Data.read_BRGM_flight" title="Link to this definition">¶</a></dt>
+<dd><p>Reads magnetic data from flight lines out of a BRGM data file</p>
+<section id="id20">
+<h3>Parameters<a class="headerlink" href="#id20" title="Link to this heading">¶</a></h3>
+<dl>
+<dt>file<span class="classifier">str</span></dt><dd><p>Name of file containing the data.</p>
+</dd>
+<dt>line<span class="classifier">int or float</span></dt><dd><dl class="simple">
+<dt>If &gt; 100000. it is supposed that line contains the Easting coordinate in meters</dt><dd><p>rounded to the next km. The program transforms this coordinate
+into the number of the flight line for Morvan data. First line at 666000.</p>
+</dd>
+</dl>
+<p>else: flight line number (starts with 320, increment 10, one line per km)</p>
+</dd>
+</dl>
+</section>
+<section id="id21">
+<h3>Returns<a class="headerlink" href="#id21" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>x<span class="classifier">1D numpy float array</span></dt><dd><p>E coordinate of each measured point along the line [Lambert 2 extended, meters]</p>
+</dd>
+<dt>y<span class="classifier">1D numpy float array</span></dt><dd><p>N coordinate of each measured point along the line [Lambert 2 extended, meters]</p>
+</dd>
+<dt>v<span class="classifier">1D numpy float array</span></dt><dd><p>Magnetic anomaly (measured field minus IGRF) [nT]</p>
+</dd>
+<dt>topo<span class="classifier">1D numpy float array</span></dt><dd><p>DMT topography at each measured point along the line [m]</p>
+</dd>
+<dt>height<span class="classifier">1D numpy float array</span></dt><dd><p>Flight height above topo at each measured point along the line [m]</p>
+</dd>
+<dt>num<span class="classifier">int</span></dt><dd><p>Number of flight line (same as line if line &lt; 100000.)</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.in_out.io.Data.read_base">
+<span class="sig-name descname"><span class="pre">read_base</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">year</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.io.Data.read_base" title="Link to this definition">¶</a></dt>
+<dd><p>Wrapper to read base station data</p>
+<section id="id22">
+<h3>Parameters<a class="headerlink" href="#id22" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>file<span class="classifier">str</span></dt><dd><p>Name of data file containing base station data.</p>
+</dd>
+<dt>year<span class="classifier">int</span></dt><dd><p>Year of data acquisition (often, data contain only day, not year).</p>
+</dd>
+</dl>
+</section>
+<section id="id23">
+<h3>Returns<a class="headerlink" href="#id23" title="Link to this heading">¶</a></h3>
+<p>None.</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.in_out.io.Data.read_geometrics">
+<span class="sig-name descname"><span class="pre">read_geometrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.io.Data.read_geometrics" title="Link to this definition">¶</a></dt>
+<dd><p>Read Geometrics <a href="#id24"><span class="problematic" id="id25">*</span></a>.stn file (G-858 instrument)</p>
+<section id="id26">
+<h3>Parameters<a class="headerlink" href="#id26" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>file<span class="classifier">str</span></dt><dd><p>Name of data file.</p>
+</dd>
+</dl>
+</section>
+<section id="id27">
+<h3>Returns<a class="headerlink" href="#id27" title="Link to this heading">¶</a></h3>
+<dl>
+<dt>data<span class="classifier">Dictionary with keys equal to line numbers (starting at 0)</span></dt><dd><p>Each line is itself a dictionary with the following entries:
+Key is line number
+“s1”: Numpy float array with data of sensor 1
+“s2”: Numpy float array with data of sensor 2</p>
+<blockquote>
+<div><p>If only data of one single sensor were measured,
+“s2” contains only one zero.</p>
+</div></blockquote>
+<p>“x”:  Numpy float array with E-W coordinates of data points
+“y”:  Numpy float array with N-S coordinates of data points
+“grad_flag” bool. True if 2 sensors were used, False if only one sensor
+“mask”: bool, True if line should be plotted, False if excluded from</p>
+<blockquote>
+<div><p>plotting. Initially set to True</p>
+</div></blockquote>
+</dd>
+</dl>
+<p>The original data are stored in class geometrics.Geometrics. See file
+geometrics.py for documentation</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.in_out.io.Data.read_gxf">
+<span class="sig-name descname"><span class="pre">read_gxf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.io.Data.read_gxf" title="Link to this definition">¶</a></dt>
+<dd><p>Read a gxf file (BRGM magnetic and gravity gridded files)
+input:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>infile: string</dt><dd><p>Name of file to be read</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.in_out.io.Data.read_txt">
+<span class="sig-name descname"><span class="pre">read_txt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.io.Data.read_txt" title="Link to this definition">¶</a></dt>
+<dd><p>Reads a non-Geometrics format magnetic data file
+This option is mainly thought for reading the output of program mgwin
+used with the option to enter all data points with their specific positions
+(NBPTS &gt; 0). This allows calculation of a 2D map with mgwin. You may use
+Prepare_mgwin_calculation_points.py to preapre the coordinates.
+The file structure is as follows:</p>
+<blockquote>
+<div><p>One comment line
+line with NX, NY (number of points in X and Y direction)</p>
+<blockquote>
+<div><p>It is supposed that the data have been calculated on a regular
+grid. mgwin writes on this line the total number of data points
+the file must therefore be edited to replace the existing number
+by the two required ones.</p>
+</div></blockquote>
+<p>one line per data poin with (X, Y, Z, DATA)
+mgwin writes only one value into the file and in order to keep the
+structure of Geometrics simple, these values are copied into both
+sensor1 and sensor2 arrays.  Data are copied as well into
+self.sensor_n (1D array) and self.sensor_n_inter (2D array)</p>
+</div></blockquote>
+<section id="id28">
+<h3>Parameters<a class="headerlink" href="#id28" title="Link to this heading">¶</a></h3>
+<p>file : str, name of file to be read</p>
+</section>
+<section id="id29">
+<h3>Returns<a class="headerlink" href="#id29" title="Link to this heading">¶</a></h3>
+<p>data</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.in_out.io.Data.write_base">
+<span class="sig-name descname"><span class="pre">write_base</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.io.Data.write_base" title="Link to this definition">¶</a></dt>
+<dd><p>Wrapper to write base station data. May be used if time variations are
+calculated from data or if original base station data were modified,
+normally by muting erroneous data</p>
+<section id="id30">
+<h3>Parameters<a class="headerlink" href="#id30" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>file<span class="classifier">str</span></dt><dd><p>Name of output file.</p>
+</dd>
+</dl>
+</section>
+<section id="id31">
+<h3>Returns<a class="headerlink" href="#id31" title="Link to this heading">¶</a></h3>
+<p>None.</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.in_out.io.Data.write_dat">
+<span class="sig-name descname"><span class="pre">write_dat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.io.Data.write_dat" title="Link to this definition">¶</a></dt>
+<dd><p>Writes Geometrics magnetic gradiometer file in Surfer format.</p>
+<section id="id32">
+<h3>Parameters<a class="headerlink" href="#id32" title="Link to this heading">¶</a></h3>
+<p>Obligatory parameters
+file : str</p>
+<blockquote>
+<div><p>File where to store the data.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>data1<span class="classifier">numpy 1D float array</span></dt><dd><p>Contains all data of sensor 1</p>
+</dd>
+<dt>x<span class="classifier">numpy 1D float array</span></dt><dd><p>Contains E-W coordinates of all data points</p>
+</dd>
+<dt>y<span class="classifier">numpy 1D float array</span></dt><dd><p>Contains N-S coordinates of all data points</p>
+</dd>
+</dl>
+<p>Optional parameters
+data2 : numpy 1D float array</p>
+<blockquote>
+<div><p>Contains all data of sensor 2 if there are. Default: None
+(must have the same shape as data1)</p>
+</div></blockquote>
+<dl class="simple">
+<dt>z<span class="classifier">numpy 1D float array</span></dt><dd><p>Topography of all data points
+If it is None, z-coordinate is set to zero</p>
+</dd>
+</dl>
+</section>
+<section id="id33">
+<h3>Returns<a class="headerlink" href="#id33" title="Link to this heading">¶</a></h3>
+<p>None.</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.in_out.io.Data.write_geometrics">
+<span class="sig-name descname"><span class="pre">write_geometrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.io.Data.write_geometrics" title="Link to this definition">¶</a></dt>
+<dd><p>Wrapper to write data in Geometrics MagMap2000 <a href="#id34"><span class="problematic" id="id35">*</span></a>.stn format
+Data must be interpolated onto a regular grid</p>
+<section id="id36">
+<h3>Parameters<a class="headerlink" href="#id36" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>file<span class="classifier">str</span></dt><dd><p>File name where to write data.</p>
+</dd>
+<dt>data1<span class="classifier">numpy float array [number_of_samples_per_line, number_of_lines]</span></dt><dd><p>Data of sensor 1.</p>
+</dd>
+<dt>x<span class="classifier">numpy float array [number_of_samples_per_line]</span></dt><dd><p>X coordinates of all measured points.</p>
+</dd>
+<dt>y<span class="classifier">numpy float array [number_of_samples_per_line, number_of_lines]</span></dt><dd><p>Y coordinates of all measured points.</p>
+</dd>
+</dl>
+<p>Optional parameters:
+data2 : numpy float array [number_of_samples_per_line, number_of_lines]</p>
+<blockquote>
+<div><p>Data of sensor 2. Optional. Default: np.zeros_like(data1)</p>
+</div></blockquote>
+<dl class="simple">
+<dt>n_block<span class="classifier">int, optional</span></dt><dd><p>Number of block (data set) to be written. The default is 0.</p>
+</dd>
+</dl>
+</section>
+<section id="id37">
+<h3>Returns<a class="headerlink" href="#id37" title="Link to this heading">¶</a></h3>
+<p>None.</p>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Pymagra.in_out.io.get_files">
+<span class="sig-prename descclassname"><span class="pre">Pymagra.in_out.io.</span></span><span class="sig-name descname"><span class="pre">get_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dir0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ftype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.io.get_files" title="Link to this definition">¶</a></dt>
+<dd><p>Ask for files with ending “stn”.
+Several files may be chosen at once using as usual SHFT or CTRL.
+If a folder was chosen, it is automatically recognized and eliminated
+from the list of file names.</p>
+<section id="id38">
+<h3>Returns<a class="headerlink" href="#id38" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>data_files: list str</dt><dd><p>list of chosen files</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Pymagra.in_out.io.get_mag_field">
+<span class="sig-prename descclassname"><span class="pre">Pymagra.in_out.io.</span></span><span class="sig-name descname"><span class="pre">get_mag_field</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.io.get_mag_field" title="Link to this definition">¶</a></dt>
+<dd><p>Get parameters of Earth’s magnetic field in the study area</p>
+<section id="id39">
+<h3>Returns<a class="headerlink" href="#id39" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>inclination<span class="classifier">float</span></dt><dd><p>Inclination of Earth’s field in degrees</p>
+</dd>
+<dt>declination<span class="classifier">float</span></dt><dd><p>Declination of Earth’s field in degrees</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Pymagra.in_out.io.read_geography_file">
+<span class="sig-prename descclassname"><span class="pre">Pymagra.in_out.io.</span></span><span class="sig-name descname"><span class="pre">read_geography_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.in_out.io.read_geography_file" title="Link to this definition">¶</a></dt>
+<dd><p>Reads file with geography information to be plotted (borders - mainly geological, towns)</p>
+<section id="id40">
+<h3>Parameters<a class="headerlink" href="#id40" title="Link to this heading">¶</a></h3>
+<dl>
+<dt>file<span class="classifier">str, name of file to be read</span></dt><dd><dl>
+<dt>File has the following structure:</dt><dd><p>keyword may be “#POINT”, “#LINE” or “#END”
+if keyword == “#POINT”, one line follows with x, y coordinates and text</p>
+<blockquote>
+<div><p>text being the description of the point (no blanks)</p>
+</div></blockquote>
+<dl class="simple">
+<dt>if keyword == “#LINE”, several lines follow, each one with x and y</dt><dd><p>coordinate of one point describing the line</p>
+</dd>
+<dt>if keyword == “#END”, this line finishes the data entry, possible following</dt><dd><p>lines will be ignored.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+<section id="id41">
+<h3>Returns<a class="headerlink" href="#id41" title="Link to this heading">¶</a></h3>
+<dl>
+<dt>geography<span class="classifier">dictionary with all geography information.</span></dt><dd><p>key is consecutive numbering of entries
+Each entry consists of a dictionary with the following entries:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>“type” str</dt><dd><p>may be “POINT” or “LINE”</p>
+</dd>
+<dt>If type == “POINT” :</dt><dd><dl class="simple">
+<dt>“x”<span class="classifier">float</span></dt><dd><p>x coordinate of point (East)</p>
+</dd>
+<dt>“y”<span class="classifier">float</span></dt><dd><p>y coordinate of point (North)</p>
+</dd>
+<dt>“name”<span class="classifier">str</span></dt><dd><p>Text to be plotted beside the point
+mostly name of a town</p>
+</dd>
+</dl>
+</dd>
+<dt>If type == “line” :</dt><dd><dl class="simple">
+<dt>“x”<span class="classifier">list of floats</span></dt><dd><p>x (East) coordinates of points describing the line</p>
+</dd>
+<dt>“y”<span class="classifier">list of floats</span></dt><dd><p>y (North) coordinate of point s describing the line</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+<section id="module-Pymagra.in_out">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-Pymagra.in_out" title="Link to this heading">¶</a></h2>
+<p>Splinart package.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyMaGra</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Hermann Zeyen.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.0.2</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/api/Pymagra.in_out.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

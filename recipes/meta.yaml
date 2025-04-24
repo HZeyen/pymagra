@@ -1,0 +1,43 @@
+{% set version = "1.0.0" %}
+
+package:
+  name: pymagra
+  version: {{ version }}
+
+source:
+#  url: file://{{ RECIPE_DIR }}/../dist/pymagra-{{ version }}.tar.gz
+  git_url: https//github.com/HZeyen/pymagra.git
+  git_rev: v{{ version }}
+
+build:
+  number: 0
+  script: "{{PYTHON}} -m pip install . --no-deps -vv"
+  noarch: python
+
+requirements:
+  build:
+    - python>=3.8
+    - setuptools
+  run:
+    - python>=3.8
+    - numpy
+    - matplotlib
+    - PyQt5
+    - signal
+    - datetime
+    - scikit-learn
+    - scipy
+
+#test:
+#  imports:
+#    - splinart
+
+about:
+  home: http://github.com/HZeyen/pymagra
+  license: BSD
+  license_family: BSD
+  summary: "Potential field data treatment"
+  description: "Potential field data treatment"
+
+extra:
+  recipe-maintainers: "hermann.zeyen@gmail.com"

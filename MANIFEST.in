@@ -1,0 +1,2 @@
+include Pymagra/plotting/*.ui
+recursive-include Pymagra *.py

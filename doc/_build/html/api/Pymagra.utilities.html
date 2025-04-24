@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Pymagra.utilities package &#8212; PyMaGra 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="pymagra-utilities-package">
+<h1>Pymagra.utilities package<a class="headerlink" href="#pymagra-utilities-package" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-Pymagra.utilities.utilities">
+<span id="pymagra-utilities-utilities-module"></span><h2>Pymagra.utilities.utilities module<a class="headerlink" href="#module-Pymagra.utilities.utilities" title="Link to this heading">¶</a></h2>
+<p>Created on Sun Jul  7 18:08:06 2024</p>
+<dl class="simple">
+<dt>&#64;author: Hermann Zeyen &lt;<a class="reference external" href="mailto:hermann&#46;zeyen&#37;&#52;&#48;universite-paris-saclay&#46;fr">hermann<span>&#46;</span>zeyen<span>&#64;</span>universite-paris-saclay<span>&#46;</span>fr</a>&gt;</dt><dd><p>Université Paris-Saclay, France</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="Pymagra.utilities.utilities.Utilities">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Pymagra.utilities.utilities.</span></span><span class="sig-name descname"><span class="pre">Utilities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">main</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.utilities.utilities.Utilities" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl>
+<dt>Contains the following utility functions for program PyMaGra:</dt><dd><p>extract
+clean_data
+diurnal_correction
+diurnal_variation
+interpol_line
+interpol_2D
+extrapolate</p>
+<p>gauss_transform
+justify_lines_gaussian
+matrixExtension
+pole_Reduction
+continuation
+analyticSignal
+horizontalDerivative2
+horizontalDerivative
+horizontalDerivative2
+tilt</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.utilities.utilities.Utilities.analyticSignal">
+<span class="sig-name descname"><span class="pre">analyticSignal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.utilities.utilities.Utilities.analyticSignal" title="Link to this definition">¶</a></dt>
+<dd><p>Calculation of analytical signal of potential field data via
+vertical and horizontal derivatives</p>
+<section id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>data<span class="classifier">2D numpy float array</span></dt><dd><p>Data interpolated onto a regular grid</p>
+</dd>
+<dt>dx, dy<span class="classifier">float</span></dt><dd><p>Grid spacing in x and y direction [m]</p>
+</dd>
+<dt>Returns:</dt><dd><p>2D numpy float array, same shape as data
+Analytic signal</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.utilities.utilities.Utilities.clean_data">
+<span class="sig-name descname"><span class="pre">clean_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_fix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_fix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percent_down</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percent_up</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.utilities.utilities.Utilities.clean_data" title="Link to this definition">¶</a></dt>
+<dd><p>Set data to np.nan under certain conditions which may be:</p>
+<section id="id1">
+<h3>Parameters<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<p>data : dictionary with data (see io.get_line)
+min_fix : float</p>
+<blockquote>
+<div><p>All data below this value are set to nan</p>
+</div></blockquote>
+<dl class="simple">
+<dt>max_fix<span class="classifier">float</span></dt><dd><p>All data above this value are set to nan</p>
+</dd>
+<dt>percent_down<span class="classifier">float</span></dt><dd><p>The lowermost percentile values are set to nan
+A value of 0.01 means that all values lower than the
+1% quantile are set to None</p>
+</dd>
+<dt>percent_up<span class="classifier">float</span></dt><dd><p>The uppermost percentile values are set to nan
+A value of 0.01 means that all values higher than the
+99% quantile are set to None</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h3>Returns<a class="headerlink" href="#returns" title="Link to this heading">¶</a></h3>
+<p>data : dictionary with data outside defined limits set to np.nan</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.utilities.utilities.Utilities.continuation">
+<span class="sig-name descname"><span class="pre">continuation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dz</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.utilities.utilities.Utilities.continuation" title="Link to this definition">¶</a></dt>
+<dd><p>Vertical continuation of potential field data using Fourier transform</p>
+<section id="id2">
+<h3>Parameters<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>data<span class="classifier">2D numpy float array</span></dt><dd><p>Data interpolated onto a regular grid</p>
+</dd>
+<dt>dx, dy<span class="classifier">float</span></dt><dd><p>Grid spacing in x and y direction [m]</p>
+</dd>
+</dl>
+<p>dz : Distance to continue data [m], positive upwards</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>2D numpy float array, same shape as data
+Prolongated data</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.utilities.utilities.Utilities.data_flatten">
+<span class="sig-name descname"><span class="pre">data_flatten</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.utilities.utilities.Utilities.data_flatten" title="Link to this definition">¶</a></dt>
+<dd><p>Data that are stored in dictionary data with one entrance per line are
+concatenated into one 1D numpy array</p>
+<section id="id3">
+<h3>Parameters<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>data<span class="classifier">dictionary with keys equal to line number</span></dt><dd><dl class="simple">
+<dt>contains for every line itself a dictionary with the following keys:</dt><dd><p>“s1” : Data of sensor 1
+“s2” : Data of sensor 2
+“x”, “y”, “z”: Coordinates of data</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+<section id="id4">
+<h3>Returns<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>s1<span class="classifier">Numpy 1D float array</span></dt><dd><p>Concatenated data of sensor 1</p>
+</dd>
+<dt>s2<span class="classifier">Numpy 1D float array</span></dt><dd><p>Concatenated data of sensor 2</p>
+</dd>
+<dt>x<span class="classifier">Numpy 1D float array</span></dt><dd><p>Concatenated x-coordinates of all data</p>
+</dd>
+<dt>y<span class="classifier">Numpy 1D float array</span></dt><dd><p>Concatenated y-coordinates of all data</p>
+</dd>
+<dt>z<span class="classifier">Numpy 1D float array</span></dt><dd><p>Concatenated z-coordinates of all data</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.utilities.utilities.Utilities.date2julian">
+<span class="sig-name descname"><span class="pre">date2julian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">day</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">month</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">year</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.utilities.utilities.Utilities.date2julian" title="Link to this definition">¶</a></dt>
+<dd><p>Function translates month and day of month to Julian day of year.
+1st of January is Julian day number 1.
+Parameters
+———-
+day : int</p>
+<blockquote>
+<div><p>Day of month (natural counting, starts at 1)</p>
+</div></blockquote>
+<dl class="simple">
+<dt>month<span class="classifier">int</span></dt><dd><p>Month of year (natural counting, starts at 1 for January)</p>
+</dd>
+<dt>year<span class="classifier">int</span></dt><dd><p>Year in which to do the calculation (important to know whether
+it is a leap year). May be 2 or 4 ciphers</p>
+</dd>
+</dl>
+<section id="id5">
+<h3>Returns<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>j_day: int</dt><dd><p>Julian day of year</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.utilities.utilities.Utilities.diurnal_correction">
+<span class="sig-name descname"><span class="pre">diurnal_correction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">degree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diff_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.utilities.utilities.Utilities.diurnal_correction" title="Link to this definition">¶</a></dt>
+<dd><p>Apply diurnal corrections
+The diurnal variations may come from base station data (function read_base)
+or, if no base station data exist, they are calculated in function
+diurnal_variation by fitting a polynomial of degree “degree” to the
+measured data. Data of different days are then fitted independently.</p>
+<p>Base station data (measured or calculated) are interpolated onto
+measurement times and simply subtracted from data. The process is done
+in situ, i.e. the values of arrays self.sensor1 and self.sensor2 are
+modified. If you need to keep the original data, you must copy them to
+other arrays before applying diurnal_correction</p>
+<section id="id6">
+<h3>Parameters<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>degree<span class="classifier">int, optional</span></dt><dd><p>Degree of polynom to be fitted to data. The default is 3.
+This parameter is only used if no base station data exist</p>
+</dd>
+<dt>diff_weight<span class="classifier">float, optional</span></dt><dd><p>If day_joint_flag is true, diff_weight defines the relative weight
+for the fit of the differences along the block edges with respect
+to the fit of the medians.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.utilities.utilities.Utilities.diurnal_variation">
+<span class="sig-name descname"><span class="pre">diurnal_variation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">degree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diff_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.utilities.utilities.Utilities.diurnal_variation" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate a fit of degree “degree” to the data of lines “lines” which
+will be used for correction of diurnal variations if not base station
+data exist</p>
+<section id="id7">
+<h3>Parameters<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>lines<span class="classifier">1D numpy int array</span></dt><dd><p>Numbers of the lines to be used for calculation of diurnal variations.
+If several files have been loaded, acquired at different days, the
+fit may be calculated independently for every day.</p>
+</dd>
+<dt>degree<span class="classifier">int, optional</span></dt><dd><p>Degree of polynom to be fitted to data. The default is 3.</p>
+</dd>
+<dt>diff_weight<span class="classifier">float, optional</span></dt><dd><p>If all blocks are inverted together, diff_weight is the weight
+given to fit of differences along the edges with respect to fit
+of medians in each block. The default is 1.</p>
+</dd>
+</dl>
+</section>
+<section id="id8">
+<h3>Returns<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>Polynome coefficients (1D numpy array of size degree+1)</dt><dd><p>The polynome is calculated as
+P[degree]+P[degree-1]*x+P[degree-2]*x**2…+P[0]*x**degree
+If multiple blocks are fitted together, P contains a polynome for
+each block, i.e. len(P) = (degree+1)*number_of_blocks</p>
+</dd>
+<dt>tmn<span class="classifier">float</span></dt><dd><p>For the stability of polynome fit, times (given in seconds) are
+reduced such that the minimum time is zero. tmn is this minumum time.
+To apply the coefficients to data, their time must be transformed to
+time-tmn before applying the polynome coefficients</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.utilities.utilities.Utilities.extract">
+<span class="sig-name descname"><span class="pre">extract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">choice</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.utilities.utilities.Utilities.extract" title="Link to this definition">¶</a></dt>
+<dd><p>Mark data segments for treatment as function of odd or even line number</p>
+<section id="id9">
+<h3>Parameters:<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
+<p>p : parent class
+choice : tuple of str</p>
+<blockquote>
+<div><dl class="simple">
+<dt>may be “all” (choose all lines)</dt><dd><p>“odd” (choose odd lines, natural counting)
+“even” (choose even line numbers, natural counting)
+“N”, “S”, “W”, “E”</p>
+</dd>
+</dl>
+</div></blockquote>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.utilities.utilities.Utilities.extrapolate">
+<span class="sig-name descname"><span class="pre">extrapolate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.utilities.utilities.Utilities.extrapolate" title="Link to this definition">¶</a></dt>
+<dd><p>Routine fills nans on an interpolated grid.
+For this, it searches first for every line and column the first and last
+existing (non-nan) points. Then, for every non-defined point, it searches
+the “n_nearest” nearest points (see first command line) and associates
+a weighted average value. The weight is calculated as 1/distance**2</p>
+<section id="id10">
+<h3>Parameters<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>d<span class="classifier">2D numpy array</span></dt><dd><p>Contains data on regular grid. NaN for inexistant data. Shape: (ny,nx)</p>
+</dd>
+<dt>x<span class="classifier">1D numpy array</span></dt><dd><p>Coordiantes of the columns of data</p>
+</dd>
+<dt>y<span class="classifier">1D numpy array</span></dt><dd><p>Coordiantes of the rows of data</p>
+</dd>
+</dl>
+</section>
+<section id="id11">
+<h3>Returns<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>data: 2D numpy array with the same shape as input data.</dt><dd><p>Contains full regular grid of data</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.utilities.utilities.Utilities.gauss_transform">
+<span class="sig-name descname"><span class="pre">gauss_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_fix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_move</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.utilities.utilities.Utilities.gauss_transform" title="Link to this definition">¶</a></dt>
+<dd><p>Transforms data sets to gaussian distribution does a projection
+of the second data set onto the distribution of the first and returns
+the back-transformed modified second data set</p>
+<section id="id12">
+<h3>Parameters<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>data_fix<span class="classifier">numpy 1D array</span></dt><dd><p>Reference data set.</p>
+</dd>
+<dt>data_move<span class="classifier">numpy 1D array</span></dt><dd><p>Data set to be projected onto the gaussian distribution of data_fix.</p>
+</dd>
+</dl>
+</section>
+<section id="id13">
+<h3>Returns<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>numpy 1D array</dt><dd><p>Modified data_move array.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.utilities.utilities.Utilities.horizontalDerivative">
+<span class="sig-name descname"><span class="pre">horizontalDerivative</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.utilities.utilities.Utilities.horizontalDerivative" title="Link to this definition">¶</a></dt>
+<dd><p>First horizontal derivative of potential field data using Fourier transform</p>
+<section id="id14">
+<h3>Parameters<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>data<span class="classifier">2D numpy float array</span></dt><dd><p>Data interpolated onto a regular grid</p>
+</dd>
+<dt>dx, dy<span class="classifier">float</span></dt><dd><p>Grid spacing in x and y direction [m]</p>
+</dd>
+<dt>Returns:</dt><dd><p>2D numpy float array, same shape as data
+First horizontal derivative of data</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.utilities.utilities.Utilities.horizontalDerivative2">
+<span class="sig-name descname"><span class="pre">horizontalDerivative2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.utilities.utilities.Utilities.horizontalDerivative2" title="Link to this definition">¶</a></dt>
+<dd><p>Second horizontal derivative of potential field data using Fourier transform</p>
+<section id="id15">
+<h3>Parameters<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>data<span class="classifier">2D numpy float array</span></dt><dd><p>Data interpolated onto a regular grid</p>
+</dd>
+<dt>dx, dy<span class="classifier">float</span></dt><dd><p>Grid spacing in x and y direction [m]</p>
+</dd>
+<dt>Returns:</dt><dd><p>2D numpy float array, same shape as data
+2nd horizontal derivative of data</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.utilities.utilities.Utilities.interpol_2D">
+<span class="sig-name descname"><span class="pre">interpol_2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.utilities.utilities.Utilities.interpol_2D" title="Link to this definition">¶</a></dt>
+<dd><p>Routine interpolates data on all lines onto a regular grid. No extrapolation
+is done, i.e. if at the beginning or the end of a line data are missing
+(the line starts later than others or stops earlier), the interpolated
+array will contain nans
+The interpolation method used is scipy.interpolate.CloughTocher2DInterpolator</p>
+<section id="id16">
+<h3>Parameters<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>dx<span class="classifier">float, optional</span></dt><dd><p>Sampling step in meters in x-direction. The default is 0.2.</p>
+</dd>
+<dt>dx<span class="classifier">float, optional</span></dt><dd><p>Sampling step in meters in y-direction. The default is 0.2.</p>
+</dd>
+</dl>
+</section>
+<section id="id17">
+<h3>Returns<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>sensor1_inter<span class="classifier">2D numpy float array</span></dt><dd><p>Contains gridded data of sensor 1</p>
+</dd>
+<dt>sensor2_inter<span class="classifier">2D numpy float array</span></dt><dd><p>Contains gridded data of sensor 2</p>
+</dd>
+<dt>grad_inter :2D numpy float array</dt><dd><p>contains the vertical gradient</p>
+</dd>
+<dt>The shape of the arrays depends on the principal direction of the lines:</dt><dd><p>if self.direction == 1, shape is (number_of_data_points_per_line, number_of_lines)
+else: (number_of_lines, number_of_data_points_per_line)</p>
+</dd>
+<dt>x_inter<span class="classifier">1D numpy float array</span></dt><dd><p>x_coordinates of the columns of s1_inter and s2_inter</p>
+</dd>
+<dt>y_inter<span class="classifier">1D numpy float array</span></dt><dd><p>y_coordinates of the rows of s1_inter and s2_inter</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.utilities.utilities.Utilities.interpol_line">
+<span class="sig-name descname"><span class="pre">interpol_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nsensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i_line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.utilities.utilities.Utilities.interpol_line" title="Link to this definition">¶</a></dt>
+<dd><p>interpolate data of one line onto a regular grid</p>
+<section id="id18">
+<h3>Parameters<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>i_line<span class="classifier">int, optional</span></dt><dd><p>Number of line to be interpolated (counting starts at 0). The default is 0.</p>
+</dd>
+<dt>dx<span class="classifier">float, optional</span></dt><dd><p>Sampling step in meters for interpolated data. The default is 0.2.</p>
+</dd>
+<dt>xmin<span class="classifier">float, optional</span></dt><dd><p>Position of first sample along self.direction in meters. The default is 0.</p>
+</dd>
+<dt>xmax<span class="classifier">float, optional</span></dt><dd><p>Position of last sample along self.direction in meters. The default is 0.</p>
+</dd>
+<dt>k<span class="classifier">int, optional</span></dt><dd><p>Degree of spline used for interpolation. The default is 3.
+See scipy.interpolate.interp1d for more information. Only splines are used.
+Correspondance between k and “kind” of scipy.interpolate.interp1d:
+k=0: kind=”zero”
+k=1: kind=”slinear”
+k=2: kind=”quadratic”
+k=3: kind=”cubic”</p>
+</dd>
+</dl>
+<p>If xmin == xmax, the starting and end points are calculated automatically.
+For this,the starting point is placed at the nearest multiple of dx for
+the coordinate of self.direction (see function read_stn)</p>
+</section>
+<section id="id19">
+<h3>Returns<a class="headerlink" href="#id19" title="Link to this heading">¶</a></h3>
+<p>sensor_inter: numpy float array: interpolated data
+x_inter: numpy float array: interpolated X-coordinates
+y_inter: numpy float array: interpolated Y-coordinates
+dmin: float position of first interpolated point within line [m]
+dmax: float position of last interpolated point within line [m]</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.utilities.utilities.Utilities.julian2date">
+<span class="sig-name descname"><span class="pre">julian2date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j_day</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">year</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.utilities.utilities.Utilities.julian2date" title="Link to this definition">¶</a></dt>
+<dd><p>Function translates Julian day number to standard date.
+1st of January is Julian day number 1.
+Parameters
+———-
+j_day : int</p>
+<blockquote>
+<div><p>Number of Julian day</p>
+</div></blockquote>
+<dl class="simple">
+<dt>year<span class="classifier">int</span></dt><dd><p>Year in which to do the calculation (important to know whether
+it is a leap year). May be 2 or 4 ciphers</p>
+</dd>
+</dl>
+<section id="id20">
+<h3>Returns<a class="headerlink" href="#id20" title="Link to this heading">¶</a></h3>
+<p>day, month
+day: int</p>
+<blockquote>
+<div><p>Day of month</p>
+</div></blockquote>
+<dl class="simple">
+<dt>month: int</dt><dd><p>Month in year</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.utilities.utilities.Utilities.justify_lines_gaussian">
+<span class="sig-name descname"><span class="pre">justify_lines_gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">just</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.utilities.utilities.Utilities.justify_lines_gaussian" title="Link to this definition">¶</a></dt>
+<dd><p>Often the measurment direction has an influence on magnetic data due to
+uncorrected effects of acquisition instrumentation.
+The function calculates the median values of every line and adjusts the
+one of every second line to the average median of the neighbouring lines</p>
+<section id="id21">
+<h3>Parameters<a class="headerlink" href="#id21" title="Link to this heading">¶</a></h3>
+<dl>
+<dt>just<span class="classifier">int, optional</span></dt><dd><dl>
+<dt>If 0: Leve medians of even line (python counting, i.e. first line is even)</dt><dd><blockquote>
+<div><p>untouched, justify odd lines to medians of even lines</p>
+</div></blockquote>
+<p>1: Do the reverse</p>
+</dd>
+</dl>
+</dd>
+<dt>local<span class="classifier">int, optional</span></dt><dd><dl class="simple">
+<dt>If 0: apply gaussian transform to the whole data set</dt><dd><p>1: apply gaussian transform only to neighboring lines</p>
+</dd>
+</dl>
+</dd>
+<dt>inplace<span class="classifier">bool, optional</span></dt><dd><p>if True, justified data are back-copied to self.sensorN_inter and True
+is returned. If not, new arrays are returned The default is True.</p>
+</dd>
+</dl>
+</section>
+<section id="id22">
+<h3>Returns<a class="headerlink" href="#id22" title="Link to this heading">¶</a></h3>
+<p>s1_justified : 2D numpy array with justified data of first sensor
+s2_justified : 2D numpy array with justified data of second sensor</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.utilities.utilities.Utilities.justify_lines_median">
+<span class="sig-name descname"><span class="pre">justify_lines_median</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">just</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.utilities.utilities.Utilities.justify_lines_median" title="Link to this definition">¶</a></dt>
+<dd><p>Often the measurment direction has an influence on magnetic data due to
+uncorrected effects of acquisition instrumentation.
+The function calculates the median values of every line and adjusts the
+one of every second line to the average median of the neighbouring lines</p>
+<section id="id23">
+<h3>Parameters<a class="headerlink" href="#id23" title="Link to this heading">¶</a></h3>
+<dl>
+<dt>just<span class="classifier">int, optional</span></dt><dd><dl>
+<dt>If 0: Leave medians of even line (python counting, i.e. first line is even)</dt><dd><blockquote>
+<div><p>untouched, justify odd lines to medians of even lines</p>
+</div></blockquote>
+<p>1: Do the reverse</p>
+</dd>
+</dl>
+</dd>
+<dt>inplace<span class="classifier">bool, optional</span></dt><dd><p>if True, justified data are back-copied to self.sensorN_inter and True
+is returned. If not, new arrays are returned The default is True.</p>
+</dd>
+</dl>
+</section>
+<section id="id24">
+<h3>Returns<a class="headerlink" href="#id24" title="Link to this heading">¶</a></h3>
+<p>s1_justified : 1D numpy array with justified data of first sensor
+s2_justified : 1D numpy array with justified data of second sensor</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.utilities.utilities.Utilities.matrixExtension">
+<span class="sig-name descname"><span class="pre">matrixExtension</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.utilities.utilities.Utilities.matrixExtension" title="Link to this definition">¶</a></dt>
+<dd><p>Creation of extended matix for 2D Fourier transform.
+The toutine mirrors the lower half of the matrix and adds it at the bottom
+and mirrors the upper half to the top. Equivalently right and left</p>
+<dl class="simple">
+<dt>Input:</dt><dd><p>data : 2D numpy array with data</p>
+</dd>
+<dt>Output:</dt><dd><p>d : 2D numpy array extended in both directions
+(ny1,nx1): Tuple with starting indices of the original data in matrix d
+(ny2,nx2): Tuple with final indices of the original data in matrix d plus one
+The original data may thus be retrieved as
+data = d[ny1:ny2,nx1:nx2]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.utilities.utilities.Utilities.pole_Reduction">
+<span class="sig-name descname"><span class="pre">pole_Reduction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Inc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Dec</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.utilities.utilities.Utilities.pole_Reduction" title="Link to this definition">¶</a></dt>
+<dd><p>Calculation of pole-reduced magnetic data supposing only induced magnetization
+Formula from Keating and Zerbo, Geophysics 61, nᵒ 1 (1996): 131‑137.</p>
+<section id="id25">
+<h3>Parameters<a class="headerlink" href="#id25" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>data<span class="classifier">2D numpy float array</span></dt><dd><p>Original magnetic data interpolated on a regular grid which may have
+different grid width in x (E-W) and y (N-S) direction.</p>
+</dd>
+<dt>dx<span class="classifier">float</span></dt><dd><p>grid step in x direction.</p>
+</dd>
+<dt>dy<span class="classifier">float</span></dt><dd><p>grid step in y direction.</p>
+</dd>
+<dt>Inc<span class="classifier">float</span></dt><dd><p>Inclination of magnetic field [degrees].</p>
+</dd>
+<dt>Dec<span class="classifier">float</span></dt><dd><p>Declination of magnetic field [degrees].</p>
+</dd>
+</dl>
+</section>
+<section id="id26">
+<h3>Returns<a class="headerlink" href="#id26" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>d<span class="classifier">2D numpy float array with the same shape as data</span></dt><dd><p>Reduced to the pole magnetic data</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.utilities.utilities.Utilities.tilt">
+<span class="sig-name descname"><span class="pre">tilt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.utilities.utilities.Utilities.tilt" title="Link to this definition">¶</a></dt>
+<dd><p>Tilt angle of potential field data using Fourier transform</p>
+<section id="id27">
+<h3>Parameters<a class="headerlink" href="#id27" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>data<span class="classifier">2D numpy float array</span></dt><dd><p>Data interpolated onto a regular grid</p>
+</dd>
+<dt>grad<span class="classifier">2D numpy float array</span></dt><dd><p>Vertical derivative of data if it has been measured</p>
+</dd>
+<dt>dx, dy<span class="classifier">float</span></dt><dd><p>Grid spacing in x and y direction [m]</p>
+</dd>
+<dt>Returns:</dt><dd><p>2D numpy float array, same shape as data
+Tilt angle of data</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.utilities.utilities.Utilities.time2data">
+<span class="sig-name descname"><span class="pre">time2data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">year</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.utilities.utilities.Utilities.time2data" title="Link to this definition">¶</a></dt>
+<dd><p>Convert seconds into julian day of year, hour, minute and second</p>
+<section id="id28">
+<h3>Parameters<a class="headerlink" href="#id28" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>time<span class="classifier">may be a single float or a 1D numpy array</span></dt><dd><p>Time to be converted [s], based on julian day of year, i.e.
+time = julian_day*86000+hour*3600+minute*60+second.</p>
+</dd>
+</dl>
+</section>
+<section id="id29">
+<h3>Returns<a class="headerlink" href="#id29" title="Link to this heading">¶</a></h3>
+<p>All returned parameters have the same shape as time.</p>
+<dl class="simple">
+<dt>month<span class="classifier">int</span></dt><dd><p>month of year</p>
+</dd>
+<dt>day<span class="classifier">int</span></dt><dd><p>day of month.</p>
+</dd>
+<dt>h<span class="classifier">int</span></dt><dd><p>Hour.</p>
+</dd>
+<dt>m<span class="classifier">int</span></dt><dd><p>minute.</p>
+</dd>
+<dt>s<span class="classifier">float</span></dt><dd><p>second.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.utilities.utilities.Utilities.verticalDerivative">
+<span class="sig-name descname"><span class="pre">verticalDerivative</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.utilities.utilities.Utilities.verticalDerivative" title="Link to this definition">¶</a></dt>
+<dd><p>First vertical derivative of potential field data using Fourier transform</p>
+<section id="id30">
+<h3>Parameters<a class="headerlink" href="#id30" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>data<span class="classifier">2D numpy float array</span></dt><dd><p>Data interpolated onto a regular grid</p>
+</dd>
+<dt>dx, dy<span class="classifier">float</span></dt><dd><p>Grid spacing in x and y direction [m]</p>
+</dd>
+<dt>Returns:</dt><dd><p>2D numpy float array, same shape as data
+First vertical derivative of data</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Pymagra.utilities.utilities.Utilities.verticalDerivative2">
+<span class="sig-name descname"><span class="pre">verticalDerivative2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Pymagra.utilities.utilities.Utilities.verticalDerivative2" title="Link to this definition">¶</a></dt>
+<dd><p>Second vertical derivative of potential field data using finite differences</p>
+<section id="id31">
+<h3>Parameters<a class="headerlink" href="#id31" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>data<span class="classifier">2D numpy float array</span></dt><dd><p>Data interpolated onto a regular grid</p>
+</dd>
+<dt>Returns:</dt><dd><p>2D numpy float array, same shape as data
+2nd vertical derivative of data</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-Pymagra.utilities">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-Pymagra.utilities" title="Link to this heading">¶</a></h2>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyMaGra</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Hermann Zeyen.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.0.2</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/api/Pymagra.utilities.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

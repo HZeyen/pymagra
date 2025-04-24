@@ -1,0 +1,913 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1500</width>
+    <height>913</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QWidget" name="mplwindow" native="true">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <layout class="QVBoxLayout" name="mplvl"/>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1500</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="addData"/>
+    <addaction name="saveSTN"/>
+    <addaction name="saveDat"/>
+    <addaction name="separator"/>
+    <addaction name="readBase"/>
+    <addaction name="save_base"/>
+    <addaction name="separator"/>
+    <addaction name="Save_plot"/>
+    <addaction name="separator"/>
+    <addaction name="geography"/>
+    <addaction name="quitAction"/>
+   </widget>
+   <widget class="QMenu" name="plotMenu">
+    <property name="title">
+     <string>Display</string>
+    </property>
+    <addaction name="originalPlot"/>
+    <addaction name="actualPlot"/>
+    <addaction name="separator"/>
+    <addaction name="plotLine"/>
+    <addaction name="basePlot"/>
+    <addaction name="medianPlot"/>
+    <addaction name="plotGradient"/>
+    <addaction name="plotGeo"/>
+    <addaction name="plotGrid"/>
+    <addaction name="plotLineaments"/>
+    <addaction name="separator"/>
+    <addaction name="zoom"/>
+    <addaction name="zoom_Out"/>
+    <addaction name="zoom_In"/>
+    <addaction name="zoom_Initial"/>
+    <addaction name="separator"/>
+    <addaction name="changeQuantile"/>
+    <addaction name="secondLine"/>
+   </widget>
+   <widget class="QMenu" name="Utilities">
+    <property name="title">
+     <string>Utilities</string>
+    </property>
+    <addaction name="originalData"/>
+    <addaction name="diurnalCorrection"/>
+    <addaction name="cleanData"/>
+    <addaction name="medianJustify"/>
+    <addaction name="gaussJustify"/>
+    <addaction name="interpolate"/>
+    <addaction name="fill"/>
+    <addaction name="poleReduction"/>
+    <addaction name="prolongation"/>
+    <addaction name="tiltAngle"/>
+    <addaction name="analytic"/>
+    <addaction name="lineFFT"/>
+    <addaction name="Spector_2D"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="plotMenu"/>
+   <addaction name="Utilities"/>
+  </widget>
+  <action name="actionPlot">
+   <property name="text">
+    <string>Display</string>
+   </property>
+  </action>
+  <action name="actualPlot">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Plot treated data</string>
+   </property>
+   <property name="shortcut">
+    <string>D</string>
+   </property>
+  </action>
+  <action name="addData">
+   <property name="text">
+    <string>Choose additional data files</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+D</string>
+   </property>
+  </action>
+  <action name="quitAction">
+   <property name="text">
+    <string>Quit</string>
+   </property>
+   <property name="toolTip">
+    <string>Quit app</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="medianPlot">
+   <property name="text">
+    <string>Plot medians</string>
+   </property>
+   <property name="shortcut">
+    <string>M</string>
+   </property>
+  </action>
+  <action name="distanceGather">
+   <property name="text">
+    <string>Distance gather</string>
+   </property>
+   <property name="shortcut">
+    <string>D</string>
+   </property>
+  </action>
+  <action name="zoom">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Zoom</string>
+   </property>
+   <property name="shortcut">
+    <string>Z</string>
+   </property>
+  </action>
+  <action name="zoom_Out">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Zoom out</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="zoom_Initial">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Zoom initial</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+Z</string>
+   </property>
+  </action>
+  <action name="interpolate">
+   <property name="text">
+    <string>Interpolate</string>
+   </property>
+   <property name="toolTip">
+    <string>Interpolate inside a convexly shaped area</string>
+   </property>
+   <property name="statusTip">
+    <string/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
+   </property>
+  </action>
+  <action name="medianJustify">
+   <property name="text">
+    <string>Reduce direction effect by median</string>
+   </property>
+   <property name="toolTip">
+    <string>Reduce direction effect adjusting medians</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+M</string>
+   </property>
+  </action>
+  <action name="StaLta">
+   <property name="text">
+    <string>STA_LTA</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+P</string>
+   </property>
+  </action>
+  <action name="PlotPicks">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Plot Picks</string>
+   </property>
+  </action>
+  <action name="MovePicks">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Move Picks</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+M</string>
+   </property>
+  </action>
+  <action name="ManualPicks">
+   <property name="text">
+    <string>Manual picks</string>
+   </property>
+   <property name="shortcut">
+    <string>M</string>
+   </property>
+  </action>
+  <action name="FrequencyFilter">
+   <property name="text">
+    <string>Frequency</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="originalDataAll">
+   <property name="text">
+    <string>Original data all shots</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+O</string>
+   </property>
+  </action>
+  <action name="erasePicks">
+   <property name="text">
+    <string>Erase all picks</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
+   </property>
+  </action>
+  <action name="TraceSign">
+   <property name="text">
+    <string>Change trace sign</string>
+   </property>
+   <property name="toolTip">
+    <string>change sign of 1 trace</string>
+   </property>
+   <property name="shortcut">
+    <string>I</string>
+   </property>
+  </action>
+  <action name="ChangeSign">
+   <property name="text">
+    <string>Change sign</string>
+   </property>
+   <property name="toolTip">
+    <string>change sign of all traces</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
+   </property>
+  </action>
+  <action name="readBase">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Get base station data</string>
+   </property>
+   <property name="toolTip">
+    <string>Choose base station data file(s)</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+B</string>
+   </property>
+  </action>
+  <action name="CorrelationPicks">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Correlation picks</string>
+   </property>
+   <property name="toolTip">
+    <string>picking by cross correlation</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+C</string>
+   </property>
+  </action>
+  <action name="AmpPicks">
+   <property name="text">
+    <string>Amplitude picks</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
+   </property>
+  </action>
+  <action name="MuteTrace">
+   <property name="text">
+    <string>Mute/recover trace</string>
+   </property>
+   <property name="toolTip">
+    <string>Click near trace to be muted or recovered</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+T</string>
+   </property>
+  </action>
+  <action name="PlotCalculatedTimes">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Plot calculated times </string>
+   </property>
+   <property name="toolTip">
+    <string>Plot calculated travel times</string>
+   </property>
+  </action>
+  <action name="StorePicks">
+   <property name="text">
+    <string>Store picks</string>
+   </property>
+   <property name="toolTip">
+    <string>Store Picks in file picks.dat</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="MuteAir">
+   <property name="text">
+    <string>Mute air wave</string>
+   </property>
+   <property name="shortcut">
+    <string>A</string>
+   </property>
+  </action>
+  <action name="Air_wave_fk">
+   <property name="text">
+    <string>Air_wave fk</string>
+   </property>
+   <property name="toolTip">
+    <string>Eliminate air waves by fk-filter</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+A</string>
+   </property>
+  </action>
+  <action name="MuteBefore">
+   <property name="text">
+    <string>Mute before line</string>
+   </property>
+   <property name="toolTip">
+    <string>Mute before line drawn</string>
+   </property>
+   <property name="shortcut">
+    <string>L</string>
+   </property>
+  </action>
+  <action name="Vel_filter">
+   <property name="text">
+    <string>Velocity filter</string>
+   </property>
+   <property name="toolTip">
+    <string>Velocity filter</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="Save_Bin">
+   <property name="text">
+    <string>Save_Binary</string>
+   </property>
+   <property name="toolTip">
+    <string>Save just binary data of all files</string>
+   </property>
+   <property name="shortcut">
+    <string>B</string>
+   </property>
+  </action>
+  <action name="saveSTN">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Save magnetic data stn format</string>
+   </property>
+   <property name="toolTip">
+    <string>Save actual data to stn file</string>
+   </property>
+   <property name="shortcut">
+    <string>S</string>
+   </property>
+  </action>
+  <action name="t_Gain">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Time gain</string>
+   </property>
+  </action>
+  <action name="d_Gain">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Distance gain</string>
+   </property>
+  </action>
+  <action name="Agc">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>AGC</string>
+   </property>
+  </action>
+  <action name="t_Norm">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Trace normalize</string>
+   </property>
+  </action>
+  <action name="MuteAfter">
+   <property name="text">
+    <string>Mute after line</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+L</string>
+   </property>
+  </action>
+  <action name="FiltTrace">
+   <property name="text">
+    <string>Frequency filter single trace</string>
+   </property>
+  </action>
+  <action name="basePlot">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Plot base station data</string>
+   </property>
+   <property name="shortcut">
+    <string>B</string>
+   </property>
+  </action>
+  <action name="Save_ASCII">
+   <property name="text">
+    <string>Save_ASCII</string>
+   </property>
+  </action>
+  <action name="gaussJustify">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Reduce direction effect by Gauss</string>
+   </property>
+   <property name="toolTip">
+    <string>Use Gauss transform to eliminate directional effect</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
+   </property>
+  </action>
+  <action name="StoreGimli">
+   <property name="text">
+    <string>Store Gimli format</string>
+   </property>
+   <property name="toolTip">
+    <string>Store Picks in Gimli format (file pics.sgt)</string>
+   </property>
+  </action>
+  <action name="Modelled_arrivals">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Plot modelled arrivals</string>
+   </property>
+   <property name="toolTip">
+    <string>Plot modelled arrival times on seismograms</string>
+   </property>
+  </action>
+  <action name="Save_plot">
+   <property name="text">
+    <string>Save Plot</string>
+   </property>
+   <property name="iconText">
+    <string>Save Plot</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+P</string>
+   </property>
+  </action>
+  <action name="diurnalCorrection">
+   <property name="text">
+    <string>Apply diurnal correction</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="Change_colors">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Change colors tomo</string>
+   </property>
+   <property name="toolTip">
+    <string>Change color scale and depth limit after tomography</string>
+   </property>
+   <property name="shortcut">
+    <string>C</string>
+   </property>
+  </action>
+  <action name="Uncertainty_change">
+   <property name="text">
+    <string>Uncertainty change</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+U</string>
+   </property>
+  </action>
+  <action name="zoom_In">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Zoom in</string>
+   </property>
+   <property name="toolTip">
+    <string>zoom into next higher zoom</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+Z</string>
+   </property>
+  </action>
+  <action name="originalPlot">
+   <property name="text">
+    <string>Plot original data</string>
+   </property>
+   <property name="shortcut">
+    <string>O</string>
+   </property>
+  </action>
+  <action name="fill">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Fill rectangle</string>
+   </property>
+   <property name="toolTip">
+    <string>Fill nans by extrapolation with inverse squarde distance weighting</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="Animation">
+   <property name="text">
+    <string>Wave animation</string>
+   </property>
+   <property name="shortcut">
+    <string>W</string>
+   </property>
+  </action>
+  <action name="Save_SEG2">
+   <property name="text">
+    <string>Save SEG2</string>
+   </property>
+   <property name="statusTip">
+    <string>Sae file(s) in SEG2 Format</string>
+   </property>
+   <property name="shortcut">
+    <string>2</string>
+   </property>
+  </action>
+  <action name="Attenuation">
+   <property name="text">
+    <string>Attenuation</string>
+   </property>
+   <property name="shortcut">
+    <string>Q</string>
+   </property>
+  </action>
+  <action name="plotAllPicks">
+   <property name="text">
+    <string>Plot all picks</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+P</string>
+   </property>
+  </action>
+  <action name="Save_headers">
+   <property name="text">
+    <string>Save headers</string>
+   </property>
+   <property name="toolTip">
+    <string>Save headers of each data file to ASCII file</string>
+   </property>
+   <property name="shortcut">
+    <string>H</string>
+   </property>
+  </action>
+  <action name="component">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Choose component</string>
+   </property>
+   <property name="toolTip">
+    <string>Choose geophone component to be plotted</string>
+   </property>
+   <property name="shortcut">
+    <string>G</string>
+   </property>
+  </action>
+  <action name="Pseudo_velocity">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Pseudo-velocities</string>
+   </property>
+   <property name="toolTip">
+    <string>Plot pseudo-velocity profile</string>
+   </property>
+   <property name="shortcut">
+    <string>V</string>
+   </property>
+  </action>
+  <action name="phaseAngles">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Phase-angles</string>
+   </property>
+   <property name="toolTip">
+    <string>Phase-angles for 2C or 3C data</string>
+   </property>
+  </action>
+  <action name="poleReduction">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Pole reduction</string>
+   </property>
+   <property name="toolTip">
+    <string>Reduce anomalies to magnetic pole</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
+  </action>
+  <action name="originalData">
+   <property name="text">
+    <string>Restart with original data</string>
+   </property>
+   <property name="toolTip">
+    <string>Restart data treatment at scratch</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="cleanData">
+   <property name="text">
+    <string>Clean data</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+K</string>
+   </property>
+  </action>
+  <action name="changeQuantile">
+   <property name="text">
+    <string>Change color scale</string>
+   </property>
+   <property name="toolTip">
+    <string>Change quantile for plotting color scale</string>
+   </property>
+   <property name="shortcut">
+    <string>Q</string>
+   </property>
+  </action>
+  <action name="plotLine">
+   <property name="text">
+    <string>Plot single Line</string>
+   </property>
+   <property name="shortcut">
+    <string>L</string>
+   </property>
+  </action>
+  <action name="saveDat">
+   <property name="text">
+    <string>Save .dat format</string>
+   </property>
+   <property name="shortcut">
+    <string>F</string>
+   </property>
+  </action>
+  <action name="lineFFT">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Spector 1D</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F</string>
+   </property>
+  </action>
+  <action name="save_base">
+   <property name="text">
+    <string>Save base data</string>
+   </property>
+   <property name="toolTip">
+    <string>Save base station data</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+B</string>
+   </property>
+  </action>
+  <action name="plotGradient">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Plot gradient</string>
+   </property>
+   <property name="shortcut">
+    <string>G</string>
+   </property>
+  </action>
+  <action name="tiltAngle">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Tilt angle</string>
+   </property>
+   <property name="toolTip">
+    <string>Caclulate tilt angle</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+T</string>
+   </property>
+  </action>
+  <action name="secondLine">
+   <property name="text">
+    <string>Every second line</string>
+   </property>
+   <property name="shortcut">
+    <string>2</string>
+   </property>
+  </action>
+  <action name="prolongation">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Upward continuation</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+U</string>
+   </property>
+  </action>
+  <action name="analytic">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Analytic signal</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+H</string>
+   </property>
+  </action>
+  <action name="geography">
+   <property name="text">
+    <string>Get geography data</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+G</string>
+   </property>
+  </action>
+  <action name="plotGeo">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Plot geography</string>
+   </property>
+   <property name="toolTip">
+    <string>Plot geography information</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
+   </property>
+  </action>
+  <action name="plotGrid">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Plot grid</string>
+   </property>
+   <property name="shortcut">
+    <string>X</string>
+   </property>
+  </action>
+  <action name="plotLineaments">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Plot lineaments</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+L</string>
+   </property>
+  </action>
+  <action name="Spector_2D">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Spector 2D</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+F</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
