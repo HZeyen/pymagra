@@ -5,14 +5,14 @@
 
 .. autoclass:: BuildEnvironment
 
-   
+
    .. automethod:: __init__
 
-   
+
    .. rubric:: Methods
 
    .. autosummary::
-   
+
       ~BuildEnvironment.__init__
       ~BuildEnvironment.apply_post_transforms
       ~BuildEnvironment.check_consistency
@@ -37,19 +37,17 @@
       ~BuildEnvironment.resolve_toctree
       ~BuildEnvironment.set_versioning_method
       ~BuildEnvironment.setup
-   
-   
 
-   
-   
+
+
+
+
    .. rubric:: Attributes
 
    .. autosummary::
-   
+
       ~BuildEnvironment.docname
       ~BuildEnvironment.found_docs
       ~BuildEnvironment.master_doctree
       ~BuildEnvironment.parser
       ~BuildEnvironment.domains
-   
-   

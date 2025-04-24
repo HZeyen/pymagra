@@ -12,7 +12,7 @@ import os
 from pathlib import Path
 from PyQt5 import QtWidgets
 
-#import Pymagra as pmg
+# import Pymagra as pmg
 from Pymagra import PyMaGra
 
 if __name__ == "__main__":
@@ -65,7 +65,7 @@ if __name__ == "__main__":
         main.w.showMaximized()
         sys.exit(app.exec_())
     except Exception as error:
-        print(f'An unexpected exception occurred: {error}.')
+        print(f"An unexpected exception occurred: {error}.")
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)

@@ -90,7 +90,6 @@ def get_files(dir0=None, ftype=None):
             continue
         if file_ext not in valid_extensions:
             continue
-        #        file_types.append(ftypes[np.where(valid_extensions == file_ext)[0][0]])
         data_files.append(f)
         fconfig = os.path.basename(f)
         j = fconfig.rfind(".")

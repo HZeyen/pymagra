@@ -3,7 +3,7 @@ name: publish
 on:
     release:
         types: [published]
-        
+
 jobs:
     make_sdist:
         name: Make SDist and wheel
@@ -17,16 +17,16 @@ jobs:
                   - macos-latest
         steps:
         - uses: actions/checkout@v4
-        
+
         - name: Install build
           run: pip install build
-          
+
         - name: Build SDist
           run: python -m build --sdist
-          
+
         - name: Build wheel
           run: python -m build wheel
-          
+
         - uses: actions/upload-artifact@v3
           with:
             path: dist/*
@@ -49,7 +49,7 @@ jobs:
               with:
                 name: artifact
                 path: dist
-                
+
             - uses: pypa/gh-action-pypi-publish@release/v1
               with:
                 repository-url: https://pypi.org/legacy
@@ -76,7 +76,7 @@ jobs:
             - name: Build the recipe
               shell: bash -l {0}
               run: conda build recipes
-                
+
             - name: upload on conda
               shell: bash -l {0}
               run: anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload --force /home/runner/

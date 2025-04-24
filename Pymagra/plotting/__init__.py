@@ -5,6 +5,6 @@
 
 # from . import floating_plots
 # from .main_window import mainWindow
-from .new_window import newWindow
+# from .new_window import newWindow
 
-__all__ = ["newWindow"]
+# __all__ = ["newWindow"]

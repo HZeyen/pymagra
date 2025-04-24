@@ -2,5 +2,3 @@
 ================
 
 .. automodule:: Pymagra.plotting
-
-   

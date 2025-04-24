@@ -763,18 +763,18 @@ class Geometrics:
         col_m = -1
         val = lines[0].split()
         if "TIME" in lines[0]:
-            for col, l in enumerate(val):
-                if "TIME" in l:
+            for col, lin in enumerate(val):
+                if "TIME" in lin:
                     col_t = col
                     break
         if "DATE" in lines[0]:
-            for col, l in enumerate(val):
-                if "DATE" in l:
+            for col, lin in enumerate(val):
+                if "DATE" in lin:
                     col_d = col
                     break
         if "LINE" in lines[0]:
-            for col, l in enumerate(val):
-                if "LINE" in l:
+            for col, lin in enumerate(val):
+                if "LINE" in lin:
                     col_l = col
                     break
         if col_t < 0 or col_d < 0 or col_l < 0:
@@ -790,34 +790,34 @@ class Geometrics:
                 QtWidgets.QMessageBox.Close,
             )
             sys.exit()
-        for col, l in enumerate(val):
-            if "X" in l:
+        for col, lin in enumerate(val):
+            if "X" in lin:
                 col_x = col
                 break
-        for col, l in enumerate(val):
-            if "Y" in l:
+        for col, lin in enumerate(val):
+            if "Y" in lin:
                 col_y = col
                 break
         if self.grad_flag:
-            for col, l in enumerate(val):
-                if "TOP" in l:
+            for col, lin in enumerate(val):
+                if "TOP" in lin:
                     col_1 = col
                     break
-            for col, l in enumerate(val):
-                if "BOTTOM" in l:
+            for col, lin in enumerate(val):
+                if "BOTTOM" in lin:
                     col_2 = col
                     break
         else:
-            for col, l in enumerate(val):
-                if "TOP" in l or "BOTTOM" in l:
+            for col, lin in enumerate(val):
+                if "TOP" in lin or "BOTTOM" in lin:
                     col_1 = col
                     break
-        # for col, l in enumerate(val):
-        #     if "Z" in l:
+        # for col, lin in enumerate(val):
+        #     if "Z" in lin:
         #         col_z = col
         #         break
-        for col, l in enumerate(val):
-            if "MARK" in l:
+        for col, lin in enumerate(val):
+            if "MARK" in lin:
                 col_m = col
                 break
         with open("temp.stn", "w") as fo:

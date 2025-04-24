@@ -4,6 +4,7 @@ Created on Mon Jan 27 15:56:23 2025
 
 @author: Hermann
 """
+
 import sys
 import os
 import numpy as np
@@ -16,7 +17,7 @@ os.chdir(dir0)
 app = QtWidgets.QApplication(sys.argv)
 
 
-class Earth_mag():
+class Earth_mag:
     """
 
     Class stores the components of the Earth's magnetic field and the direction
@@ -35,16 +36,16 @@ class Earth_mag():
         self.sde = np.sin(np.radians(self.dec))
         self.cie = np.cos(np.radians(self.inc))
         self.sie = np.sin(np.radians(self.inc))
-        self.cdci = self.cde*self.cie
-        self.sdci = self.sde*self.cie
-        self.eh = self.f*self.cie
-        self.ex = self.f*self.cdci
-        self.ey = self.f*self.sdci
-        self.ez = self.f*self.sie
+        self.cdci = self.cde * self.cie
+        self.sdci = self.sde * self.cie
+        self.eh = self.f * self.cie
+        self.ex = self.f * self.cdci
+        self.ey = self.f * self.sdci
+        self.ez = self.f * self.sie
         return True
 
 
-class Okabe():
+class Okabe:
     """
     This class allows calculating the gravitational and magnetic effects of
     one rectangular vertical prism with inclined upper and lower surfaces
@@ -90,14 +91,14 @@ class Okabe():
         self.earth = earth
         self.GM = typ.upper()
         self.galile = 6.674e-6
-# No idea why in the following magnetization calculation the Earth's field
-# must be divided by 2 and not by my_0*10**9 (my0 = 4pi*10**-7 and 10**9
-# because of the Earth's field being fiven in nT). Comparison of results
-# with analytical formula for a sphere and with Plouff's program gave this
-# factor of 200*pi.
-        if np.isclose(rem, 0.):
+        # No idea why in the following magnetization calculation the Earth's field
+        # must be divided by 2 and not by my_0*10**9 (my0 = 4pi*10**-7 and 10**9
+        # because of the Earth's field being fiven in nT). Comparison of results
+        # with analytical formula for a sphere and with Plouff's program gave this
+        # factor of 200*pi.
+        if np.isclose(rem, 0.0):
             # rem = sus*earth.f/(400*np.pi)
-            rem = sus*earth.f*0.5
+            rem = sus * earth.f * 0.5
             rem_i = earth.inc
             rem_d = earth.dec
         self.rk = np.zeros(3)
@@ -152,82 +153,82 @@ class Okabe():
 
     def calc_ano(self, carte, x1, x2, dx, y1, y2, dy, alti):
         """
-         convention du rangement dans la matrice "carte"
+        convention du rangement dans la matrice "carte"
 
-                carte(0, nrow-1)              carte(nrow-1,ncol-1)
-                  y2!--------------------------!
-                    !                          !
-                    !                          !
-                    !                          !
-                    !                          !
-                    !                          !
-                    !                          !
-                    !                          !
-                    !                          !
-                    !                          !
-                    !                          !
-                    !                          !
-                    !                          !
-                  y1!--------------------------!
-                    x1                        x2
-                carte(0,0)                carte(0, ncol-1)
+               carte(0, nrow-1)              carte(nrow-1,ncol-1)
+                 y2!--------------------------!
+                   !                          !
+                   !                          !
+                   !                          !
+                   !                          !
+                   !                          !
+                   !                          !
+                   !                          !
+                   !                          !
+                   !                          !
+                   !                          !
+                   !                          !
+                   !                          !
+                 y1!--------------------------!
+                   x1                        x2
+               carte(0,0)                carte(0, ncol-1)
 
-         _____________________________________________________________________
-         |      coord entry                          coord OKABE        |
-         |                                                                   |
-         |    | Z                                       _________________    |
-         |    |           ________                    /|         X (Nord)    |
-         |    |          /       /|    Il faut       / |                     |
-         |    |         /       / |    passer       /  |       ________      |
-         |    |        /_______/  |    d'un        /   |      /       /|     |
-         |    |    Y/  |       |  |    systeme  Y /    |     /       / |     |
-         |    |    /   |       | /       a      (Est)  |    /_______/  |     |
-         |    |   /    |       |/      l'autre         |    |       |  |     |
-         |    |  /     |_______/                       |    |       | /      |
-         |    | /                                    Z |    |       |/       |
-         |    |/_______________                        V    |_______/        |
-         |                      X                                            |
-         |___________________________________________________________________|
+        _____________________________________________________________________
+        |      coord entry                          coord OKABE        |
+        |                                                                   |
+        |    | Z                                       _________________    |
+        |    |           ________                    /|         X (Nord)    |
+        |    |          /       /|    Il faut       / |                     |
+        |    |         /       / |    passer       /  |       ________      |
+        |    |        /_______/  |    d'un        /   |      /       /|     |
+        |    |    Y/  |       |  |    systeme  Y /    |     /       / |     |
+        |    |    /   |       | /       a      (Est)  |    /_______/  |     |
+        |    |   /    |       |/      l'autre         |    |       |  |     |
+        |    |  /     |_______/                       |    |       | /      |
+        |    | /                                    Z |    |       |/       |
+        |    |/_______________                        V    |_______/        |
+        |                      X                                            |
+        |___________________________________________________________________|
         """
 
         nrow, ncol = carte.shape
-        carte[:, :] = 0.
+        carte[:, :] = 0.0
         np_fac, nfac = self.x_face.shape
         for ifac in range(nfac):
             self.xfac = self.x_face[:, ifac]
             self.yfac = self.y_face[:, ifac]
             self.zfac = self.z_face[:, ifac]
 
-            zfa_pt = alti-self.zfac
+            zfa_pt = alti - self.zfac
             for ir in range(nrow):
-                yp = y1 + ir*dy
-                yfa_pt = self.yfac-yp
+                yp = y1 + ir * dy
+                yfa_pt = self.yfac - yp
                 for ic in range(ncol):
-                    xp = x1 + ic*dx
-                    xfa_pt = self.xfac-xp
-# ATTN au passage de coord. ( x <-> y )    ???
-                    anom = -self.Okabe1(np.copy(yfa_pt), np.copy(xfa_pt),
-                                        np.copy(zfa_pt))
+                    xp = x1 + ic * dx
+                    xfa_pt = self.xfac - xp
+                    # ATTN au passage de coord. ( x <-> y )    ???
+                    anom = -self.Okabe1(
+                        np.copy(yfa_pt), np.copy(xfa_pt), np.copy(zfa_pt)
+                    )
                     if not np.isfinite(anom):
                         print(f"face {ifac}, row {ir}, col {ic}: {anom}")
                         sys.exit()
-                    carte[ir, ic] = carte[ir, ic]+anom
+                    carte[ir, ic] = carte[ir, ic] + anom
         return carte
 
     def ini_okb(self, aim, deca, dipa, rho):
-
-        if self.GM == 'M':
-            ad = deca*np.pi/180.
-            ai = dipa*np.pi/180.
-            self.rk[0] = aim*np.cos(ai)*np.cos(ad)
-            self.rk[1] = aim*np.cos(ai)*np.sin(ad)
-            self.rk[2] = aim*np.sin(ai)
-            self.contra = 0.
+        if self.GM == "M":
+            ad = deca * np.pi / 180.0
+            ai = dipa * np.pi / 180.0
+            self.rk[0] = aim * np.cos(ai) * np.cos(ad)
+            self.rk[1] = aim * np.cos(ai) * np.sin(ad)
+            self.rk[2] = aim * np.sin(ai)
+            self.contra = 0.0
         else:
-            self.contra = self.galile*rho
-# No idea whay, but the results for gravity calculation must be divided by 2
-# to get the correct result (test e.g. with Bouguer plate, but also comparison
-# with Nagy program)
+            self.contra = self.galile * rho
+            # No idea whay, but the results for gravity calculation must be divided by 2
+            # to get the correct result (test e.g. with Bouguer plate, but also comparison
+            # with Nagy program)
             self.contra *= 0.5
             self.rim[0] = 0.0
             self.rim[1] = 0.0
@@ -247,27 +248,27 @@ class Okabe():
         xk = x[2]
         yk = y[2]
         zk = z[2]
-        sxy = xi*(yj-yk) + xj*(yk-yi) + xk*(yi-yj)
-        syz = yi*(zj-zk) + yj*(zk-zi) + yk*(zi-zj)
-        szx = zi*(xj-xk) + zj*(xk-xi) + zk*(xi-xj)
-        rr = syz*syz + szx*szx
-        r3d = np.sqrt(rr+sxy*sxy)
-        cosp = -sxy/r3d
+        sxy = xi * (yj - yk) + xj * (yk - yi) + xk * (yi - yj)
+        syz = yi * (zj - zk) + yj * (zk - zi) + yk * (zi - zj)
+        szx = zi * (xj - xk) + zj * (xk - xi) + zk * (xi - xj)
+        rr = syz * syz + szx * szx
+        r3d = np.sqrt(rr + sxy * sxy)
+        cosp = -sxy / r3d
         r = np.sqrt(rr)
-        sinp = r/r3d
-        if np.isclose(rr, 0.):
-            coste = 1.
-            sinte = 0.
+        sinp = r / r3d
+        if np.isclose(rr, 0.0):
+            coste = 1.0
+            sinte = 0.0
         else:
-            coste = -syz/r
-            sinte = -szx/r
+            coste = -syz / r
+            sinte = -szx / r
         return cosp, sinp, coste, sinte
 
     def rotation2D(self, x, y, z, cosp, sinp, coste, sinte):
-        a = coste*x + sinte*y
-        xm = a*cosp - z*sinp
-        ym = y*coste - x*sinte
-        zm = a*sinp + z*cosp
+        a = coste * x + sinte * y
+        xm = a * cosp - z * sinp
+        ym = y * coste - x * sinte
+        zm = a * sinp + z * cosp
         return xm, ym, zm
 
     def Okabe1(self, x, y, z):
@@ -284,7 +285,7 @@ class Okabe():
             Dimension Xx(Maxsom),Yy(Maxsom),Zz(Maxsom)
             Common/Cosdr/Rk(3),Rim(3),Aim,Contra,GM
         """
-        if self.GM == 'M':
+        if self.GM == "M":
             okabe1 = self.Okbmag(x, y, z)
         else:
             okabe1 = self.Okbgra(x, y, z)
@@ -292,133 +293,135 @@ class Okabe():
 
     def Okbgra(self, x, y, z):
         """
-        ATTN: l'entree (x, y, z) est detruite
-        ---------------------------------------------------------------------
-         Calcul de l'anomalie gravimetrique creee par une facette de 3
-         sommets COPLANAIRES au point origine (0,0,0).
-        ---------------------------------------------------------------------
-      # Real*8 Deps,Resul
-      # Dimension X(51),Y(51),Z(51)
-      # Common /Keps/Deps,Eps
-      """
-# ! FERMETURE DU POLIGONE
+          ATTN: l'entree (x, y, z) est detruite
+          ---------------------------------------------------------------------
+           Calcul de l'anomalie gravimetrique creee par une facette de 3
+           sommets COPLANAIRES au point origine (0,0,0).
+          ---------------------------------------------------------------------
+        # Real*8 Deps,Resul
+        # Dimension X(51),Y(51),Z(51)
+        # Common /Keps/Deps,Eps
+        """
+        # ! FERMETURE DU POLIGONE
         if len(x) < 3:
-            return 0.
+            return 0.0
         cosp, sinp, coste, sinte = self.rotation3D(x, y, z)
-        if np.isclose(abs(cosp), 0.):
-            return 0.
-# Rotations de 'teta' et 'phi' (formule (17) de Okabe)
+        if np.isclose(abs(cosp), 0.0):
+            return 0.0
+        # Rotations de 'teta' et 'phi' (formule (17) de Okabe)
         xt, yt, zt = self.rotation2D(x, y, z, cosp, sinp, coste, sinte)
 
-        resul = 0.
+        resul = 0.0
         for i in range(3):
             x1 = xt[i]
-            x2 = xt[i+1]
-            dx = x2-x1
+            x2 = xt[i + 1]
+            dx = x2 - x1
             y1 = yt[i]
-            y2 = yt[i+1]
-            dy = y2-y1
-            r = np.sqrt(dx*dx + dy*dy)
-            if np.isclose(r, 0.):
+            y2 = yt[i + 1]
+            dy = y2 - y1
+            r = np.sqrt(dx * dx + dy * dy)
+            if np.isclose(r, 0.0):
                 continue
-            cosps = dx/r
-            sinps = dy/r
-            z2 = zt[i+1]
+            cosps = dx / r
+            sinps = dy / r
+            z2 = zt[i + 1]
             z1 = zt[i]
-            res = self.Okg(cosps, sinps, x2, y2, z2) -\
-                self.Okg(cosps, sinps, x1, y1, z1)
+            res = self.Okg(cosps, sinps, x2, y2, z2) - self.Okg(
+                cosps, sinps, x1, y1, z1
+            )
             resul += res
         # return resul*cosp
-        return resul*self.contra*cosp
+        return resul * self.contra * cosp
 
     def Okg(self, c, s, x, y, z):
-        t = 0.
-        r = np.sqrt(x*x + y*y + z*z)
-        if r > 0.:
-            if abs(z) > 0. and abs(c) > 0.:
-                t = (x*c + (1+s)*(y+r))/(z*c)
-                t = -2.*z*np.arctan(t)
-            rprim = x*c + y*s + r
-            if rprim > 0.:
-                t += (x*s - y*c)*np.log(rprim)
+        t = 0.0
+        r = np.sqrt(x * x + y * y + z * z)
+        if r > 0.0:
+            if abs(z) > 0.0 and abs(c) > 0.0:
+                t = (x * c + (1 + s) * (y + r)) / (z * c)
+                t = -2.0 * z * np.arctan(t)
+            rprim = x * c + y * s + r
+            if rprim > 0.0:
+                t += (x * s - y * c) * np.log(rprim)
         return t
 
     def Okbmag(self, x, y, z):
         """
-        ATTN: l'entree (X,Y,Z) est detruite
-        ---------------------------------------------------------------------
-         Calcul de l'anomalie magnetrique creee par une facette de "Nsom"
-         sommets COPLANAIRES au point origine (0,0,0).
-        ---------------------------------------------------------------------
-      DIMENSION X(51),Y(51),Z(51)
-      Real*8 Resul,Deps
-      Character*1 GM
-      Common/Cosdr/Rk(3),Rim(3),Aim,Contra,GM
-      Common /Keps/ Deps,Eps
-      """
-# FERMETURE DU POLIGONE
+          ATTN: l'entree (X,Y,Z) est detruite
+          ---------------------------------------------------------------------
+           Calcul de l'anomalie magnetrique creee par une facette de "Nsom"
+           sommets COPLANAIRES au point origine (0,0,0).
+          ---------------------------------------------------------------------
+        DIMENSION X(51),Y(51),Z(51)
+        Real*8 Resul,Deps
+        Character*1 GM
+        Common/Cosdr/Rk(3),Rim(3),Aim,Contra,GM
+        Common /Keps/ Deps,Eps
+        """
+        # FERMETURE DU POLIGONE
         if len(x) < 3:
             return 0.0
         cosp, sinp, coste, sinte = self.rotation3D(x, y, z)
-        cmpeff = self.rim[0]*sinp*coste + self.rim[1]*sinp*sinte +\
-            self.rim[2]*cosp
-        if abs(cmpeff) <= 0.:
+        cmpeff = (
+            self.rim[0] * sinp * coste + self.rim[1] * sinp * sinte + self.rim[2] * cosp
+        )
+        if abs(cmpeff) <= 0.0:
             return 0.0
-# Rotation des axes magnetiques
+        # Rotation des axes magnetiques
         xt = self.rk[0]
         yt = self.rk[1]
         zt = self.rk[2]
-        at = coste*xt + sinte*yt
-        xm = at*cosp - zt*sinp
-        ym = yt*coste - xt*sinte
-        zm = at*sinp + zt*cosp
-# Rotations de 'teta' et 'phi' (formule (17) de Okabe)
+        at = coste * xt + sinte * yt
+        xm = at * cosp - zt * sinp
+        ym = yt * coste - xt * sinte
+        zm = at * sinp + zt * cosp
+        # Rotations de 'teta' et 'phi' (formule (17) de Okabe)
         xt, yt, zt = self.rotation2D(x, y, z, cosp, sinp, coste, sinte)
 
-        resul = 0.
+        resul = 0.0
         for i in range(3):
             xi = xt[i]
-            xi1 = xt[i+1]
-            dx = xi1-xi
+            xi1 = xt[i + 1]
+            dx = xi1 - xi
             yi = yt[i]
-            yi1 = yt[i+1]
-            dy = yi1-yi
-            rr = dx*dx + dy*dy
+            yi1 = yt[i + 1]
+            dy = yi1 - yi
+            rr = dx * dx + dy * dy
             r = np.sqrt(rr)
-            if np.isclose(r, 0.):
+            if np.isclose(r, 0.0):
                 res = 0.0
             else:
-                cosps = dx/r
-                sinps = dy/r
-# Rotation dans le plan de la facette (formule 20)
-# A partir d'ici  X -> Qsi  et Y -> Eta
-                x2 = yi1*sinps + xi1*cosps
-                y2 = yi1*cosps - xi1*sinps
-                x1 = yi*sinps + xi*cosps
-                y1 = yi*cosps - xi*sinps
-                z2 = zt[i+1]
+                cosps = dx / r
+                sinps = dy / r
+                # Rotation dans le plan de la facette (formule 20)
+                # A partir d'ici  X -> Qsi  et Y -> Eta
+                x2 = yi1 * sinps + xi1 * cosps
+                y2 = yi1 * cosps - xi1 * sinps
+                x1 = yi * sinps + xi * cosps
+                y1 = yi * cosps - xi * sinps
+                z2 = zt[i + 1]
                 z1 = zt[i]
                 res = self.Okm(xm, ym, zm, cosps, sinps, x2, y2, z2)
                 res -= self.Okm(xm, ym, zm, cosps, sinps, x1, y1, z1)
             resul += res
-        return resul*cmpeff
+        return resul * cmpeff
 
     def Okm(self, xm, ym, zm, c, s, x, y, z):
         #   Real*8 Deps
         # Common /Keps/ Deps,Eps
-        aa = y*y + z*z
-        r = np.sqrt(x*x + aa)
-        if np.isclose(abs(r), 0.):
+        aa = y * y + z * z
+        r = np.sqrt(x * x + aa)
+        if np.isclose(abs(r), 0.0):
             return 0.0
-        if abs(z) > 0. and abs(c) > 0.:
-            t = zm*np.arctan((aa*(s/c)-x*y)/(z*r))
+        if abs(z) > 0.0 and abs(c) > 0.0:
+            t = zm * np.arctan((aa * (s / c) - x * y) / (z * r))
         else:
             t = 0.0
-        rprim = x+r
-        if rprim <= 0.:
-            t += (xm*s-ym*c) * np.log(r-x)
+        rprim = x + r
+        if rprim <= 0.0:
+            t += (xm * s - ym * c) * np.log(r - x)
         else:
-            t += (ym*c-xm*s) * np.log(rprim)
+            t += (ym * c - xm * s) * np.log(rprim)
         return t
 
 
@@ -465,8 +468,12 @@ def read_synthetic_model():
     """
     file = list(
         QtWidgets.QFileDialog.getOpenFileName(
-            None, "Select model file", "",
-            filter="txt/dat/mod (*.txt *.dat *.mod) ;; all (*.*)"))
+            None,
+            "Select model file",
+            "",
+            filter="txt/dat/mod (*.txt *.dat *.mod) ;; all (*.*)",
+        )
+    )
     if len(file) == 0:
         print("No file chosen, program finishes")
         return None, None, None, None, None, None, None, None
@@ -496,7 +503,9 @@ def read_synthetic_model():
                 "Synthetic model file does not have enough columns:\n"
                 + f"At least 7 columns are needed, {ncol} found.\n"
                 + "Synthetic modeling aborted.",
-                QtWidgets.QMessageBox.Close, QtWidgets.QMessageBox.Ignore)
+                QtWidgets.QMessageBox.Close,
+                QtWidgets.QMessageBox.Ignore,
+            )
             return None, None, None, None, None, None, None, None
         if ncol < 11:
             if ncol == 7:
@@ -509,7 +518,8 @@ def read_synthetic_model():
                 "Synthetic model file has only {ncol} columns:\n"
                 + f"{text}\nPress Ignore to accept or Abort to abandon.",
                 QtWidgets.QMessageBox.Ignore | QtWidgets.QMessageBox.Abort,
-                QtWidgets.QMessageBox.Ignore)
+                QtWidgets.QMessageBox.Ignore,
+            )
             if answer == QtWidgets.QMessageBox.Abort:
                 return None, None, None, None, None, None, None, None
         xmin.append(float(val[0]))
@@ -551,8 +561,16 @@ def read_synthetic_model():
         z = np.zeros((nprism, 2))
         z[:, 0] = np.array(zmin)
         z[:, 1] = np.array(zmax)
-    return x, y, z, np.array(sus), np.array(rem), np.array(rem_i), \
-        np.array(rem_d), np.array(rho)
+    return (
+        x,
+        y,
+        z,
+        np.array(sus),
+        np.array(rem),
+        np.array(rem_i),
+        np.array(rem_d),
+        np.array(rho),
+    )
 
 
 def store_gxf(file, data, x0, y0, dx, dy):
@@ -595,33 +613,34 @@ def store_gxf(file, data, x0, y0, dx, dy):
                 else:
                     fo.write(f"{data[iy, ix]:0.3f} ")
                 nc += 1
-                if nc == 8 or ix == cols-1:
+                if nc == 8 or ix == cols - 1:
                     fo.write("\n")
                     nc = 0
 
 
-earth = Earth_mag(50000., 90., 0.)
+earth = Earth_mag(50000.0, 90.0, 0.0)
 xp, yp, zz, sus, rem, rem_i, rem_d, rho = read_synthetic_model()
 zp = np.zeros(8)
 zp[:2] = -zz[0][0]
-zp[2:4] = zp[:2]+0.
+zp[2:4] = zp[:2] + 0.0
 zp[4:] = -zz[0][1]
 # typ = "M"
 typ = "G"
-prism = Okabe(xp[0], yp[0], zp, sus[0], rem[0], rem_i[0], rem_d[0], rho[0],
-              earth, typ=typ)
-x0 = 0.
-x1 = 15.
+prism = Okabe(
+    xp[0], yp[0], zp, sus[0], rem[0], rem_i[0], rem_d[0], rho[0], earth, typ=typ
+)
+x0 = 0.0
+x1 = 15.0
 dx = 0.5
-y0 = 0.
-y1 = 15.
+y0 = 0.0
+y1 = 15.0
 dy = 0.5
-x = np.arange(x0, x1+dx/2., dx)
-y = np.arange(y0, y1+dy/2., dy)
+x = np.arange(x0, x1 + dx / 2.0, dx)
+y = np.arange(y0, y1 + dy / 2.0, dy)
 nx = len(x)
 ny = len(y)
 calc = np.zeros((nx, ny))
-calc += prism.calc_ano(calc, x0, x1, dx, y0, y1, dy, 0.)
+calc += prism.calc_ano(calc, x0, x1, dx, y0, y1, dy, 0.0)
 
 fig, ax = plt.subplots(1, 1, figsize=(10, 15))
 pl = ax.imshow(np.flip(calc, axis=0), cmap="rainbow", extent=[x0, x1, y0, y1])

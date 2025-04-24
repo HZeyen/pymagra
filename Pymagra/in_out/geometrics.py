@@ -719,16 +719,16 @@ class Geometrics:
         col_2 = -1
         val = lines[0].split()
         if "TIME" in lines[0]:
-            for col_t, l in enumerate(val):
-                if "TIME" in l:
+            for col_t, lin in enumerate(val):
+                if "TIME" in lin:
                     break
         if "DATE" in lines[0]:
-            for col_d, l in enumerate(val):
-                if "DATE" in l:
+            for col_d, lin in enumerate(val):
+                if "DATE" in lin:
                     break
         if "LINE" in lines[0]:
-            for col_l, l in enumerate(val):
-                if "LINE" in l:
+            for col_l, lin in enumerate(val):
+                if "LINE" in lin:
                     break
         if col_t < 0 or col_d < 0 or col_l < 0:
             _ = QtWidgets.QMessageBox.warning(
@@ -743,22 +743,22 @@ class Geometrics:
                 QtWidgets.QMessageBox.Close,
             )
             sys.exit()
-        for col_x, l in enumerate(val):
-            if "X" in l:
+        for col_x, lin in enumerate(val):
+            if "X" in lin:
                 break
-        for col_y, l in enumerate(val):
-            if "Y" in l:
+        for col_y, lin in enumerate(val):
+            if "Y" in lin:
                 break
         if self.grad_flag:
-            for col_1, l in enumerate(val):
-                if "TOP" in l:
+            for col_1, lin in enumerate(val):
+                if "TOP" in lin:
                     break
-            for col_2, l in enumerate(val):
-                if "BOTTOM" in l:
+            for col_2, lin in enumerate(val):
+                if "BOTTOM" in lin:
                     break
         else:
-            for col_1, l in enumerate(val):
-                if "TOP" in l or "BOTTOM" in l:
+            for col_1, lin in enumerate(val):
+                if "TOP" in lin or "BOTTOM" in lin:
                     break
         with open("temp.stn", "w") as fo:
             fo.write("99 0 0\n")

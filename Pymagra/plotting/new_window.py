@@ -207,7 +207,7 @@ class newWindow(QWidget):
         self.start = []
         self.coor_x = []
         self.coor_y = []
-        figure = self.fig
+        # figure = self.fig
         (self.line,) = ax.plot(self.coor_x, self.coor_y, "k", animated=True)
 
         def onPress(event):
@@ -262,10 +262,6 @@ class newWindow(QWidget):
                 except NameError:
                     pass
                 self.line_click = False
-                # try:
-                #     self.line.figure.canvas.mpl_disconnect(self.cidmotion)
-                # except NameError:
-                #     pass
                 if len(self.coor_x) > 0:
                     self.line_click = True
                 self.line.set_animated(False)

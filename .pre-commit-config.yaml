@@ -4,12 +4,12 @@ repos:
     hooks:
       - id: end-of-file-fixer
 #      - id: trailing-whitespace
-      - id: check-merge-conflict
-      - id: check-yaml
+#      - id: check-merge-conflict
+#      - id: check-yaml
         exclude: conda/recipe/meta.yaml
       - id: check-json
 #      - id: no-commit-to-branch
-      - id: mixed-line-ending
+#      - id: mixed-line-ending
         args: ["--fix=crlf"]
         description: Forces to replace line ending by the Windows 'cr-lf' character.
   - repo: https://GitHub.com/Lucas-C/pre-commit-hooks

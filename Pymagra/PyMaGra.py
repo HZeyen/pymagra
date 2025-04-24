@@ -1274,7 +1274,7 @@ class Main(QtWidgets.QWidget):
         None.
 
         """
-        self.point_flag = self.point_flag == False
+        self.point_flag = not self.point_flag
         self.plotActual()
 
     def plot_line(self):

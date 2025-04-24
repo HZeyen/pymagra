@@ -19,4 +19,4 @@ You may also open file pymagra_start.py (in C:\User\user_name\anaconda3\Lib\ sit
 
 Read the **[manual](./docs/pymagra_Manual.pdf)** for installation, menu description and including a short tutorial.
 
-**API html pages** may be found [here](./docs/build/html). 
+**API html pages** may be found [here](./docs/build/html).
