@@ -19,11 +19,14 @@ if __name__ == "__main__":
     # dir0 = "./Example"
     # dir0 = r"E:\Daten\Fontaines_Salées_BRGM"
     # dir0 = r"D:\Tadjikistan\ZolIZard"
-    dir0 = r"D:\Tadjikistan\Kuweit\Data_mag"
+    # dir0 = r"D:\Tadjikistan\Kuweit\Data_mag"
     # dir0 = r"E:\Daten\Magnetics\test_mag_topo"
     # dir0 = r"E:\Daten\Magnetics\test_mag_inver\syn_simple1"
     # dir0 = r"E:\Daten\Magnetics\Py_Test"
     # dir0 = r"E:\Daten\Magnetik\Beaver Creek"
+    # dir0 = r"D:\Documents\Cours\Stages\M1\2024-25\Magnetics\20241002"
+    dir0 = r"D:\Documents\Handbooks\Magnetics\Pymagra_tutorial"
+    # dir0 = r"E:\Daten\Magnetics\Py_Test"
 
     os.chdir(dir0)
 

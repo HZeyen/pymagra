@@ -54,31 +54,25 @@ def get_files(dir0=None, ftype=None):
         dir0 = None
     files = list(
         QtWidgets.QFileDialog.getOpenFileNames(
-            None,
-            "Select data files",
-            "",
-            filter="stn/gxf/XYZ/dat (*.stn *.gxf *.XYZ *.dat) ;; all (*.*)",
-        )
-    )
+            None, "Select data files", "",
+            filter="stn/gxf/XYZ/dat (*.stn *.gxf *.XYZ *.dat) ;; all (*.*)"))
     if len(files) == 0:
         print("No file chosen, program finishes")
         sys.exit("No file chosen")
     elif len(files[0]) == 0:
-        print(
-            "\nNo file chosen, program finishes\n\n"
-            + "You probably must close the Spyder console before restarting"
-        )
+        print("\nNo file chosen, program finishes\n\n"
+              + "You probably must close the Spyder console before restarting")
         sys.exit("No file chosen")
-    # Sort chosen file names
+# Sort chosen file names
     files[0].sort()
-    # Check data formats
-    # Set working folder as folder of the first selected file
+# Check data formats
+# Set working folder as folder of the first selected file
     if ftype != "base":
         dir0 = os.path.dirname(files[0][0])
         os.chdir(dir0)
         print(f"Set working folder to: {dir0}")
 
-    # Loop over file names and store valid file names into list data_files
+# Loop over file names and store valid file names into list data_files
     data_files = []
     file_types = []
     data_types = []
@@ -93,12 +87,12 @@ def get_files(dir0=None, ftype=None):
         data_files.append(f)
         fconfig = os.path.basename(f)
         j = fconfig.rfind(".")
-        # Check whether there is a configuration file for each data file
+# Check whether there is a configuration file for each data file
         if j > 0:
             fconfig = fconfig[:j] + ".config"
         else:
             fconfig += ".config"
-        # If there is, read its content
+# If there is, read its content
         if os.path.isfile(fconfig):
             with open(fconfig, "r") as fc:
                 file_types.append(fc.readline()[:-1].upper())
@@ -113,14 +107,11 @@ def get_files(dir0=None, ftype=None):
             file_types.append(ftypes[n_ftype])
     if len(data_files) == 0:
         _ = QtWidgets.QMessageBox.critical(
-            None,
-            "Error",
-            "No valid data files given\n\n"
+            None, "Error", "No valid data files given\n\n"
             + f"Only {valid_extensions} allowed.\n\nProgram stops",
-            QtWidgets.QMessageBox.Ok,
-        )
+            QtWidgets.QMessageBox.Ok)
         raise Exception("File type error.\n")
-    # Ask for data types
+# Ask for data types
     labels = []
     values = []
     types = []
@@ -147,7 +138,8 @@ def get_files(dir0=None, ftype=None):
             types.append("r")
             values.append(n_ftype + 1)
         if len(labels) > 0:
-            results, ok_button = dialog(labels, types, values, title="data types")
+            results, ok_button = dialog(labels, types, values,
+                                        title="data types")
             if not ok_button:
                 print("No entry, program finished")
                 sys.exit()
@@ -254,14 +246,9 @@ def read_synthetic_model():
         Densities of prisms.
 
     """
-    file = list(
-        QtWidgets.QFileDialog.getOpenFileName(
-            None,
-            "Select model file",
-            "",
-            filter="txt/dat/mod (*.txt *.dat *.mod) ;; all (*.*)",
-        )
-    )
+    file = list(QtWidgets.QFileDialog.getOpenFileName(
+        None, "Select model file", "",
+        filter="txt/dat/mod (*.txt *.dat *.mod) ;; all (*.*)"))
     if len(file) == 0:
         print("No file chosen, program finishes")
         return None, None, None, None, None, None, None, None
@@ -286,14 +273,11 @@ def read_synthetic_model():
         ncol = len(val)
         if ncol < 7:
             answer = QtWidgets.QMessageBox.warning(
-                None,
-                "Warning",
+                None, "Warning",
                 "Synthetic model file does not have enough columns:\n"
                 + f"At least 7 columns are needed, {ncol} found.\n"
                 + "Synthetic modeling aborted.",
-                QtWidgets.QMessageBox.Close,
-                QtWidgets.QMessageBox.Ignore,
-            )
+                QtWidgets.QMessageBox.Close, QtWidgets.QMessageBox.Ignore)
             return None, None, None, None, None, None, None, None
         if ncol < 11:
             if ncol == 7:
@@ -302,12 +286,10 @@ def read_synthetic_model():
                 text = "Density is set to zero."
             answer = QtWidgets.QMessageBox.warning(
                 None,
-                "Warning",
-                f"Synthetic model file has only {ncol} columns:\n"
+                "Warning", f"Synthetic model file has only {ncol} columns:\n"
                 + f"{text}\nPress Ignore to accept or Abort to abandon.",
                 QtWidgets.QMessageBox.Ignore | QtWidgets.QMessageBox.Abort,
-                QtWidgets.QMessageBox.Ignore,
-            )
+                QtWidgets.QMessageBox.Ignore)
             if answer == QtWidgets.QMessageBox.Abort:
                 return None, None, None, None, None, None, None, None
         xmin.append(float(val[0]))
@@ -349,16 +331,8 @@ def read_synthetic_model():
         z = np.zeros((nprism, 2))
         z[:, 0] = np.array(zmin)
         z[:, 1] = np.array(zmax)
-    return (
-        x,
-        y,
-        z,
-        np.array(sus),
-        np.array(rem),
-        np.array(rem_i),
-        np.array(rem_d),
-        np.array(rho),
-    )
+    return (x, y, z, np.array(sus), np.array(rem), np.array(rem_i),
+            np.array(rem_d), np.array(rho))
 
 
 def read_geography_file(file):
@@ -467,13 +441,10 @@ def get_mag_field(line_dir, strength=None, inclination=None, declination=None):
     if strength is None:
         results, _ = dialog(
             ["Field strength [nT]", "Field inclination", "Field declination"],
-            ["e", "e", "e"],
-            [50000, 62, 0],
-            "Earth's field parameters",
-        )
+            ["e", "e", "e"], [50000, 62, 0], "Earth's field parameters")
         strength = float(results[0])
         inclination = float(results[1])
-        declination = float(results[2]) - line_dir
+        declination = float(results[2])-line_dir
     else:
         declination -= line_dir
     earth = Earth_mag(strength, inclination, declination)
@@ -528,7 +499,8 @@ def read_geometrics(file, n_block, height1, height2, dispo):
     return gdata
 
 
-def write_geometrics(self, file, data1, x, y, data2=None, n_block=0, time=None):
+def write_geometrics(self, file, data1, x, y, data2=None, n_block=0,
+                     time=None):
     """
     Wrapper to write data in Geometrics MagMap2000 .stn format.
 
