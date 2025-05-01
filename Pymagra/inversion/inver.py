@@ -49,8 +49,21 @@ class inversion:
         - write_parameters
     """
 
-    def __init__(self, data_class, data, x, y, z, topo=None, earth=None,
-                 data_type="m", line_pos=None, direction="N", dim=3, act="I"):
+    def __init__(
+        self,
+        data_class,
+        data,
+        x,
+        y,
+        z,
+        topo=None,
+        earth=None,
+        data_type="m",
+        line_pos=None,
+        direction="N",
+        dim=3,
+        act="I",
+    ):
         """
         Initialization of inversion.
 
@@ -102,18 +115,18 @@ class inversion:
         self.n_data1 = len(self.data)
         self.x = np.copy(self.xo1[self.index_data])
         self.z = np.copy(self.zo1[self.index_data])
-# If UTM (or similar) coordinates are used, coordinates are divided by 1000 for
-# plotting in order to keep axis annotation short
+        # If UTM (or similar) coordinates are used, coordinates are divided by 1000 for
+        # plotting in order to keep axis annotation short
         if max(self.x) - min(self.x) > 10000.0:
             self.dfac = 0.001
         else:
             self.dfac = 1.0
-# If no topography is given, the one of class data is used
+        # If no topography is given, the one of class data is used
         if topo is None:
             self.topo = -self.data_class.topo_inter.flatten()
-# If topography is given and 2D inversion is used, extend topography vector
-# outside the data area, since else, spline interpolation may invent quite
-# huge, senseless values
+        # If topography is given and 2D inversion is used, extend topography vector
+        # outside the data area, since else, spline interpolation may invent quite
+        # huge, senseless values
         else:
             if dim == 2:
                 index = np.where(np.isfinite(topo))[0]
@@ -125,11 +138,11 @@ class inversion:
                 xx, indices = np.unique(xx, return_index=True)
                 topo = topo[indices]
                 self.topo = np.zeros(len(topo) + 10)
-                self.topo[5:len(topo)+5] = -np.copy(topo)
+                self.topo[5 : len(topo) + 5] = -np.copy(topo)
                 self.topo[:5] = -topo[0]
                 self.topo[-5:] = -topo[-1]
                 self.x_topo = np.zeros(len(xx) + 10)
-                self.x_topo[5:len(xx)+5] = np.copy(xx)
+                self.x_topo[5 : len(xx) + 5] = np.copy(xx)
                 self.x_topo[:5] = xx[0] - (np.arange(5, 0, -1)) * 2 / self.dfac
                 self.x_topo[-5:] = xx[-1] + (np.arange(5) + 1) * 2 / self.dfac
             else:
@@ -146,11 +159,13 @@ class inversion:
         if self.topo_flag:
             if dim == 2:
                 self.topo_inter = interpolate.interp1d(
-                    self.x_topo, self.topo, fill_value="extrapolate")
+                    self.x_topo, self.topo, fill_value="extrapolate"
+                )
             else:
                 self.topo_inter = interpolate.NearestNDInterpolator(
-                    list(zip(self.x, self.y)), self.topo[index_topo])
-# If only one data set is to be inverted, set values of second one to None
+                    list(zip(self.x, self.y)), self.topo[index_topo]
+                )
+        # If only one data set is to be inverted, set values of second one to None
         if len(data) == 1:
             self.data2 = None
             self.x2 = None
@@ -158,8 +173,8 @@ class inversion:
             self.z2 = None
             self.n_sensor = 1
             self.n_data2 = 0
-# If two data sets are available, copy data and coordinates into their
-# respective arrays
+        # If two data sets are available, copy data and coordinates into their
+        # respective arrays
         else:
             self.data2_shape = data[1].shape
             self.data2 = data[1].flatten()
@@ -270,48 +285,55 @@ class inversion:
             prism_add = 3
         else:
             prism_add = 7
-# Start inversion
+        # Start inversion
         while True:
             self.iteration += 1
             if self.max_iter == 0:
                 print("\nOnly forward model calculated")
                 self.G = self.mPrism.create_Frechet(
-                    self.sus_inv, self.rem_inv, self.rho_inv, self.x, self.y,
-                    self.z)
+                    self.sus_inv, self.rem_inv, self.rho_inv, self.x, self.y, self.z
+                )
                 self.data_mod = np.matmul(self.G, self.params)
                 return
-# Calculate effect of actual model
+            # Calculate effect of actual model
             print(f"\nStart iteration {self.iteration}")
 
             # Create Frechet matrix and covariance matrices
             self.n_param = self.mPrism.get_n_param(
-                self.sus_inv, self.rem_inv, self.rho_inv)
+                self.sus_inv, self.rem_inv, self.rho_inv
+            )
             self.S = self.mPrism.create_smooth(
-                self.sus_inv, self.rem_inv, self.rho_inv, self.sigma_sus,
-                self.sigma_rem, self.sigma_rho, self.depth_ref)
+                self.sus_inv,
+                self.rem_inv,
+                self.rho_inv,
+                self.sigma_sus,
+                self.sigma_rem,
+                self.sigma_rho,
+                self.depth_ref,
+            )
             self.G = self.mPrism.create_Frechet(
-                self.sus_inv, self.rem_inv, self.rho_inv, self.x, self.y,
-                self.z)
-# Define data covariance and regularization matrices.
-# Since both matrices have only values on their diagonal, values are stored as
-# 1D vector. For the regularization matrix, the base value is the squared one
-# given by the user interactively as parameter variability. This value is
-# modified by the depth using as formula:
-#    factor = (average_depth_of_prism/depth_ref) squared of gravity data and
-#    to the power of three for magnetic data. Depth_ref is given interactively
-#    by the user
+                self.sus_inv, self.rem_inv, self.rho_inv, self.x, self.y, self.z
+            )
+            # Define data covariance and regularization matrices.
+            # Since both matrices have only values on their diagonal, values are stored as
+            # 1D vector. For the regularization matrix, the base value is the squared one
+            # given by the user interactively as parameter variability. This value is
+            # modified by the depth using as formula:
+            #    factor = (average_depth_of_prism/depth_ref) squared of gravity data and
+            #    to the power of three for magnetic data. Depth_ref is given interactively
+            #    by the user
             self.dat = np.copy(self.data)
             self.sigma_data, self.sigma_param = self.sigmas()
             print(f"Frechet calculated, shape: {self.G.shape}")
-# Do inversion with positivity constraint
+            # Do inversion with positivity constraint
             if self.positive:
                 fit = []
                 self.dat = self.data_ori
                 dd = np.copy(self.dat)
                 self.params[:-1] = 0.001
                 self.params[-1] = 0.0
-# Iterate to get best fit. Limit number of iterations to maximum 50, but stop
-# iterations if misfit does no longer decrease
+                # Iterate to get best fit. Limit number of iterations to maximum 50, but stop
+                # iterations if misfit does no longer decrease
                 for it in range(50):
                     self.yparam = np.copy(self.params)
                     self.yparam[:-1] = np.log(self.params[:-1])
@@ -329,12 +351,15 @@ class inversion:
                     Gs_fac = Gi_max / Gs_max
                     if self.iteration == 0 and it == 0:
                         print(f"\nMaximum GT*Cd*G: {Gi_max:0.1f}")
-                        print(f"   Maximum regularization: {Gp_max:0.1f} (fac:"
-                              + f" {Gp_fac})")
-                        print(f"   Maximum smoothing     : {Gs_max:0.1f} (fac:"
-                              + f" {Gs_fac})")
-                        if Gp_fac > 10 or Gs_fac > 10 or Gp_fac < 0.1\
-                                or Gs_fac < 0.1:
+                        print(
+                            f"   Maximum regularization: {Gp_max:0.1f} (fac:"
+                            + f" {Gp_fac})"
+                        )
+                        print(
+                            f"   Maximum smoothing     : {Gs_max:0.1f} (fac:"
+                            + f" {Gs_fac})"
+                        )
+                        if Gp_fac > 10 or Gs_fac > 10 or Gp_fac < 0.1 or Gs_fac < 0.1:
                             self.check_regularization(Gp_fac, Gs_fac)
                     G_inv += Gs
                     G_inv[np.diag_indices(G_inv.shape[0])] += Gp
@@ -350,10 +375,10 @@ class inversion:
                     self.params = np.copy(self.yparam)
                     self.params[:-1] = np.exp(self.yparam[:-1])
                     self.params[:-1][self.params[:-1] < 1.0e-7] = 1.0e-7
-# At the first iteration, if one starts with several layers, I observed often
-# that the averages of the parameters in each layer are very different, no idea
-# why. This is why I decided to reduce the minimum in each layer to near zero
-# if the positivity constraint is activated
+                    # At the first iteration, if one starts with several layers, I observed often
+                    # that the averages of the parameters in each layer are very different, no idea
+                    # why. This is why I decided to reduce the minimum in each layer to near zero
+                    # if the positivity constraint is activated
                     nlay = 0
                     zp = np.zeros(len(self.mPrism.prisms.keys()))
                     for i, key in enumerate(self.mPrism.prisms.keys()):
@@ -382,12 +407,12 @@ class inversion:
                         continue
                     if abs((fit[-2] - fit[-1]) / fit[-2]) < 1.0e-5:
                         break
-# Do inversion without positivity constraint
+            # Do inversion without positivity constraint
             else:
                 GCT = self.G.T * self.sigma_data
                 G_inv = np.matmul(GCT, self.G)
-# For first iteration test whether regularization and smoothing matrices have
-# an appreciable effect. If not, give a warning message
+                # For first iteration test whether regularization and smoothing matrices have
+                # an appreciable effect. If not, give a warning message
                 if self.iteration == 0:
                     mG = abs(G_inv).max()
                     print(f"\nMaximum GT*Cd*G: {mG:0.1f}")
@@ -395,23 +420,21 @@ class inversion:
                     mSmo = (self.gam * self.S).max()
                     G_Sig = mG / mSig
                     G_Smo = mG / mSmo
-                    print(f"   Maximum regularization: {mSig:0.1f} (fac: "
-                          + f"{G_Sig})")
-                    print(f"   Maximum smoothing: {mSmo:0.1f} (fac: "
-                          + f"{G_Smo})")
+                    print(
+                        f"   Maximum regularization: {mSig:0.1f} (fac: " + f"{G_Sig})"
+                    )
+                    print(f"   Maximum smoothing: {mSmo:0.1f} (fac: " + f"{G_Smo})")
                     if G_Sig > 10 or G_Smo > 10 or G_Sig < 0.1 or G_Smo < 0.1:
                         self.check_regularization(G_Sig, G_Smo)
-                G_inv[np.diag_indices(G_inv.shape[0])] += \
-                    self.lam * self.sigma_param
+                G_inv[np.diag_indices(G_inv.shape[0])] += self.lam * self.sigma_param
                 G_inv += self.gam * self.S
-                d_par = np.matmul(np.matmul(np.linalg.inv(G_inv), GCT),
-                                  self.dat)
+                d_par = np.matmul(np.matmul(np.linalg.inv(G_inv), GCT), self.dat)
                 self.params += d_par
-# At the first iteration, if one starts with several layers, I observed often
-# that the averages of the parameters in each layer are very different, no idea
-# why. This is why I decided to eliminate the averaged in each layer if the
-# positivity constraint is not activated
-# if self.iteration == 0 and self.mod_zshape > 1:
+                # At the first iteration, if one starts with several layers, I observed often
+                # that the averages of the parameters in each layer are very different, no idea
+                # why. This is why I decided to eliminate the averaged in each layer if the
+                # positivity constraint is not activated
+                # if self.iteration == 0 and self.mod_zshape > 1:
                 nlay = 0
                 zp = np.zeros(len(self.mPrism.prisms.keys()))
                 for i, key in enumerate(self.mPrism.prisms.keys()):
@@ -425,8 +448,9 @@ class inversion:
                         av /= len(n)
                         for i in n:
                             self.params[i] -= av
-                        print("\nAverage parameter of topography layer: "
-                              + f"{av:0.6f}")
+                        print(
+                            "\nAverage parameter of topography layer: " + f"{av:0.6f}"
+                        )
                 for i, zz in enumerate(self.z_prism[:-1]):
                     n = np.where((zp > zz) & (zp < self.z_prism[i + 1]))[0]
                     if len(n) > 0:
@@ -437,11 +461,10 @@ class inversion:
                         av /= len(n)
                         for i in n:
                             self.params[i] -= av
-                        print(f"Average parameter of layer {nlay}: "
-                              + f"{av:0.6f}\n\n")
+                        print(f"Average parameter of layer {nlay}: " + f"{av:0.6f}\n\n")
             self.data_mod = np.matmul(self.G, self.params)
-# Extract new prism properties from parameter vector, set the correspondig
-#   values in the prism parameters and copy them into vector par_hist
+            # Extract new prism properties from parameter vector, set the correspondig
+            #   values in the prism parameters and copy them into vector par_hist
             i0 = 0
             ss = []
             if self.sus_inv:
@@ -468,7 +491,7 @@ class inversion:
                     self.mPrism.prisms[key].rho = self.params[i]
                     s.append(self.mPrism.prisms[key].rho)
                 self.par_hist.append(np.array(s))
-# Calculate magnetic misfits and some statistics
+            # Calculate magnetic misfits and some statistics
             data = self.data_ori - self.data_mod
             data -= np.nanmedian(data)
             self.data = np.copy(data)
@@ -486,35 +509,40 @@ class inversion:
             print(f"Relative Std misfit [%]: {self.std_data_rel*100}")
             print(f"Relative variation of misfit [%]: {std_data_diff*100}")
             if self.sus_inv:
-                print(f"Average: {self.params[-1]:0.2f}, "
-                      + f"sus*10**-3: ({self.params[:-1].min()*1000.:0.3f}, "
-                      + f"{self.params[:-1].max()*1000.:0.3f})\n")
+                print(
+                    f"Average: {self.params[-1]:0.2f}, "
+                    + f"sus*10**-3: ({self.params[:-1].min()*1000.:0.3f}, "
+                    + f"{self.params[:-1].max()*1000.:0.3f})\n"
+                )
             elif self.rem_inv:
-                print(f"Average: {self.params[-1]:0.2f}, "
-                      + f"rem: ({self.params[:-1].min():0.3f}, "
-                      + f"{self.params[:-1].max():0.3f})\n")
+                print(
+                    f"Average: {self.params[-1]:0.2f}, "
+                    + f"rem: ({self.params[:-1].min():0.3f}, "
+                    + f"{self.params[:-1].max():0.3f})\n"
+                )
             else:
-                print(f"Average: {self.params[-1]:0.2f}, "
-                      + f"rho: ({self.params[:-1].min():0.3f}, "
-                      + f"{self.params[:-1].max():0.3f})\n")
-# If Maximum iteration number is reached, misfit does not become smaller or
-# relative misfits are smaller than predefined minimum value, stop iterations
+                print(
+                    f"Average: {self.params[-1]:0.2f}, "
+                    + f"rho: ({self.params[:-1].min():0.3f}, "
+                    + f"{self.params[:-1].max():0.3f})\n"
+                )
+            # If Maximum iteration number is reached, misfit does not become smaller or
+            # relative misfits are smaller than predefined minimum value, stop iterations
             if self.iteration == self.max_iter:
-                print("\nMaximum number of iterations reached\n"
-                      + "Iterations stop")
+                print("\nMaximum number of iterations reached\n" + "Iterations stop")
                 return
             if self.stop_RMS_flag:
                 print("\nMisfit limit reached\nIterations stop")
                 return
             if self.stop_Diff_flag:
                 print("\nNo more misfit reduction.")
-# Modify prism size in area of maximum misfit
+            # Modify prism size in area of maximum misfit
             key_m = []
             key_r = []
             self.stop_Diff_flag = False
-# In the following lines, only the mPrism.get_max_prisms lines are important.
-# The lineswith utils.get_extremes are only for testing purposes, such as the
-# plots later on.
+            # In the following lines, only the mPrism.get_max_prisms lines are important.
+            # The lineswith utils.get_extremes are only for testing purposes, such as the
+            # plots later on.
             # if self.n_sensor == 2:
             #     d = np.copy(self.datao1)
             #     d[self.index_data] = abs(data[:self.n_data1])
@@ -542,56 +570,68 @@ class inversion:
                 key_m1 = self.mPrism.get_max_prisms(
                     d.reshape(self.data1_shape),
                     self.G[: self.n_data1, : self.n_prisms],
-                    self.index_data, max_lim=self.max_amp,
-                    width=self.width_max)
+                    self.index_data,
+                    max_lim=self.max_amp,
+                    width=self.width_max,
+                )
                 d = np.copy(self.datao2)
-                d[self.index_data2] = abs(data[self.n_data1:])
+                d[self.index_data2] = abs(data[self.n_data1 :])
                 key_m2 = self.mPrism.get_max_prisms(
                     d.reshape(self.data2_shape),
-                    self.G[self.n_data1:, :self.n_prisms],
-                    self.index_data2, max_lim=self.max_amp,
-                    width=self.width_max)
-                key_m = list(np.unique(np.array(key_m1+key_m2)))
+                    self.G[self.n_data1 :, : self.n_prisms],
+                    self.index_data2,
+                    max_lim=self.max_amp,
+                    width=self.width_max,
+                )
+                key_m = list(np.unique(np.array(key_m1 + key_m2)))
             else:
                 d = np.copy(self.datao1)
                 d[self.index_data] = abs(data)
                 key_m = self.mPrism.get_max_prisms(
                     d.reshape(self.data_shape),
                     self.G[: self.n_data1, : self.n_prisms],
-                    self.index_data, width=self.width_max)
+                    self.index_data,
+                    width=self.width_max,
+                )
             if self.sus_inv and self.rem_inv:
                 if self.n_sensor == 2:
                     d = np.copy(self.datao1)
                     d[self.index_data] = abs(data[: self.n_data1])
                     key_r1 = self.mPrism.get_max_prisms(
                         d.reshape(self.data1_shape),
-                        self.G[:self.n_data1, self.n_prisms:],
-                        self.index_data, max_lim=self.max_amp,
-                        width=self.width_max)
+                        self.G[: self.n_data1, self.n_prisms :],
+                        self.index_data,
+                        max_lim=self.max_amp,
+                        width=self.width_max,
+                    )
                     d = np.copy(self.datao2)
-                    d[self.index_data2] = abs(data[self.n_data1:])
+                    d[self.index_data2] = abs(data[self.n_data1 :])
                     key_r2 = self.mPrism.get_max_prisms(
                         d.reshape(self.data2_shape),
-                        self.G[self.n_data1:, self.n_prisms:],
-                        self.index_data2, max_lim=self.max_amp,
-                        width=self.width_max)
+                        self.G[self.n_data1 :, self.n_prisms :],
+                        self.index_data2,
+                        max_lim=self.max_amp,
+                        width=self.width_max,
+                    )
                     key_r = list(np.unique(np.array(key_r1 + key_r2)))
                 else:
                     d = np.copy(self.datao1)
                     d[self.index_data] = abs(data)
                     key_r = self.mPrism.get_max_prisms(
                         d.reshape(self.data1_shape),
-                        self.G[:self.n_data1, self.n_prisms:],
-                        self.index_data, max_lim=self.max_amp,
-                        width=self.width_max)
+                        self.G[: self.n_data1, self.n_prisms :],
+                        self.index_data,
+                        max_lim=self.max_amp,
+                        width=self.width_max,
+                    )
             key_split = list(np.unique(np.array(key_m + key_r)))
-# Test whether prisms are marked for splitting
+            # Test whether prisms are marked for splitting
             if len(key_split) == 0:
                 print("  Prisms reached size limit\nIteration stops")
                 return
-# Test whether number of prisms becomes larger than number of data points after
-# splitting Prisms will be split into up to 8 pieces, the prism itself is
-# eliminated. Therefore the factor 7 in the next line.
+            # Test whether number of prisms becomes larger than number of data points after
+            # splitting Prisms will be split into up to 8 pieces, the prism itself is
+            # eliminated. Therefore the factor 7 in the next line.
             if self.n_prisms + prism_add * len(key_split) > self.n_data:
                 print("Inversion stopped: More prisms than data points")
                 return
@@ -599,13 +639,13 @@ class inversion:
             self.prism_new[self.iteration] = {}
             print(f"  Split prisms {key_split}")
             for _, key in enumerate(key_split):
-                self.prism_del[self.iteration][key] = \
-                    deepcopy(self.mPrism.prisms[key])
+                self.prism_del[self.iteration][key] = deepcopy(self.mPrism.prisms[key])
                 key_add = self.mPrism.split(key)
                 self.prism_new[self.iteration][key] = {}
                 for k in key_add:
-                    self.prism_new[self.iteration][key][k] = \
-                        deepcopy(self.mPrism.prisms[k])
+                    self.prism_new[self.iteration][key][k] = deepcopy(
+                        self.mPrism.prisms[k]
+                    )
             self.n_prisms = len(list(self.mPrism.prisms.keys()))
             self.params = []
             param_prism = []
@@ -632,77 +672,103 @@ class inversion:
     def check_regularization(self, G_Sig, G_Smo):
         if G_Sig > 10.0:
             if G_Smo > 10.0:
-                text = ("Regularization and smoothing much smaller than "
-                        + "Frechet, will not influence inversion:\n"
-                        + f"     Frechet/Regularization: {G_Sig:0.0f}\n"
-                        + f"     Frechet/Smoothing: {G_Smo:0.0f}\n"
-                        + "You may increase lambda/gamma or restart and "
-                        + "decrease parameter variances\n\n")
+                text = (
+                    "Regularization and smoothing much smaller than "
+                    + "Frechet, will not influence inversion:\n"
+                    + f"     Frechet/Regularization: {G_Sig:0.0f}\n"
+                    + f"     Frechet/Smoothing: {G_Smo:0.0f}\n"
+                    + "You may increase lambda/gamma or restart and "
+                    + "decrease parameter variances\n\n"
+                )
             elif G_Smo < 0.1:
-                text = ("Regularization much smaller than Frechet, "
-                        + "will not influence inversion:\n"
-                        + f"     Frechet/Regularization: {G_Sig:0.0f}\n"
-                        + "\nSmoothing much larger than Frechet, too strong "
-                        + "influence:"
-                        + f"     Smoothing/Frechet: {1./G_Smo:0.0f}\n"
-                        + "You may increase lambda and/or decrease gamma or "
-                        + "restart and decrease parameter variances\n\n")
+                text = (
+                    "Regularization much smaller than Frechet, "
+                    + "will not influence inversion:\n"
+                    + f"     Frechet/Regularization: {G_Sig:0.0f}\n"
+                    + "\nSmoothing much larger than Frechet, too strong "
+                    + "influence:"
+                    + f"     Smoothing/Frechet: {1./G_Smo:0.0f}\n"
+                    + "You may increase lambda and/or decrease gamma or "
+                    + "restart and decrease parameter variances\n\n"
+                )
             else:
-                text = ("Regularization much smaller than Frechet, "
-                        + "Frechet, will not influence inversion:\n"
-                        + f"     Frechet/Regularization: {G_Sig:0.0f}\n"
-                        + "You may increase lambda or "
-                        + "restart and change parameter variances\n\n")
+                text = (
+                    "Regularization much smaller than Frechet, "
+                    + "Frechet, will not influence inversion:\n"
+                    + f"     Frechet/Regularization: {G_Sig:0.0f}\n"
+                    + "You may increase lambda or "
+                    + "restart and change parameter variances\n\n"
+                )
         elif G_Sig < 0.1:
             if G_Smo < 0.1:
-                text = ("Regularization and smoothing much larger than "
-                        + "Frechet, will influence inversion too much:\n"
-                        + f"     Regularization/Frechet: {1./G_Sig:0.0f}\n"
-                        + f"     Smoothing/Frechet: {1./G_Smo:0.0f}\n"
-                        + "You may decrease lambda/gamma or restart and "
-                        + "increase parameter variances\n\n")
+                text = (
+                    "Regularization and smoothing much larger than "
+                    + "Frechet, will influence inversion too much:\n"
+                    + f"     Regularization/Frechet: {1./G_Sig:0.0f}\n"
+                    + f"     Smoothing/Frechet: {1./G_Smo:0.0f}\n"
+                    + "You may decrease lambda/gamma or restart and "
+                    + "increase parameter variances\n\n"
+                )
             elif G_Smo > 10.0:
-                text = ("Regularization much larger than Frechet, "
-                        + "Frechet, will influence inversion too much:\n"
-                        + f"     Regularization/Frechet: {1./G_Sig:0.0f}\n"
-                        + "\nSmoothing much smaller than Frechet, no "
-                        + "influence on inversion:"
-                        + f"     Frechet/Smoothing: {G_Smo:0.0f}\n"
-                        + "You may decrease lambda and/or increase gamma or "
-                        + "restart and change parameter variances\n\n")
+                text = (
+                    "Regularization much larger than Frechet, "
+                    + "Frechet, will influence inversion too much:\n"
+                    + f"     Regularization/Frechet: {1./G_Sig:0.0f}\n"
+                    + "\nSmoothing much smaller than Frechet, no "
+                    + "influence on inversion:"
+                    + f"     Frechet/Smoothing: {G_Smo:0.0f}\n"
+                    + "You may decrease lambda and/or increase gamma or "
+                    + "restart and change parameter variances\n\n"
+                )
             else:
-                text = ("Regularization much larger than Frechet, "
-                        + "will influence inversion too much:\n"
-                        + f"     Regularization/Frechet: {1./G_Sig:0.0f}\n"
-                        + "You may decrease lambda or "
-                        + "restart and change parameter variances\n\n")
+                text = (
+                    "Regularization much larger than Frechet, "
+                    + "will influence inversion too much:\n"
+                    + f"     Regularization/Frechet: {1./G_Sig:0.0f}\n"
+                    + "You may decrease lambda or "
+                    + "restart and change parameter variances\n\n"
+                )
         else:
             if G_Smo > 10.0:
-                text = ("Smoothing much smaller than Frechet, no "
-                        + "influence on inversion:"
-                        + f"     Frechet/Smoothing: {G_Smo:0.0f}\n"
-                        + "You may increase gamma or "
-                        + "restart and change parameter variances\n\n")
+                text = (
+                    "Smoothing much smaller than Frechet, no "
+                    + "influence on inversion:"
+                    + f"     Frechet/Smoothing: {G_Smo:0.0f}\n"
+                    + "You may increase gamma or "
+                    + "restart and change parameter variances\n\n"
+                )
             if G_Smo < 0.1:
-                text = ("Smoothing much larger than Frechet, too much "
-                        + "influence on inversion:"
-                        + f"     Smoothing/Frechet: {1./G_Smo:0.0f}\n"
-                        + "You may decrease gamma or "
-                        + "restart and change parameter variances\n\n")
+                text = (
+                    "Smoothing much larger than Frechet, too much "
+                    + "influence on inversion:"
+                    + f"     Smoothing/Frechet: {1./G_Smo:0.0f}\n"
+                    + "You may decrease gamma or "
+                    + "restart and change parameter variances\n\n"
+                )
         answer = QtWidgets.QMessageBox.warning(
-            None, "Warning", text
+            None,
+            "Warning",
+            text
             + "Ignore to continue nevertheless\n"
             + "Retry to give new initial lambda/gamma\n"
             + "Abort to stop inversion\n",
-            QtWidgets.QMessageBox.Ignore | QtWidgets.QMessageBox.Abort
-            | QtWidgets.QMessageBox.Retry, QtWidgets.QMessageBox.Ignore)
+            QtWidgets.QMessageBox.Ignore
+            | QtWidgets.QMessageBox.Abort
+            | QtWidgets.QMessageBox.Retry,
+            QtWidgets.QMessageBox.Ignore,
+        )
         if answer == QtWidgets.QMessageBox.Abort:
             sys.exit()
         elif answer == QtWidgets.QMessageBox.Retry:
             results, okButton = dialog(
-                ["New Initial lambda (regularization)",
-                 "New initial gamma (smoothing)"],
-                ["e", "e"], [self.lam, self.gam], "New inversion parameters")
+                [
+                    "New Initial lambda (regularization)",
+                    "New initial gamma (smoothing)",
+                ],
+                ["e", "e"],
+                [self.lam, self.gam],
+                "New inversion parameters",
+            )
             if okButton:
                 self.lam = float(results[0])
                 self.gam = float(results[1])
@@ -737,25 +803,25 @@ class inversion:
                 if not np.isclose(self.depth_ref, 1.0):
                     for _, val in self.mPrism.prisms.items():
                         i += 1
-                        f = 1.0+((val.z[0]+val.z[1])/2.0-self.zprism_top)*fac
+                        f = 1.0 + ((val.z[0] + val.z[1]) / 2.0 - self.zprism_top) * fac
                         sigma_param[i] *= f**3
                 icol += self.n_prisms
             elif self.rem_inv:
-                sigma_param = np.ones(self.mPrism.n_prisms)/self.sigma_rem**2
+                sigma_param = np.ones(self.mPrism.n_prisms) / self.sigma_rem**2
                 if not np.isclose(self.depth_ref, 1.0):
                     for _, val in self.mPrism.prisms.items():
                         i += 1
-                        f = 1.0+((val.z[0]+val.z[1])/2.0-self.zprism_top)*fac
+                        f = 1.0 + ((val.z[0] + val.z[1]) / 2.0 - self.zprism_top) * fac
                         sigma_param[i] *= f**3
                 icol += self.n_prisms
         else:
-            sigma_data = np.ones(self.n_data)/self.sigma_grav**2
-            sigma_param = np.ones(self.mPrism.n_prisms)/self.sigma_rho**2
+            sigma_data = np.ones(self.n_data) / self.sigma_grav**2
+            sigma_param = np.ones(self.mPrism.n_prisms) / self.sigma_rho**2
             i = -1
             if not np.isclose(self.depth_ref, 1.0):
                 for _, val in self.mPrism.prisms.items():
                     i += 1
-                    f = 1.0+((val.z[0]+val.z[1])/2.0-self.zprism_top)*fac
+                    f = 1.0 + ((val.z[0] + val.z[1]) / 2.0 - self.zprism_top) * fac
                     sigma_param[i] *= f**2
         sigma_param = np.concatenate((sigma_param, np.array([0.0])))
         return sigma_data, sigma_param
@@ -778,13 +844,12 @@ class inversion:
             txt = "Remanence"
         else:
             txt = "Density"
-# Plot misfit evolution
+        # Plot misfit evolution
         if self.iteration > 0:
             self.fig_mis2 = newWindow(f"{txt} model", 1000, 750, 15, 15)
             self.fig_mis2.fig.tight_layout(w_pad=15, h_pad=2)
             ax_mis = self.fig_mis2.fig.add_subplot()
-            ax_mis.plot(np.arange(len(self.rel_RMS_misfit)),
-                        self.rel_RMS_misfit)
+            ax_mis.plot(np.arange(len(self.rel_RMS_misfit)), self.rel_RMS_misfit)
             ax_mis.set_title(title, fontsize=14)
             ax_mis.set_xlabel("Iteration #", fontsize=12)
             ax_mis.set_ylabel("Relative RMS misfit [%]", fontsize=12)
@@ -793,10 +858,10 @@ class inversion:
             fil = os.path.join(self.folder, file + "_misfit.png")
             self.fig_mis2.fig.savefig(fil)
 
-# Plot measured and calculated data
+        # Plot measured and calculated data
         while True:
             self.plot_2D(file, inv_flag=True)
-# Save inversion control parameters to file parameters.dat
+            # Save inversion control parameters to file parameters.dat
             file_name = os.path.join(self.folder, "parameters.dat")
             self.write_parameters(file_name)
             if self.equal_flag:
@@ -843,8 +908,8 @@ class inversion:
         else:
             txt = "Density"
             c_txt = "Density [kg/m3]"
-# Calculate number of subplots to be done, depending on number of layers
-#    calculated
+        # Calculate number of subplots to be done, depending on number of layers
+        #    calculated
         i0 = 0
         n_prop_plots = len(self.nz_plot)
         max_ax_col = int(np.ceil(np.sqrt(n_prop_plots)))
@@ -855,7 +920,7 @@ class inversion:
         width = npltx * 5
         height = nplty * 5
         par = []
-# Plot model parameter distribution
+        # Plot model parameter distribution
         for key, val in self.mPrism.prisms.items():
             if self.sus_inv:
                 par.append(val.getsus() * 1000.0)
@@ -880,8 +945,9 @@ class inversion:
                 figx0 += 10
                 patches = []
                 col = []
-                ax = self.fig_par.fig.add_subplot(self.gs[figy0:figy0+8,
-                                                          figx0:figx0+8])
+                ax = self.fig_par.fig.add_subplot(
+                    self.gs[figy0 : figy0 + 8, figx0 : figx0 + 8]
+                )
                 if k >= n_prop_plots:
                     ax.axis("off")
                     k += 1
@@ -907,7 +973,8 @@ class inversion:
                         patches.append(Rectangle((x1, y1), x2 - x1, y2 - y1))
                 col = np.array(col)
                 p = PatchCollection(
-                    patches, cmap="rainbow", norm=norm, edgecolors=("black",))
+                    patches, cmap="rainbow", norm=norm, edgecolors=("black",)
+                )
                 p.set_array(col)
                 ax.add_collection(p)
                 ax.set_title(f"{txt} at {self.z_plot[k]:0.1f} m", fontsize=10)
@@ -922,10 +989,8 @@ class inversion:
                     ax.yaxis.tick_right()
                 else:
                     ax.set_yticklabels([])
-                ax.set_xlim([self.xprism_min*self.dfac,
-                             self.xprism_max*self.dfac])
-                ax.set_ylim([self.yprism_min*self.dfac,
-                             self.yprism_max*self.dfac])
+                ax.set_xlim([self.xprism_min * self.dfac, self.xprism_max * self.dfac])
+                ax.set_ylim([self.yprism_min * self.dfac, self.yprism_max * self.dfac])
                 ax.set_aspect("equal", adjustable="box")
                 if k < nax_plot:
                     ax.set_xlabel("")
@@ -942,8 +1007,7 @@ class inversion:
         self.fig_par.setHelp("Press ENTER to finish, R to continue iterations")
         self.fig_par.show()
         self.write_parameters(os.path.join(self.folder, "parameters.dat"))
-        self.fig_par.fig.savefig(
-            os.path.join(self.folder, f"{txt}_distribution.png"))
+        self.fig_par.fig.savefig(os.path.join(self.folder, f"{txt}_distribution.png"))
 
         if "m" in self.data_type:
             self.fig_theo = newWindow("Magnetic data", 1500, 1000, 20, 15)
@@ -952,8 +1016,10 @@ class inversion:
             title = "Modelled magnetic sensor1"
             unit = "nT"
             if self.iteration > 0:
-                title2 = ("Mag difference sensor1\nrel. RMS misfit: "
-                          + f"{self.std_data_rel*100:0.2f}%")
+                title2 = (
+                    "Mag difference sensor1\nrel. RMS misfit: "
+                    + f"{self.std_data_rel*100:0.2f}%"
+                )
             else:
                 title2 = "Mag difference sensor1"
         else:
@@ -963,8 +1029,10 @@ class inversion:
             title = "Modelled gravity data"
             unit = "mGal"
             if self.iteration > 0:
-                title2 = ("Gravity difference\nrel. RMS misfit: "
-                          + f"{self.std_data_rel*100:0.2f}%")
+                title2 = (
+                    "Gravity difference\nrel. RMS misfit: "
+                    + f"{self.std_data_rel*100:0.2f}%"
+                )
             else:
                 title2 = "Gravity difference"
         self.ax_theo = []
@@ -972,25 +1040,21 @@ class inversion:
         ddy = self.yplt_max - self.yplt_min
         if ddx > 1.5 * ddy:
             self.gs = GridSpec(18, 10, self.fig_theo)
-            self.ax_theo.append(
-                self.fig_theo.fig.add_subplot(self.gs[1:7, 1:]))
-            self.ax_theo.append(
-                self.fig_theo.fig.add_subplot(self.gs[11:17, 1:]))
+            self.ax_theo.append(self.fig_theo.fig.add_subplot(self.gs[1:7, 1:]))
+            self.ax_theo.append(self.fig_theo.fig.add_subplot(self.gs[11:17, 1:]))
             self.bar_or = "vertical"
             #                    anchor = 'E'
             self.nticks = 10
-# Horizontal layout
+        # Horizontal layout
         else:
             self.gs = GridSpec(10, 18, self.fig_theo)
-            self.ax_theo.append(
-                self.fig_theo.fig.add_subplot(self.gs[1:, 1:7]))
-            self.ax_theo.append(
-                self.fig_theo.fig.add_subplot(self.gs[1:, 11:17]))
+            self.ax_theo.append(self.fig_theo.fig.add_subplot(self.gs[1:, 1:7]))
+            self.ax_theo.append(self.fig_theo.fig.add_subplot(self.gs[1:, 11:17]))
             self.bar_or = "horizontal"
             #                    anchor = 'S'
             self.nticks = 5
 
-# Plot magnetic anomalies produced by inverted model
+        # Plot magnetic anomalies produced by inverted model
         data = self.datao1.flatten()
         data[self.index_data] = self.data_mod[: self.n_data1]
         data = data.reshape(self.data1_shape)
@@ -1000,29 +1064,35 @@ class inversion:
         vmax = np.ceil(np.nanquantile(data, 0.995) * 1000) / 1000
         br_map, norm = utils.mag_color_map(vmin, vmax)
         im, cbar = utils.data_plot(
-            data, self.fig_theo.fig, self.ax_theo[0],
+            data,
+            self.fig_theo.fig,
+            self.ax_theo[0],
             title=f"{title}\nMedian: {med:0.1f}",
             xtitle=f"Easting [{self.ax_unit}]",
             ytitle=f"Northing [{self.ax_unit}]",
-            cmap=br_map, norm=norm, cbar_title=unit,
-            extent=[self.xplt_min, self.xplt_max,
-                    self.yplt_min, self.yplt_max])
-# plot prism contours
+            cmap=br_map,
+            norm=norm,
+            cbar_title=unit,
+            extent=[self.xplt_min, self.xplt_max, self.yplt_min, self.yplt_max],
+        )
+        # plot prism contours
         for key, val in self.mPrism.prisms.items():
             x1 = val.x[0]
             x2 = val.x[1]
             y1 = val.y[0]
             y2 = val.y[1]
-            self.ax_theo[0].plot([x1, x2, x2, x1, x1], [y1, y1, y2, y2, y1],
-                                 "k", linewidth=1)
+            self.ax_theo[0].plot(
+                [x1, x2, x2, x1, x1], [y1, y1, y2, y2, y1], "k", linewidth=1
+            )
         self.ax_theo[0].set_xlim([self.xplt_min, self.xplt_max])
         self.ax_theo[0].set_ylim([self.yplt_min, self.yplt_max])
         self.ax_theo[0].grid(visible=True, which="both")
         self.ax_theo[0].set_xlabel("")
-# Plot misfit
+        # Plot misfit
         data = self.datao1.flatten()
         data[self.index_data] = (
-            self.data_mod[:self.n_data1]-self.data_ori[:self.n_data1])
+            self.data_mod[: self.n_data1] - self.data_ori[: self.n_data1]
+        )
         data -= np.nanmedian(data)
         data = data.reshape(self.data1_shape)
         vmin = np.ceil(np.nanquantile(data, 0.005) * 1000) / 1000
@@ -1030,46 +1100,48 @@ class inversion:
         br_map, norm = utils.mag_color_map(vmin, vmax)
         im, cbar = utils.data_plot(
             data,
-            self.fig_theo.fig, self.ax_theo[1], title=f"{title2}",
+            self.fig_theo.fig,
+            self.ax_theo[1],
+            title=f"{title2}",
             xtitle=f"Easting [{self.ax_unit}]",
             ytitle=f"Northing [{self.ax_unit}]",
-            extent=[self.xplt_min, self.xplt_max,
-                    self.yplt_min, self.yplt_max], cmap=br_map,
-            cbar_title=f"Difference calc-meas [{unit}]", norm=norm)
+            extent=[self.xplt_min, self.xplt_max, self.yplt_min, self.yplt_max],
+            cmap=br_map,
+            cbar_title=f"Difference calc-meas [{unit}]",
+            norm=norm,
+        )
         self.ax_theo[1].grid(visible=True, which="both")
         self.fig_theo.show()
         self.fig_theo.fig.savefig(plt_file)
 
-# Plot results for sensor 2
+        # Plot results for sensor 2
         if self.n_sensor == 2:
             self.fig_theo2 = newWindow("Magnetic data", 1500, 1000, 24, 18)
             self.fig_theo2.fig.tight_layout(w_pad=15, h_pad=2)
             plt_file2 = os.path.join(self.folder, "Mag_sensor2_calc&diff.png")
-            title2 = ("Mag difference sensor2, rel. RMS misfit: "
-                      + f"{self.std_data_rel*100:0.2f}%")
+            title2 = (
+                "Mag difference sensor2, rel. RMS misfit: "
+                + f"{self.std_data_rel*100:0.2f}%"
+            )
             self.ax_theo2 = []
             if ddx > 1.5 * ddy:
                 self.gs = GridSpec(18, 10, self.fig_theo2)
-                self.ax_theo2.append(
-                    self.fig_theo2.fig.add_subplot(self.gs[1:7, 1:]))
-                self.ax_theo2.append(
-                    self.fig_theo2.fig.add_subplot(self.gs[11:17, 1:]))
+                self.ax_theo2.append(self.fig_theo2.fig.add_subplot(self.gs[1:7, 1:]))
+                self.ax_theo2.append(self.fig_theo2.fig.add_subplot(self.gs[11:17, 1:]))
                 self.bar_or = "vertical"
                 #                    anchor = 'E'
                 self.nticks = 10
-# Horizontal layout
+            # Horizontal layout
             else:
                 self.gs = GridSpec(10, 18, self.fig_theo2)
-                self.ax_theo2.append(
-                    self.fig_theo2.fig.add_subplot(self.gs[1:, 1:7]))
-                self.ax_theo2.append(
-                    self.fig_theo2.fig.add_subplot(self.gs[1:, 11:17]))
+                self.ax_theo2.append(self.fig_theo2.fig.add_subplot(self.gs[1:, 1:7]))
+                self.ax_theo2.append(self.fig_theo2.fig.add_subplot(self.gs[1:, 11:17]))
                 self.bar_or = "horizontal"
                 #                    anchor = 'S'
                 self.nticks = 5
-# Plot magnetic anomalies produced by inverted model
+            # Plot magnetic anomalies produced by inverted model
             data = self.datao2.flatten()
-            data[self.index_data2] = self.data_mod[self.n_data1:]
+            data[self.index_data2] = self.data_mod[self.n_data1 :]
             data = data.reshape(self.data2_shape)
             med = np.median(data)
             data -= med
@@ -1077,64 +1149,76 @@ class inversion:
             vmax = np.ceil(np.nanquantile(data, 0.995) * 1000) / 1000
             br_map, norm = utils.mag_color_map(vmin, vmax)
             im, cbar = utils.data_plot(
-                data, self.fig_theo2.fig, self.ax_theo2[0],
+                data,
+                self.fig_theo2.fig,
+                self.ax_theo2[0],
                 title=f"Modelled magnetic sensor2\nMedian: {med:0.1f}",
                 xtitle=f"Easting [{self.ax_unit}]",
                 ytitle=f"Northing [{self.ax_unit}]",
-                cmap=br_map, norm=norm, cbar_title=unit,
-                extent=[self.xplt_min, self.xplt_max,
-                        self.yplt_min, self.yplt_max],)
-# plot prism contours
+                cmap=br_map,
+                norm=norm,
+                cbar_title=unit,
+                extent=[self.xplt_min, self.xplt_max, self.yplt_min, self.yplt_max],
+            )
+            # plot prism contours
             for key, val in self.mPrism.prisms.items():
                 x1 = val.x[0]
                 x2 = val.x[1]
                 y1 = val.y[0]
                 y2 = val.y[1]
-                self.ax_theo2[0].plot([x1, x2, x2, x1, x1],
-                                      [y1, y1, y2, y2, y1], "k", linewidth=1)
+                self.ax_theo2[0].plot(
+                    [x1, x2, x2, x1, x1], [y1, y1, y2, y2, y1], "k", linewidth=1
+                )
             self.ax_theo2[0].set_xlim([self.xplt_min, self.xplt_max])
             self.ax_theo2[0].set_ylim([self.yplt_min, self.yplt_max])
             self.ax_theo2[0].grid(visible=True, which="both")
             self.ax_theo2[0].set_xlabel("")
 
-# Plot misfit
+            # Plot misfit
             data = self.datao1.flatten()
             data[self.index_data2] = (
-                self.data_mod[self.n_data1:]-self.data_ori[self.n_data1:])
+                self.data_mod[self.n_data1 :] - self.data_ori[self.n_data1 :]
+            )
             data -= np.nanmedian(data)
             data = data.reshape(self.data2_shape)
-            vmin = np.ceil(np.nanquantile(data, 0.005)*1000)/1000
-            vmax = np.floor(np.nanquantile(data, 0.995)*1000)/1000
+            vmin = np.ceil(np.nanquantile(data, 0.005) * 1000) / 1000
+            vmax = np.floor(np.nanquantile(data, 0.995) * 1000) / 1000
             br_map, norm = utils.mag_color_map(vmin, vmax)
             im, cbar = utils.data_plot(
                 data,
                 self.fig_theo2.fig,
-                self.ax_theo2[1], title="Mag difference sensor2\n"
+                self.ax_theo2[1],
+                title="Mag difference sensor2\n"
                 + f"rel. RMS misfit: {self.std_data_rel*100:0.2f}%",
                 xtitle=f"Easting [{self.ax_unit}]",
                 ytitle=f"Northing [{self.ax_unit}]",
-                extent=[self.xplt_min, self.xplt_max,
-                        self.yplt_min, self.yplt_max],
+                extent=[self.xplt_min, self.xplt_max, self.yplt_min, self.yplt_max],
                 cbar_title="Difference calc-meas [nT]",
-                cmap=br_map, norm=norm)
+                cmap=br_map,
+                norm=norm,
+            )
             self.ax_theo2[1].grid(visible=True, which="both")
             self.fig_theo2.show()
             self.fig_theo2.fig.savefig(plt_file2)
 
-# Plot misfit evolution
+        # Plot misfit evolution
         if self.iteration > 0:
             self.fig_misfit = newWindow("Magnetic data", 800, 500)
             self.ax_misfit = self.fig_misfit.fig.subplots(1, 1)
             self.ax_misfit.plot(
-                np.arange(len(self.rel_RMS_misfit)), self.rel_RMS_misfit, "k")
+                np.arange(len(self.rel_RMS_misfit)), self.rel_RMS_misfit, "k"
+            )
             self.ax_misfit.set_title("Misfit evolution")
             self.ax_misfit.set_xlabel("Iteration number")
             self.ax_misfit.set_ylabel("RMS misfit [%]")
             self.fig_misfit.show()
             self.fig_misfit.fig.savefig(
-                os.path.join(self.folder, "misfit-evolution.png"))
-        print("\nClick into parameter distribution window and press ENTER "
-              + "to finish inversion, r to continue iterations")
+                os.path.join(self.folder, "misfit-evolution.png")
+            )
+        print(
+            "\nClick into parameter distribution window and press ENTER "
+            + "to finish inversion, r to continue iterations"
+        )
         while True:
             event = self.fig_par.get_event()
             if event.name == "key_press_event":
@@ -1215,35 +1299,42 @@ class inversion:
                 ax_dat.plot(xx, dat, "b*", label="meas. data")
             ax_dat.plot(xx, self.data_mod, "cyan", label="calc. data")
             if inv_flag:
-                ax_dat.legend(bbox_to_anchor=(1, 1), loc="upper right",
-                              fontsize=10)
+                ax_dat.legend(bbox_to_anchor=(1, 1), loc="upper right", fontsize=10)
         else:
             if inv_flag:
-                dat = (self.data_ori[: self.n_data1]
-                       + np.nanmedian(self.data_mod[: self.n_data1])
-                       - np.nanmedian(self.data_ori[: self.n_data1]))
-                ax_dat.plot(xx[: self.n_data1], dat, "b*",
-                            label="meas. data sensor 1")
-                dat = (self.data_ori[self.n_data1:]
-                       + np.nanmedian(self.data_mod[self.n_data1:])
-                       - np.nanmedian(self.data_ori[self.n_data1:]))
-                ax_dat.plot(xx[self.n_data1:], dat, "r+",
-                            label="meas. data sensor 2")
-            ax_dat.plot(xx[: self.n_data1], self.data_mod[: self.n_data1],
-                        "cyan", label="calc. data sensor 1")
-            ax_dat.plot(xx[self.n_data1:], self.data_mod[self.n_data1:],
-                        "orange", label="calc. data sensor 2")
+                dat = (
+                    self.data_ori[: self.n_data1]
+                    + np.nanmedian(self.data_mod[: self.n_data1])
+                    - np.nanmedian(self.data_ori[: self.n_data1])
+                )
+                ax_dat.plot(xx[: self.n_data1], dat, "b*", label="meas. data sensor 1")
+                dat = (
+                    self.data_ori[self.n_data1 :]
+                    + np.nanmedian(self.data_mod[self.n_data1 :])
+                    - np.nanmedian(self.data_ori[self.n_data1 :])
+                )
+                ax_dat.plot(xx[self.n_data1 :], dat, "r+", label="meas. data sensor 2")
+            ax_dat.plot(
+                xx[: self.n_data1],
+                self.data_mod[: self.n_data1],
+                "cyan",
+                label="calc. data sensor 1",
+            )
+            ax_dat.plot(
+                xx[self.n_data1 :],
+                self.data_mod[self.n_data1 :],
+                "orange",
+                label="calc. data sensor 2",
+            )
             if inv_flag:
-                ax_dat.legend(bbox_to_anchor=(1, 1), loc="upper right",
-                              fontsize=10)
+                ax_dat.legend(bbox_to_anchor=(1, 1), loc="upper right", fontsize=10)
         ax_dat.tick_params(axis="both", labelsize=12)
         ax_dat.set_title(title, fontsize=14)
         ax_dat.set_xlabel(f"{sens} [{unit}]", fontsize=12)
         ax_dat.set_ylabel(ylabel, fontsize=12)
         ax_dat.set_xlim([xmin, xmax])
-# Plot model
-        cax = ax_dat.inset_axes([1.05, 0.05, 0.02, 0.9],
-                                transform=ax_dat.transAxes)
+        # Plot model
+        cax = ax_dat.inset_axes([1.05, 0.05, 0.02, 0.9], transform=ax_dat.transAxes)
         cax.axis("off")
         patches = []
         col = []
@@ -1269,15 +1360,15 @@ class inversion:
                     col.append(val.rho)
                 if val.typ == "O":
                     if coord == "X":
-                        arr = [[val.x[0]*fac, (val.z[0]+val.z[1])*fac/2.0]]
-                        arr.append([val.x[1]*fac, (val.z[2]+val.z[3])*fac/2.0])
-                        arr.append([val.x[1]*fac, (val.z[6]+val.z[7])*fac/2.0])
-                        arr.append([val.x[0]*fac, (val.z[4]+val.z[5])*fac/2.0])
+                        arr = [[val.x[0] * fac, (val.z[0] + val.z[1]) * fac / 2.0]]
+                        arr.append([val.x[1] * fac, (val.z[2] + val.z[3]) * fac / 2.0])
+                        arr.append([val.x[1] * fac, (val.z[6] + val.z[7]) * fac / 2.0])
+                        arr.append([val.x[0] * fac, (val.z[4] + val.z[5]) * fac / 2.0])
                     else:
-                        arr = [[val.y[0]*fac, (val.z[0]+val.z[1])*fac/2.0]]
-                        arr.append([val.y[1]*fac, (val.z[2]+val.z[3])*fac/2.0])
-                        arr.append([val.y[1]*fac, (val.z[6]+val.z[7])*fac/2.0])
-                        arr.append([val.y[0]*fac, (val.z[4]+val.z[5])*fac/2.0])
+                        arr = [[val.y[0] * fac, (val.z[0] + val.z[1]) * fac / 2.0]]
+                        arr.append([val.y[1] * fac, (val.z[2] + val.z[3]) * fac / 2.0])
+                        arr.append([val.y[1] * fac, (val.z[6] + val.z[7]) * fac / 2.0])
+                        arr.append([val.y[0] * fac, (val.z[4] + val.z[5]) * fac / 2.0])
                     arr.append(arr[0])
                     arr = np.array(arr)
                     fo.write(f"{key}: {arr}, sus: {val.getsus()}\n")
@@ -1305,15 +1396,11 @@ class inversion:
             ymin = min(ymin, self.z.min() * fac)
         for key, val in self.mPrism.prisms.items():
             if val.typ == "O":
-                xp = np.array([val.x[0], val.x[1], val.x[1],
-                               val.x[0], val.x[0]])
-                yp = np.array([val.z[0], val.z[2], val.z[6],
-                               val.z[4], val.z[0]])
+                xp = np.array([val.x[0], val.x[1], val.x[1], val.x[0], val.x[0]])
+                yp = np.array([val.z[0], val.z[2], val.z[6], val.z[4], val.z[0]])
             else:
-                xp = np.array([val.x[0], val.x[1], val.x[1],
-                               val.x[0], val.x[0]])
-                yp = np.array([val.z[0], val.z[0], val.z[1],
-                               val.z[1], val.z[0]])
+                xp = np.array([val.x[0], val.x[1], val.x[1], val.x[0], val.x[0]])
+                yp = np.array([val.z[0], val.z[0], val.z[1], val.z[1], val.z[0]])
             xp *= fac
             yp *= fac
             ax_mod.plot(xp, yp, "k")
@@ -1328,9 +1415,8 @@ class inversion:
             ax_mod.set_aspect("equal")
         else:
             ax_mod.set_aspect("auto")
-        cax = ax_mod.inset_axes([1.05, 0.05, 0.02, 0.9],
-                                transform=ax_mod.transAxes)
-# Plot color bar
+        cax = ax_mod.inset_axes([1.05, 0.05, 0.02, 0.9], transform=ax_mod.transAxes)
+        # Plot color bar
         cbar = plt.colorbar(p, orientation="vertical", cax=cax, fraction=0.1)
         cbar.set_label(label=c_txt, size=12)
         for lab in cbar.ax.yaxis.get_ticklabels():
@@ -1339,7 +1425,8 @@ class inversion:
             "Press ENTER to finish; press r to continue iterations; "
             + "press e to toggle between equal scale and filling window "
             + "for model axis; press c to toggle between linear and log "
-            + "color scale. If no reaction, move mouse a little bit")
+            + "color scale. If no reaction, move mouse a little bit"
+        )
         self.fig_2D.show()
 
     def show_synthetic(self):
@@ -1362,7 +1449,7 @@ class inversion:
             plt_file = os.path.join(self.folder, "Gravi_synthetic.png")
             title = "Modelled gravity anomaly"
             unit = "mGal"
-# Plot magnetic anomalies produced by synthetic model
+        # Plot magnetic anomalies produced by synthetic model
         data = self.data_mod[: self.n_data1].reshape(self.data1_shape)
         if self.data1_shape[0] == 1 or self.data_shape[1] == 1:
             if self.data1_shape[0] == 1:
@@ -1380,34 +1467,29 @@ class inversion:
                     break
         else:
             if self.n_sensor == 2:
-                data2 = self.data_mod[self.n_data1:].reshape(self.data2_shape)
+                data2 = self.data_mod[self.n_data1 :].reshape(self.data2_shape)
                 ddx = self.x.max() - self.x.min()
                 ddy = self.y.max() - self.y.min()
                 facx = 10 / (2 * ddx)
                 facy = 8 / (2 * ddy)
-# Vertical layout
+                # Vertical layout
                 self.ax_syn = []
                 if facx < facy:
                     self.gs = GridSpec(18, 10, self.fig_syn.fig)
-                    self.ax_syn.append(
-                        self.fig_syn.fig.add_subplot(self.gs[1:8, 1:]))
-                    self.ax_syn.append(
-                        self.fig_syn.fig.add_subplot(self.gs[10:17, 1:]))
+                    self.ax_syn.append(self.fig_syn.fig.add_subplot(self.gs[1:8, 1:]))
+                    self.ax_syn.append(self.fig_syn.fig.add_subplot(self.gs[10:17, 1:]))
                     self.bar_or = "vertical"
                     self.nticks = 10
-# Horizontal layout
+                # Horizontal layout
                 else:
                     self.gs = GridSpec(10, 18, self.fig_syn.fig)
-                    self.ax_syn.append(
-                        self.fig_syn.fig.add_subplot(self.gs[1:, 1:8]))
-                    self.ax_syn.append(
-                        self.fig_syn.fig.add_subplot(self.gs[1:, 10:17]))
+                    self.ax_syn.append(self.fig_syn.fig.add_subplot(self.gs[1:, 1:8]))
+                    self.ax_syn.append(self.fig_syn.fig.add_subplot(self.gs[1:, 10:17]))
                     self.bar_or = "horizontal"
                     self.nticks = 5
             else:
                 self.gs = GridSpec(10, 10, self.fig_syn.fig)
-                self.ax_syn = [self.fig_syn.fig.add_subplot(
-                    self.gs[1:-1, 1:-1])]
+                self.ax_syn = [self.fig_syn.fig.add_subplot(self.gs[1:-1, 1:-1])]
             vmin = np.ceil(np.nanquantile(data, 0.005) * 1000) / 1000
             vmax = np.ceil(np.nanquantile(data, 0.995) * 1000) / 1000
             self.xplt_min = self.x.min()
@@ -1417,36 +1499,60 @@ class inversion:
             if "m" in self.data_type:
                 br_map, norm = utils.mag_color_map(vmin, vmax)
                 im, cbar = utils.data_plot(
-                    data, self.fig_syn.fig, self.ax_syn[0], title=f"{title}",
-                    xtitle="Easting [m]", ytitle="Northing [m]", cmap=br_map,
-                    norm=norm, cbar_title=unit,
-                    extent=[self.xplt_min, self.xplt_max,
-                            self.yplt_min, self.yplt_max])
+                    data,
+                    self.fig_syn.fig,
+                    self.ax_syn[0],
+                    title=f"{title}",
+                    xtitle="Easting [m]",
+                    ytitle="Northing [m]",
+                    cmap=br_map,
+                    norm=norm,
+                    cbar_title=unit,
+                    extent=[self.xplt_min, self.xplt_max, self.yplt_min, self.yplt_max],
+                )
                 if self.n_sensor == 2:
                     im, cbar = utils.data_plot(
-                        data2, self.fig_syn.fig, self.ax_syn[1],
-                        title=f"{title2}", xtitle="Easting [m]",
-                        ytitle="Northing [m]", cmap=br_map, norm=norm,
-                        cbar_title=unit, extent=[self.xplt_min, self.xplt_max,
-                                                 self.yplt_min, self.yplt_max])
+                        data2,
+                        self.fig_syn.fig,
+                        self.ax_syn[1],
+                        title=f"{title2}",
+                        xtitle="Easting [m]",
+                        ytitle="Northing [m]",
+                        cmap=br_map,
+                        norm=norm,
+                        cbar_title=unit,
+                        extent=[
+                            self.xplt_min,
+                            self.xplt_max,
+                            self.yplt_min,
+                            self.yplt_max,
+                        ],
+                    )
             else:
                 im, cbar = utils.data_plot(
-                    data, self.fig_syn.fig, self.ax_syn[0], title=f"{title}",
-                    xtitle="Easting [m]", ytitle="Northing [m]",
-                    cmap="rainbow", cbar_title=unit,
-                    extent=[self.xplt_min, self.xplt_max,
-                            self.yplt_min, self.yplt_max])
+                    data,
+                    self.fig_syn.fig,
+                    self.ax_syn[0],
+                    title=f"{title}",
+                    xtitle="Easting [m]",
+                    ytitle="Northing [m]",
+                    cmap="rainbow",
+                    cbar_title=unit,
+                    extent=[self.xplt_min, self.xplt_max, self.yplt_min, self.yplt_max],
+                )
             # plot prism contours
             for key, val in self.mPrism.prisms.items():
                 x1 = val.x[0]
                 x2 = val.x[1]
                 y1 = val.y[0]
                 y2 = val.y[1]
-                self.ax_syn[0].plot([x1, x2, x2, x1, x1], [y1, y1, y2, y2, y1],
-                                    "k", linewidth=1)
+                self.ax_syn[0].plot(
+                    [x1, x2, x2, x1, x1], [y1, y1, y2, y2, y1], "k", linewidth=1
+                )
                 if self.n_sensor == 2:
-                    self.ax_syn[1].plot([x1, x2, x2, x1, x1],
-                                        [y1, y1, y2, y2, y1], "k", linewidth=1)
+                    self.ax_syn[1].plot(
+                        [x1, x2, x2, x1, x1], [y1, y1, y2, y2, y1], "k", linewidth=1
+                    )
             self.ax_syn[0].set_xlim([self.xplt_min, self.xplt_max])
             self.ax_syn[0].set_ylim([self.yplt_min, self.yplt_max])
             self.ax_syn[0].grid(visible=True, which="both")
@@ -1473,14 +1579,18 @@ class inversion:
             if self.n_sensor == 1:
                 for ix in range(nx):
                     for iy in range(ny):
-                        fo.write(f"{x[iy, ix]:0.3f} {y[iy, ix]:0.3f} "
-                                 + f"{z[iy, ix]:0.3f} {data[iy, ix]:0.3f}\n")
+                        fo.write(
+                            f"{x[iy, ix]:0.3f} {y[iy, ix]:0.3f} "
+                            + f"{z[iy, ix]:0.3f} {data[iy, ix]:0.3f}\n"
+                        )
             else:
                 for ix in range(nx):
                     for iy in range(ny):
-                        fo.write(f"{x[iy, ix]:0.3f} {y[iy, ix]:0.3f} "
-                                 + f"{z[iy, ix]:0.3f} {data[iy, ix]:0.3f} "
-                                 + f"{data2[iy, ix]:0.3f}\n")
+                        fo.write(
+                            f"{x[iy, ix]:0.3f} {y[iy, ix]:0.3f} "
+                            + f"{z[iy, ix]:0.3f} {data[iy, ix]:0.3f} "
+                            + f"{data2[iy, ix]:0.3f}\n"
+                        )
 
     def save_model(self):
         """
@@ -1507,14 +1617,20 @@ class inversion:
             if self.rho_inv:
                 text1 += "  rho  "
                 text2 += "[km/m3]"
-            fo.write(f"           Prism_center      {text1}                   "
-                     + " Prism coordinates\n")
+            fo.write(
+                f"           Prism_center      {text1}                   "
+                + " Prism coordinates\n"
+            )
             if self.direction == "N":
-                fo.write(f"      X          Y       Z   {text2}   #       S   "
-                         + "      N          W          E      top   bottom\n")
+                fo.write(
+                    f"      X          Y       Z   {text2}   #       S   "
+                    + "      N          W          E      top   bottom\n"
+                )
             else:
-                fo.write(f"      X          Y       Z   {text2}   #       W   "
-                         + "      E          S          N      top   bottom\n")
+                fo.write(
+                    f"      X          Y       Z   {text2}   #       W   "
+                    + "      E          S          N      top   bottom\n"
+                )
             for key, val in self.mPrism.prisms.items():
                 if self.direction in ("N", "S", 0.0, 180.0) and self.dim == 2:
                     x1 = val.y[0]
@@ -1545,13 +1661,17 @@ class inversion:
                 if self.rho_inv:
                     fo.write(f"{val.rho:7.0f}")
                 if self.direction in ("N", "S", 0.0, 180.0) and self.dim == 2:
-                    fo.write(f"{key:6d} {y1:9.2f} {y2:9.2f} {x1:10.2f} "
-                             + f"{x2:10.2f} {z1:7.2f} {z2:7.2f}\n")
+                    fo.write(
+                        f"{key:6d} {y1:9.2f} {y2:9.2f} {x1:10.2f} "
+                        + f"{x2:10.2f} {z1:7.2f} {z2:7.2f}\n"
+                    )
                 else:
-                    fo.write(f"{key:6d} {x1:9.2f} {x2:9.2f} {y1:10.2f} "
-                             + f"{y2:10.2f} {z1:7.2f} {z2:7.2f}\n")
-# Write model in format to be used as synthetic model. Allows modifying it
-# manually for tests
+                    fo.write(
+                        f"{key:6d} {x1:9.2f} {x2:9.2f} {y1:10.2f} "
+                        + f"{y2:10.2f} {z1:7.2f} {z2:7.2f}\n"
+                    )
+        # Write model in format to be used as synthetic model. Allows modifying it
+        # manually for tests
         with open(os.path.join(self.folder, "synthetic_model.txt"), "w") as fo:
             for key, val in self.mPrism.prisms.items():
                 if val.typ == "P":
@@ -1561,17 +1681,21 @@ class inversion:
                     z1 = np.mean(val.z[:4])
                     z2 = np.mean(val.z[4:])
                 if self.direction in ("N", "S", 0.0, 180.0) and self.dim == 2:
-                    fo.write(f"{val.y[0]:0.1f} {val.y[1]:0.1f} {val.x[0]:0.1f}"
-                             + f" {val.x[1]:0.1f} {z1:0.1f} {z2:0.1f} "
-                             + f"{val.getsus():0.6f} "
-                             + f"{val.rem:0.3f} {val.inc:0.1f} "
-                             + f"{val.dec:0.1f} {val.rho:0.1f}\n")
+                    fo.write(
+                        f"{val.y[0]:0.1f} {val.y[1]:0.1f} {val.x[0]:0.1f}"
+                        + f" {val.x[1]:0.1f} {z1:0.1f} {z2:0.1f} "
+                        + f"{val.getsus():0.6f} "
+                        + f"{val.rem:0.3f} {val.inc:0.1f} "
+                        + f"{val.dec:0.1f} {val.rho:0.1f}\n"
+                    )
                 else:
-                    fo.write(f"{val.x[0]:0.1f} {val.x[1]:0.1f} {val.y[0]:0.1f}"
-                             + f" {val.y[1]:0.1f} {z1:0.1f} "
-                             + f"{z2:0.1f} {val.getsus():0.6f} "
-                             + f"{val.rem:0.3f} {val.inc:0.1f} "
-                             + f"{val.dec:0.1f} {val.rho:0.1f}\n")
+                    fo.write(
+                        f"{val.x[0]:0.1f} {val.x[1]:0.1f} {val.y[0]:0.1f}"
+                        + f" {val.y[1]:0.1f} {z1:0.1f} "
+                        + f"{z2:0.1f} {val.getsus():0.6f} "
+                        + f"{val.rem:0.3f} {val.inc:0.1f} "
+                        + f"{val.dec:0.1f} {val.rho:0.1f}\n"
+                    )
         return None
 
     def get_inversion_parameters(self, data_type):
@@ -1615,63 +1739,106 @@ class inversion:
                 pos = None
         if "m" in data_type:
             results, okButton = dialog(
-                ["Invert for:", "Susceptibility", "Remanence",
-                 "Maximum number of iterations", "Maximum relative RMS misfit",
-                 "Maximum variation of RMS", "Initial lambda (regularization)",
-                 "Lambda factor per iteration",
-                 "Minimum lambda", "Initial Gamma (smoothing)",
-                 "Gamma factor per iteration", "Minimum Gamma",
-                 "Use positivity constraint"],
-                ["l", "c", "c", "e", "e", "e", "e", "e", "e", "e", "e", "e",
-                 "c"],
-                [None, 1, 0, itera, self.max_diff_fac, self.max_rel_diff,
-                 self.lam, self.lam_fac, self.lam_min, self.gam, self.gam_fac,
-                 self.gam_min, pos], "Magnetic inversion parameters")
+                [
+                    "Invert for:",
+                    "Susceptibility",
+                    "Remanence",
+                    "Maximum number of iterations",
+                    "Maximum relative RMS misfit",
+                    "Maximum variation of RMS",
+                    "Initial lambda (regularization)",
+                    "Lambda factor per iteration",
+                    "Minimum lambda",
+                    "Initial Gamma (smoothing)",
+                    "Gamma factor per iteration",
+                    "Minimum Gamma",
+                    "Use positivity constraint",
+                ],
+                ["l", "c", "c", "e", "e", "e", "e", "e", "e", "e", "e", "e", "c"],
+                [
+                    None,
+                    1,
+                    0,
+                    itera,
+                    self.max_diff_fac,
+                    self.max_rel_diff,
+                    self.lam,
+                    self.lam_fac,
+                    self.lam_min,
+                    self.gam,
+                    self.gam_fac,
+                    self.gam_min,
+                    pos,
+                ],
+                "Magnetic inversion parameters",
+            )
         else:
             results, okButton = dialog(
-                ["Maximum number of iterations", "Maximum relative RMS misfit",
-                 "Maximum variation of RMS", "Initial lambda (regularization)",
-                 "Lambda factor per iteration", "Minimum lambda",
-                 "Initial Gamma (smoothing)", "Gamma factor per iteration",
-                 "Minimum Gamma", "Use positivity constraint"],
+                [
+                    "Maximum number of iterations",
+                    "Maximum relative RMS misfit",
+                    "Maximum variation of RMS",
+                    "Initial lambda (regularization)",
+                    "Lambda factor per iteration",
+                    "Minimum lambda",
+                    "Initial Gamma (smoothing)",
+                    "Gamma factor per iteration",
+                    "Minimum Gamma",
+                    "Use positivity constraint",
+                ],
                 ["e", "e", "e", "e", "e", "e", "e", "e", "e", "c"],
-                [itera, self.max_diff_fac, self.max_rel_diff, self.lam,
-                 self.lam_fac, self.lam_min, self.gam, self.gam_fac,
-                    self.gam_min, pos], "Gravity inversion parameters")
+                [
+                    itera,
+                    self.max_diff_fac,
+                    self.max_rel_diff,
+                    self.lam,
+                    self.lam_fac,
+                    self.lam_min,
+                    self.gam,
+                    self.gam_fac,
+                    self.gam_min,
+                    pos,
+                ],
+                "Gravity inversion parameters",
+            )
         if not okButton:
             print("No inversion parameters given")
             return False
-# set flags for properties to be optimized
+        # set flags for properties to be optimized
         if "m" in data_type:
             if int(results[1]) > -1:
                 self.sus_inv = True
             if int(results[2]) > -1:
                 self.rem_inv = True
             if self.sus_inv and self.rem_inv:
-                print("\nInverting for both, susceptibility and remanence, "
-                      + "does not make sense.\n\nSusceptibility inversion "
-                      + "canceled and susceptibility set to zero.")
+                print(
+                    "\nInverting for both, susceptibility and remanence, "
+                    + "does not make sense.\n\nSusceptibility inversion "
+                    + "canceled and susceptibility set to zero."
+                )
                 self.sus_inv = False
             if not self.sus_inv and not self.rem_inv:
-                print("\nNo parameter type for inversion chosen.\n"
-                      + "Susceptibility will be used by default")
+                print(
+                    "\nNo parameter type for inversion chosen.\n"
+                    + "Susceptibility will be used by default"
+                )
                 self.sus_inv = True
             ianswer = 3
         else:
             self.rho_inv = True
             ianswer = 0
-# Set maximum number of iterations
+        # Set maximum number of iterations
         self.max_iter = int(results[ianswer])
         ianswer += 1
-# set relative RMS misfit for all data sets which stops iterations if reached
+        # set relative RMS misfit for all data sets which stops iterations if reached
         self.max_diff_fac = float(results[ianswer])
         ianswer += 1
-# set maximum relative change of RMS misfit from one iteration to the next for
-#     which iterations continue
+        # set maximum relative change of RMS misfit from one iteration to the next for
+        #     which iterations continue
         self.max_rel_diff = float(results[ianswer])
         ianswer += 1
-# set relative importance of initial model and reduction of this parameter per
-# iteration
+        # set relative importance of initial model and reduction of this parameter per
+        # iteration
         self.lam = float(results[ianswer])
         ianswer += 1
         self.lam_fac = float(results[ianswer])
@@ -1709,7 +1876,7 @@ class inversion:
 
         Similar variable for the y and z direction
         """
-#    Calculate default prism sizes
+        #    Calculate default prism sizes
         xmin = self.x.min()
         xmax = self.x.max()
         line_length = xmax - xmin
@@ -1731,14 +1898,35 @@ class inversion:
 
         while True:
             results, okButton = dialog(
-                ["xmin [m]", "xmax [m]", "dx_ini [m]", "minimum size x [m]",
-                 "zmin [m]", "zmax [m]", "dz_ini [m]", "minimum size z [m]",
-                 "prism half-width [m]",
-                 "Data point reduction\n(1 point out of...)",
-                 "Use topography"],
+                [
+                    "xmin [m]",
+                    "xmax [m]",
+                    "dx_ini [m]",
+                    "minimum size x [m]",
+                    "zmin [m]",
+                    "zmax [m]",
+                    "dz_ini [m]",
+                    "minimum size z [m]",
+                    "prism half-width [m]",
+                    "Data point reduction\n(1 point out of...)",
+                    "Use topography",
+                ],
                 ["e", "e", "e", "e", "e", "e", "e", "e", "e", "e", "c"],
-                [xmin, xmax, dx_ini, dx_ini/4.0, zmin, zmax, dz_ini,
-                 dz_ini/4.0, yw, 1, 0], "2D prism parameters")
+                [
+                    xmin,
+                    xmax,
+                    dx_ini,
+                    dx_ini / 4.0,
+                    zmin,
+                    zmax,
+                    dz_ini,
+                    dz_ini / 4.0,
+                    yw,
+                    1,
+                    0,
+                ],
+                "2D prism parameters",
+            )
             if not okButton:
                 print("\nNo prism data given, inversion aborted")
                 return False
@@ -1757,11 +1945,11 @@ class inversion:
             self.yprism_max = yw
             self.dy_prism = 2.0 * yw
             self.min_size_y = self.dy_prism
-# To avoid boundary effects prisms are defined on an area larger than the data
-# area by at least the maximum model depth.
+            # To avoid boundary effects prisms are defined on an area larger than the data
+            # area by at least the maximum model depth.
             self.xprism_min = self.xdata_min - self.zprism_max
             self.xprism_max = self.xdata_max + self.zprism_max
-# Set limits of prism zone to multiple of initial prism size
+            # Set limits of prism zone to multiple of initial prism size
             xlen0 = self.xprism_max - self.xprism_min
             nxp = int(xlen0 / self.dx_prism)
             if nxp * self.dx_prism < xlen0:
@@ -1797,7 +1985,7 @@ class inversion:
         Similar variable for the y and z direction
 
         """
-#    Calculate default prism sizes
+        #    Calculate default prism sizes
         xmin = self.x.min()
         xmax = self.x.max()
         line_length_x = xmax - xmin
@@ -1821,18 +2009,44 @@ class inversion:
         if dy_ini * ny - dy <= line_length_y:
             ny += 1
 
-# Get initial prism configuration and prism control parameters
+        # Get initial prism configuration and prism control parameters
         while True:
             results, okButton = dialog(
-                ["xmin [m]", "xmax [m]", "dx_ini [m]", "minimum size x [m]",
-                 "ymin [m]", "ymax [m]", "dy_ini [m]", "minimum size y [m]",
-                 "zmin [m]", "zmax [m]", "dz_ini [m]", "minimum size z [m]",
-                 "Data point reduction\n(1 point out of...)",
-                 "Use topography"],
-                ["e", "e", "e", "e", "e", "e", "e", "e", "e", "e", "e", "e",
-                 "e", "c"],
-                [xmin, xmax, dx_ini, dx_ini/4, ymin, ymax, dy_ini, dy_ini/4,
-                 zmin, zmax, dz_ini, dz_ini/4, 1, 0], "Prism parameters")
+                [
+                    "xmin [m]",
+                    "xmax [m]",
+                    "dx_ini [m]",
+                    "minimum size x [m]",
+                    "ymin [m]",
+                    "ymax [m]",
+                    "dy_ini [m]",
+                    "minimum size y [m]",
+                    "zmin [m]",
+                    "zmax [m]",
+                    "dz_ini [m]",
+                    "minimum size z [m]",
+                    "Data point reduction\n(1 point out of...)",
+                    "Use topography",
+                ],
+                ["e", "e", "e", "e", "e", "e", "e", "e", "e", "e", "e", "e", "e", "c"],
+                [
+                    xmin,
+                    xmax,
+                    dx_ini,
+                    dx_ini / 4,
+                    ymin,
+                    ymax,
+                    dy_ini,
+                    dy_ini / 4,
+                    zmin,
+                    zmax,
+                    dz_ini,
+                    dz_ini / 4,
+                    1,
+                    0,
+                ],
+                "Prism parameters",
+            )
             if not okButton:
                 print("\nNo prism data given, inversion aborted")
                 return False
@@ -1850,11 +2064,11 @@ class inversion:
             self.min_size_z = float(results[11])
             self.data_reduction = int(results[12])
             self.topo_flag = int(results[13]) > -1
-# To avoid boundary effects prisms are defined on an area larger than the data
-# area by at least the maximum model depth.
+            # To avoid boundary effects prisms are defined on an area larger than the data
+            # area by at least the maximum model depth.
             self.xprism_min = self.xdata_min - self.zprism_max
             self.xprism_max = self.xdata_max + self.zprism_max
-# Set limits of prism zone to multiple of initial prism size
+            # Set limits of prism zone to multiple of initial prism size
             xlen0 = self.xprism_max - self.xprism_min
             nxp = int(xlen0 / self.dx_prism)
             if nxp * self.dx_prism < xlen0:
@@ -1873,8 +2087,8 @@ class inversion:
                 dy = (ylen - ylen0) * 0.5
                 self.yprism_min -= dy
                 self.yprism_max += dy
-# Calculate effective minimum prism thickness and round to the nearest smaller
-# meter or, if thinner prisms are desired, to the nearest smaller decimeter.
+            # Calculate effective minimum prism thickness and round to the nearest smaller
+            # meter or, if thinner prisms are desired, to the nearest smaller decimeter.
             dz = self.zprism_max - self.zprism_min
             while True:
                 dz /= 2.0
@@ -1898,11 +2112,13 @@ class inversion:
                     dy *= 2.0
                     break
             dy_min = dy
-# make sure there are topography data over the whole prism area
+            # make sure there are topography data over the whole prism area
             self.xtopo = np.arange(
-                self.xprism_min, self.xprism_max + dx_min / 2, dx_min)
+                self.xprism_min, self.xprism_max + dx_min / 2, dx_min
+            )
             self.ytopo = np.arange(
-                self.yprism_min, self.yprism_max + dy_min / 2, dy_min)
+                self.yprism_min, self.yprism_max + dy_min / 2, dy_min
+            )
             self.nx_topo = len(self.xtopo)
             self.ny_topo = len(self.ytopo)
             X, Y = np.meshgrid(self.xtopo, self.ytopo)
@@ -1938,12 +2154,13 @@ class inversion:
                             t[-i:, j] = t[-(i + 1), j]
                 self.topo = t
                 self.topo_inter = interpolate.NearestNDInterpolator(
-                    list(zip(X.flatten(), Y.flatten())), self.topo.flatten())
-# Extract data within prism area and, if asked for, reduce point density
+                    list(zip(X.flatten(), Y.flatten())), self.topo.flatten()
+                )
+            # Extract data within prism area and, if asked for, reduce point density
             ret = self.prepare_data()
             if ret is True:
                 break
-# Back up original (reduced) data
+        # Back up original (reduced) data
         self.data_ori = np.copy(self.data)
         self.std_data_ori = np.std(self.data)
         self.xmin = np.nanmin((self.x))
@@ -1975,24 +2192,30 @@ class inversion:
                 n1 = n[0]
             else:
                 _ = QtWidgets.QMessageBox.warning(
-                    None, "Warning",
+                    None,
+                    "Warning",
                     "No data available for prism area:\n"
                     + f"xmin_prism = {xdata_min:0.3f}\n"
                     + f"xmax_data = {self.x[:ndata].max():0.3f}\n\n"
                     + "Redefine area",
-                    QtWidgets.QMessageBox.Close, QtWidgets.QMessageBox.Close)
+                    QtWidgets.QMessageBox.Close,
+                    QtWidgets.QMessageBox.Close,
+                )
                 return False
             n = np.where(self.x[:ndata] <= xdata_max)[0]
             if len(n) > 0:
                 n2 = n[-1] + 1
             else:
                 _ = QtWidgets.QMessageBox.warning(
-                    None, "Warning",
+                    None,
+                    "Warning",
                     "No data available for prism area:\n"
                     + f"xmax_prism = {xdata_max:0.3f}\n"
                     + f"xmin_data = {self.x[:ndata].min():0.3f}\n\n"
                     + "Redefine area",
-                    QtWidgets.QMessageBox.Close, QtWidgets.QMessageBox.Close)
+                    QtWidgets.QMessageBox.Close,
+                    QtWidgets.QMessageBox.Close,
+                )
                 return False
             for i in range(n1, n2):
                 if np.isfinite(self.data[i]):
@@ -2003,13 +2226,13 @@ class inversion:
                     break
             n2 = i + 1
             n1 = max(n1, int(self.data_reduction / 2))
-            x = self.x[n1:n2:self.data_reduction]
-            y = self.y[n1:n2:self.data_reduction]
-            z = self.z[n1:n2:self.data_reduction]
+            x = self.x[n1 : n2 : self.data_reduction]
+            y = self.y[n1 : n2 : self.data_reduction]
+            z = self.z[n1 : n2 : self.data_reduction]
             self.xo1 = np.copy(x)
             self.yo1 = np.copy(y)
             self.zo1 = np.copy(z)
-            data = self.data[n1:n2:self.data_reduction]
+            data = self.data[n1 : n2 : self.data_reduction]
             self.data_shape = data.shape
             self.data1_shape = data.shape
             data = data.flatten()
@@ -2032,20 +2255,20 @@ class inversion:
                         break
                 n2 = i + 1
                 n1 = max(n1, int(self.data_reduction / 2))
-                d2 = self.data2[n1:n2:self.data_reduction]
+                d2 = self.data2[n1 : n2 : self.data_reduction]
                 self.index_data2 = np.where(np.isfinite(d2))[0]
                 self.datao2 = np.copy(d2)
                 d2 = d2[self.index_data2]
                 self.n_data2 = len(d2)
                 self.data2_shape = d2.shape
                 data = np.concatenate((data, d2))
-                xx = self.x2[n1:n2:self.data_reduction]
+                xx = self.x2[n1 : n2 : self.data_reduction]
                 self.xo2 = np.copy(xx)
                 x = np.concatenate((x, xx[self.index_data2]))
-                yy = self.y2[n1:n2:self.data_reduction]
+                yy = self.y2[n1 : n2 : self.data_reduction]
                 self.yo2 = np.copy(yy)
                 y = np.concatenate((y, yy[self.index_data2]))
-                zz = self.z2[n1:n2:self.data_reduction]
+                zz = self.z2[n1 : n2 : self.data_reduction]
                 self.zo2 = np.copy(zz)
                 z = np.concatenate((z, zz[self.index_data2]))
             else:
@@ -2069,13 +2292,16 @@ class inversion:
             ny1 = np.where(yrow >= ydata_min)[0][0]
             ny2 = np.where(yrow <= ydata_max)[0][-1] + 1
             ny1 = max(ny1, int(self.data_reduction / 2))
-            x = x[ny1:ny2:self.data_reduction, nx1:nx2:self.data_reduction
-                  ].flatten()
-            y = y[ny1:ny2:self.data_reduction, nx1:nx2:self.data_reduction
-                  ].flatten()
-            z = z[ny1:ny2:self.data_reduction, nx1:nx2:self.data_reduction
-                  ].flatten()
-            data = d[ny1:ny2:self.data_reduction, nx1:nx2:self.data_reduction]
+            x = x[
+                ny1 : ny2 : self.data_reduction, nx1 : nx2 : self.data_reduction
+            ].flatten()
+            y = y[
+                ny1 : ny2 : self.data_reduction, nx1 : nx2 : self.data_reduction
+            ].flatten()
+            z = z[
+                ny1 : ny2 : self.data_reduction, nx1 : nx2 : self.data_reduction
+            ].flatten()
+            data = d[ny1 : ny2 : self.data_reduction, nx1 : nx2 : self.data_reduction]
             self.data_shape = data.shape
             self.data1_shape = data.shape
             data = data.flatten()
@@ -2102,14 +2328,18 @@ class inversion:
                 ny1 = np.where(yrow >= ydata_min)[0][0]
                 ny2 = np.where(yrow <= ydata_max)[0][-1] + 1
                 ny1 = max(ny1, int(self.data_reduction / 2))
-                self.xo2 = np.copy(x2[ny1:ny2:self.data_reduction,
-                                      nx1:nx2:self.data_reduction])
-                self.yo2 = np.copy(y2[ny1:ny2:self.data_reduction,
-                                      nx1:nx2:self.data_reduction])
-                self.zo2 = np.copy(z2[ny1:ny2:self.data_reduction,
-                                      nx1:nx2:self.data_reduction])
-                self.datao2 = np.copy(x2[ny1:ny2:self.data_reduction,
-                                         nx1:nx2:self.data_reduction])
+                self.xo2 = np.copy(
+                    x2[ny1 : ny2 : self.data_reduction, nx1 : nx2 : self.data_reduction]
+                )
+                self.yo2 = np.copy(
+                    y2[ny1 : ny2 : self.data_reduction, nx1 : nx2 : self.data_reduction]
+                )
+                self.zo2 = np.copy(
+                    z2[ny1 : ny2 : self.data_reduction, nx1 : nx2 : self.data_reduction]
+                )
+                self.datao2 = np.copy(
+                    x2[ny1 : ny2 : self.data_reduction, nx1 : nx2 : self.data_reduction]
+                )
                 self.data2_shape = self.datao2.shape
                 self.index_data2 = np.where(np.isifinte(self.data2.flatten()))
                 self.x2 = self.xo2.flatten()[self.index_data2]
@@ -2119,8 +2349,7 @@ class inversion:
                 x = np.concatenate((x, self.x2))
                 y = np.concatenate((y, self.y2))
                 z = np.concatenate((z, self.z2))
-                d2 = d[ny1:ny2:self.data_reduction,
-                       nx1:nx2:self.data_reduction]
+                d2 = d[ny1 : ny2 : self.data_reduction, nx1 : nx2 : self.data_reduction]
                 data = np.concatenate((data, self.data2))
                 self.n_data2 = len(self.data2)
         self.x = x
@@ -2137,8 +2366,10 @@ class inversion:
         self.xplt_max = self.x.max() + self.dx * 0.5
         self.yplt_min = self.y.min() - self.dy * 0.5
         self.yplt_max = self.y.max() + self.dy * 0.5
-        if (max(self.xprism_max-self.xprism_min,
-                self.yprism_max-self.yprism_min) > 10000):
+        if (
+            max(self.xprism_max - self.xprism_min, self.yprism_max - self.yprism_min)
+            > 10000
+        ):
             self.xplt_min /= 1000.0
             self.xplt_max /= 1000.0
             self.yplt_min /= 1000.0
@@ -2158,21 +2389,26 @@ class inversion:
         None.
 
         """
-# Define depths at which resulting model should be plotted (list of depths)
+        # Define depths at which resulting model should be plotted (list of depths)
         if self.topo_flag:
             zm = self.z.max()
             self.z_plot = [zm - 1.0]
             self.z_plot += list(
-                np.arange(self.z.max()+self.min_size_z/2, self.zprism_max+zm,
-                          self.min_size_z))
+                np.arange(
+                    self.z.max() + self.min_size_z / 2,
+                    self.zprism_max + zm,
+                    self.min_size_z,
+                )
+            )
             self.z_plot = np.array(self.z_plot)
             self.nz_plot = []
             zmn = self.z_plot[0] - self.min_size_z / 2.0
             for i, zz in enumerate(self.z_plot):
                 self.nz_plot.append(int((zz - zmn) / self.min_size_z))
             return
-        self.z_plot = np.arange(self.zprism_min+self.min_size_z/2,
-                                self.zprism_max, self.min_size_z)
+        self.z_plot = np.arange(
+            self.zprism_min + self.min_size_z / 2, self.zprism_max, self.min_size_z
+        )
         self.nz_plot = []
         for i, zz in enumerate(self.z_plot):
             self.nz_plot.append(int((zz - self.zprism_min) / self.min_size_z))
@@ -2186,34 +2422,49 @@ class inversion:
         None.
 
         """
-# Define initial model
+        # Define initial model
         self.x_prism = np.arange(
-            self.xprism_min, self.xprism_max+self.dx_prism/2, self.dx_prism)
+            self.xprism_min, self.xprism_max + self.dx_prism / 2, self.dx_prism
+        )
         zmin = np.round(self.topo.max(), 0)
         self.z_prism = (
-            np.arange(self.zprism_min, self.zprism_max+self.dz_prism/2,
-                      self.dz_prism) + zmin)
-        self.mod_xshape = len(self.x_prism)-1
-        self.mod_zshape = len(self.z_prism)-1
+            np.arange(
+                self.zprism_min, self.zprism_max + self.dz_prism / 2, self.dz_prism
+            )
+            + zmin
+        )
+        self.mod_xshape = len(self.x_prism) - 1
+        self.mod_zshape = len(self.z_prism) - 1
         if self.topo_flag:
             self.mod_zshape += 1
         if self.dim == 3:
             self.y_prism = np.arange(
-                self.yprism_min, self.yprism_max+self.dy_prism/2,
-                self.dy_prism)
+                self.yprism_min, self.yprism_max + self.dy_prism / 2, self.dy_prism
+            )
             self.yprism_topo = np.copy(self.y_prism)
             self.mod_yshape = len(self.y_prism) - 1
         else:
             self.y_prism = np.array([self.yprism_min, self.yprism_max])
             self.mod_yshape = 1
-# Define prisms of initial model
+        # Define prisms of initial model
         if self.topo_flag:
-            self.mPrism = PP(self.earth, self.min_size_x, self.min_size_y,
-                             self.min_size_z, topo=self.topo_inter,
-                             dim=self.dim, direction=self.direction)
+            self.mPrism = PP(
+                self.earth,
+                self.min_size_x,
+                self.min_size_y,
+                self.min_size_z,
+                topo=self.topo_inter,
+                dim=self.dim,
+                direction=self.direction,
+            )
         else:
-            self.mPrism = PP(self.earth, self.min_size_x, self.min_size_y,
-                             self.min_size_z, direction=self.direction)
+            self.mPrism = PP(
+                self.earth,
+                self.min_size_x,
+                self.min_size_y,
+                self.min_size_z,
+                direction=self.direction,
+            )
         self.nx_prism = len(self.x_prism) - 1
         self.ny_prism = len(self.y_prism) - 1
         self.nz_prism = len(self.z_prism) - 1
@@ -2234,12 +2485,24 @@ class inversion:
         self.zprism_top = 1.0e6
         for i in range(self.mod_xshape):
             xpr = np.array([self.x_prism[i], self.x_prism[i + 1]])
-            xtopo = np.array([self.x_prism[i], self.x_prism[i+1],
-                              self.x_prism[i+1], self.x_prism[i]])
+            xtopo = np.array(
+                [
+                    self.x_prism[i],
+                    self.x_prism[i + 1],
+                    self.x_prism[i + 1],
+                    self.x_prism[i],
+                ]
+            )
             for j in range(self.mod_yshape):
                 ypr = np.array([self.y_prism[j], self.y_prism[j + 1]])
-                ytopo = np.array([self.y_prism[j], self.y_prism[j],
-                                  self.y_prism[j + 1], self.y_prism[j + 1]])
+                ytopo = np.array(
+                    [
+                        self.y_prism[j],
+                        self.y_prism[j],
+                        self.y_prism[j + 1],
+                        self.y_prism[j + 1],
+                    ]
+                )
                 for k in range(self.mod_zshape):
                     if self.topo_flag and k == 0:
                         if self.dim == 3:
@@ -2266,13 +2529,22 @@ class inversion:
                         self.prism_layer.append(k)
                         s = sus
                     self.mPrism.add_prism(
-                        xpr, ypr, zpr, s, rem, self.earth.inc, self.earth.dec,
-                        rho, self.prism_layer[-1],
-                        typ=self.data_class.data_type)
+                        xpr,
+                        ypr,
+                        zpr,
+                        s,
+                        rem,
+                        self.earth.inc,
+                        self.earth.dec,
+                        rho,
+                        self.prism_layer[-1],
+                        typ=self.data_class.data_type,
+                    )
                     self.zprism_top = min(self.zprism_top, zpr.min())
-        print("Model prism dictionary defined with "
-              + f"{len(self.mPrism.prisms)} prisms")
-# Prepare book-keeping arrays
+        print(
+            "Model prism dictionary defined with " + f"{len(self.mPrism.prisms)} prisms"
+        )
+        # Prepare book-keeping arrays
         if self.sus_inv and self.rem_inv:
             self.par_hist.append((np.zeros(self.mPrism.n_prisms), 2))
         else:
@@ -2298,17 +2570,23 @@ class inversion:
         return True
 
     def set_prisms_test(self):
-        xav = (self.xprism_min + self.xprism_max)/2.0
-        self.x_prism = np.array([xav-self.dx_prism/2, xav+self.dx_prism/2])
+        xav = (self.xprism_min + self.xprism_max) / 2.0
+        self.x_prism = np.array([xav - self.dx_prism / 2, xav + self.dx_prism / 2])
         self.z_prism = np.array([0.0, self.zprism_max])
         self.mod_xshape = len(self.x_prism) - 1
         self.mod_zshape = len(self.z_prism) - 1
         self.y_prism = np.array([self.yprism_min, self.yprism_max])
         self.mod_yshape = 1
-# Define prisms of initial model
+        # Define prisms of initial model
         self.topo_flag = True
-        self.mPrism = PP(self.earth, self.min_size_x, self.min_size_y,
-                         self.min_size_z, topo=self.topo_inter, dim=self.dim)
+        self.mPrism = PP(
+            self.earth,
+            self.min_size_x,
+            self.min_size_y,
+            self.min_size_z,
+            topo=self.topo_inter,
+            dim=self.dim,
+        )
         self.n_prisms = 2
         self.prism_nr = []
         self.prism_type = []
@@ -2322,20 +2600,38 @@ class inversion:
         zpr = np.array(zt)
         self.prism_type.append("O")
         self.prism_layer.append(-1)
-        self.mPrism.add_prism(xpr, ypr, zpr, sus, rem, self.earth.inc,
-                              self.earth.dec, rho, self.prism_layer[-1],
-                              typ=self.data_class.data_type)
+        self.mPrism.add_prism(
+            xpr,
+            ypr,
+            zpr,
+            sus,
+            rem,
+            self.earth.inc,
+            self.earth.dec,
+            rho,
+            self.prism_layer[-1],
+            typ=self.data_class.data_type,
+        )
         zpr = np.array([self.z_prism[0], self.z_prism[1]])
         self.prism_type.append("P")
         self.prism_layer.append(0)
-        self.mPrism.add_prism(xpr, ypr, zpr, sus, rem, self.earth.inc,
-                              self.earth.dec, rho, self.prism_layer[-1],
-                              typ=self.data_class.data_type)
+        self.mPrism.add_prism(
+            xpr,
+            ypr,
+            zpr,
+            sus,
+            rem,
+            self.earth.inc,
+            self.earth.dec,
+            rho,
+            self.prism_layer[-1],
+            typ=self.data_class.data_type,
+        )
         self.par_hist.append((np.zeros(self.mPrism.n_prisms), 1))
         self.param_prism += list(range(self.mPrism.n_prisms))
         self.i0 = self.mPrism.n_prisms
         self.n_param = self.mPrism.n_prisms
-        self.params = np.zeros(self.n_param+1)
+        self.params = np.zeros(self.n_param + 1)
         i = -1
         for key, val in self.mPrism.prisms.items():
             i += 1
@@ -2373,13 +2669,29 @@ class inversion:
         if self.sus_inv:
             if self.rem_inv:
                 results, okButton = dialog(
-                    ["sigma_mag", "\n", "sigma_sus", "sigma_rem", "\n",
-                     "sigma factor at bottom\n   will be cubed",
-                     "width_max [samples]", "max_amp [%]"],
+                    [
+                        "sigma_mag",
+                        "\n",
+                        "sigma_sus",
+                        "sigma_rem",
+                        "\n",
+                        "sigma factor at bottom\n   will be cubed",
+                        "width_max [samples]",
+                        "max_amp [%]",
+                    ],
                     ["e", "l", "e", "e", "l", "e", "e", "e"],
-                    [self.sigma_mag, None, self.sigma_sus, self.sigma_rem,
-                     None, 0.5, self.width_max, self.max_amp*100.0],
-                    "Inversion parameters")
+                    [
+                        self.sigma_mag,
+                        None,
+                        self.sigma_sus,
+                        self.sigma_rem,
+                        None,
+                        0.5,
+                        self.width_max,
+                        self.max_amp * 100.0,
+                    ],
+                    "Inversion parameters",
+                )
                 if not okButton:
                     print("\nNo inversion done: no inversion parameters given")
                     return False
@@ -2391,13 +2703,27 @@ class inversion:
                 self.max_amp = float(results[7]) / 100.0
             else:
                 results, okButton = dialog(
-                    ["sigma_mag", "\n", "sigma_sus", "\n",
-                     "sigma factor at bottom\n   will be cubed",
-                     "width_max [samples]", "max_amp [%]"],
+                    [
+                        "sigma_mag",
+                        "\n",
+                        "sigma_sus",
+                        "\n",
+                        "sigma factor at bottom\n   will be cubed",
+                        "width_max [samples]",
+                        "max_amp [%]",
+                    ],
                     ["e", "l", "e", "l", "e", "e", "e"],
-                    [self.sigma_mag, None, self.sigma_sus, None, 0.5,
-                     self.width_max, self.max_amp*100.0],
-                    "Inversion parameters")
+                    [
+                        self.sigma_mag,
+                        None,
+                        self.sigma_sus,
+                        None,
+                        0.5,
+                        self.width_max,
+                        self.max_amp * 100.0,
+                    ],
+                    "Inversion parameters",
+                )
                 if not okButton:
                     print("\nNo inversion done: no inversion parameters given")
                     return False
@@ -2408,12 +2734,27 @@ class inversion:
                 self.max_amp = float(results[6]) / 100.0
         elif self.rem_inv:
             results, okButton = dialog(
-                ["sigma_mag", "\n", "sigma_rem", "\n",
-                 "sigma factor at bottom\n   will be squared",
-                 "width_max [samples]", "max_amp [%]"],
+                [
+                    "sigma_mag",
+                    "\n",
+                    "sigma_rem",
+                    "\n",
+                    "sigma factor at bottom\n   will be squared",
+                    "width_max [samples]",
+                    "max_amp [%]",
+                ],
                 ["e", "l", "e", "l", "e", "e", "e"],
-                [self.sigma_mag, None, self.sigma_rem, None, 0.5,
-                 self.width_max, self.max_amp*100.0,], "Inversion parameters")
+                [
+                    self.sigma_mag,
+                    None,
+                    self.sigma_rem,
+                    None,
+                    0.5,
+                    self.width_max,
+                    self.max_amp * 100.0,
+                ],
+                "Inversion parameters",
+            )
             if not okButton:
                 print("\nNo inversion done: no inversion parameters given")
                 return False
@@ -2424,12 +2765,27 @@ class inversion:
             self.max_amp = float(results[6]) / 100.0
         else:
             results, okButton = dialog(
-                ["sigma_grav", "\n", "sigma_rho", "\n",
-                 "sigma factor at bottom\n   will be squared",
-                 "width_max [samples]", "max_amp [%]"],
+                [
+                    "sigma_grav",
+                    "\n",
+                    "sigma_rho",
+                    "\n",
+                    "sigma factor at bottom\n   will be squared",
+                    "width_max [samples]",
+                    "max_amp [%]",
+                ],
                 ["e", "l", "e", "l", "e", "e", "e"],
-                [self.sigma_grav, None, self.sigma_rho, None, 0.5,
-                 self.width_max, self.max_amp*100.0], "Inversion parameters")
+                [
+                    self.sigma_grav,
+                    None,
+                    self.sigma_rho,
+                    None,
+                    0.5,
+                    self.width_max,
+                    self.max_amp * 100.0,
+                ],
+                "Inversion parameters",
+            )
             if not okButton:
                 print("\nNo inversion done: no inversion parameters given")
                 return False
@@ -2458,9 +2814,11 @@ class inversion:
             fo.write(f"{self.data_class.title}\n\n")
             fo.write("File:\n")
             fo.write(f"   {self.data_class.file_name}\n")
-            fo.write(f"\nEarth's field: strength: {self.earth.f} nT, "
-                     + f"inclination: {self.earth.inc} deg, "
-                     + f"declination: {self.earth.dec} deg\n")
+            fo.write(
+                f"\nEarth's field: strength: {self.earth.f} nT, "
+                + f"inclination: {self.earth.inc} deg, "
+                + f"declination: {self.earth.dec} deg\n"
+            )
             fo.write("\nParameters\n")
             if self.sus_inv:
                 fo.write("   Invert for susceptibilities\n")
@@ -2469,28 +2827,35 @@ class inversion:
             if self.rho_inv:
                 fo.write("   Invert for densities\n")
             fo.write(f"   Maximum number of iterations: {self.max_iter}\n")
-            fo.write(f"   Stop if relative misfit < {self.max_diff_fac*100}% "
-                     + "or relative misfit variation < "
-                     + f"{self.max_rel_diff*100}%\n")
+            fo.write(
+                f"   Stop if relative misfit < {self.max_diff_fac*100}% "
+                + "or relative misfit variation < "
+                + f"{self.max_rel_diff*100}%\n"
+            )
             fo.write(
                 f"   Lambda: Initial: {self.lam}, minimum: "
-                + f"{self.lam_min}, factor per iteration: {self.lam_fac}\n")
+                + f"{self.lam_min}, factor per iteration: {self.lam_fac}\n"
+            )
             fo.write(
                 f"   Gamma:  Initial: {self.gam}, minimum: {self.gam_min}"
-                + f", factor per iteration: {self.gam_fac}\n")
+                + f", factor per iteration: {self.gam_fac}\n"
+            )
             fo.write("\nInitial prism area\n")
             fo.write(
                 f"   West:  {self.xprism_min}, East:  {self.xprism_max}, "
                 + f"initial size in X: {self.dx_prism}, "
-                + f"min_size_x: {self.min_size_x}\n")
+                + f"min_size_x: {self.min_size_x}\n"
+            )
             fo.write(
                 f"   South: {self.yprism_min}, North: {self.yprism_max}, "
                 + f"initial size in Y: {self.dy_prism}, "
-                + f"min_size_y: {self.min_size_y}\n")
+                + f"min_size_y: {self.min_size_y}\n"
+            )
             fo.write(
                 f"   Top:   {self.zprism_min}, Bottom: {self.zprism_max},"
                 + f" initial size in Z: {self.dz_prism}, "
-                + f"min_size_z: {self.min_size_z}\n")
+                + f"min_size_z: {self.min_size_z}\n"
+            )
             fo.write("\nData uncertainty:\n")
             if "m" in self.data_type:
                 fo.write(f"   Magnetics: {self.sigma_mag}\n")
@@ -2503,9 +2868,15 @@ class inversion:
                 fo.write(f"   Remancence: {self.sigma_rem}\n")
             if self.rho_inv:
                 fo.write(f"   Gravity:   {self.sigma_rho}\n")
-            fo.write("   Factor at bottom for weighting of parameter "
-                     + f"variability: {self.depth_ref}\n")
-            fo.write("   Size of area around a point for local maximum "
-                     + f"determination: {self.width_max} points\n")
-            fo.write("   Minimum relative amplitude for prism split: "
-                     + f"{self.max_amp*100}%\n")
+            fo.write(
+                "   Factor at bottom for weighting of parameter "
+                + f"variability: {self.depth_ref}\n"
+            )
+            fo.write(
+                "   Size of area around a point for local maximum "
+                + f"determination: {self.width_max} points\n"
+            )
+            fo.write(
+                "   Minimum relative amplitude for prism split: "
+                + f"{self.max_amp*100}%\n"
+            )
