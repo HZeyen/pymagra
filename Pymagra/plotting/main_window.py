@@ -523,6 +523,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             ax.grid(visible=True, which="both")
         if self.plotLin_flag:
             self.plot_lineaments(ax, dfac)
+        if self.main.point_flag:
+            ax.plot(x, y, "+", ms=3.0)
         ax.set_xlim([xmin, xmax])
         ax.set_ylim([ymin, ymax])
         ax.xaxis.set_minor_locator(AutoMinorLocator())
@@ -821,8 +823,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             dec=data.line_declination,
             dfac=dfac,
         )
-        if self.main.point_flag:
-            ax[0].plot(x1, y1, "+")
         # Do plot for sensor 2
         if self.grad_data:
             if ";" in title[:-1]:
@@ -846,8 +846,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
                 dec=data.line_declination,
                 dfac=dfac,
             )
-            if self.main.point_flag:
-                ax[1].plot(x2, y2, "+")
             # plot vertical gradient
             if grad_flag:
                 if ";" in title[:-1]:
@@ -871,8 +869,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
                     dec=data.line_declination,
                     dfac=dfac,
                 )
-                if self.main.point_flag:
-                    ax[1].plot(x1, y1, "+")
         # Erase actual plot in central widget and plot the new one
         self.rmMPL()
         self.addMPL(fig)
@@ -981,7 +977,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             vmax=max_col,
         )
         if self.main.point_flag:
-            ax.plot(self.main.data.x, self.main.data.y, "+")
+            ax.plot(self.main.data.x, self.main.data.y, "+", ms=3.0)
         if self.grad_data:
             ax.set_title(title, fontsize=14)
         else:

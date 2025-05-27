@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Last modified on Apr 23, 2025
+Last modified on May 27, 2025
 
 @author: Hermann Zeyen <hermann.zeyen@gmail.com>
          Université Paris-Saclay
@@ -933,7 +933,7 @@ def plot_analytic(data, color="rainbow"):
             nline = np.argmin(abs(xc - event.xdata))
             pos = yc
             pos_line = xc[nline]
-            text = f"{pos_line} East"
+            text = f"{np.round(pos_line, 2)} East"
             text_x = f"Northing [{dunit}]"
             nl = len(xc)
             direct = "y"
@@ -941,7 +941,7 @@ def plot_analytic(data, color="rainbow"):
             nline = np.argmin(abs(yc - event.ydata))
             pos = xc
             pos_line = yc[nline]
-            text = f"{pos_line} North"
+            text = f"{np.round(pos_line, 2)} North"
             text_x = f"Easting [{dunit}]"
             nl = len(yc)
             direct = "x"
@@ -969,15 +969,16 @@ def plot_analytic(data, color="rainbow"):
             depth_min = 0.0
             depth_max = dx * 20.0 / dfac
         results, okButton = dialog(
-            ["Threshold", "Minimum depth", "Maximum depth"],
-            ["e", "e", "e"],
-            [dmin, depth_min, depth_max],
+            ["Threshold", "Minimum depth", "Maximum depth", "Half width"],
+            ["e", "e", "e", "e"],
+            [dmin, depth_min, depth_max, 5],
             "Analytic signal parameters",
         )
         if okButton:
             dmin = float(results[0])
             depth_min = float(results[1])
             depth_max = float(results[2])
+            half_width = int(results[3])
         dd = np.copy(d2)
         dd[d2 < dmin] = -1.0
 
@@ -1016,8 +1017,8 @@ def plot_analytic(data, color="rainbow"):
                 ax_sig.set_title(f"Squared analytic signal at {text}")
                 ax_sig.set_xlabel(text_x)
                 ax_sig.set_ylabel(f"Amplitude [{data.unit}/m]**2")
-            # # Find maxim and minima along line
-            max_pos, _, min_pos, _ = utils.min_max(d_interest, half_width=3)
+            # Find maxim and minima along line
+            max_pos, _, min_pos, _ = utils.min_max(d_interest, half_width=half_width)
             lab_flag = False
             # Start loop over all found maxima
             for p in max_pos:
@@ -1028,14 +1029,20 @@ def plot_analytic(data, color="rainbow"):
                 for k in range(p, -1, -1):
                     if d_interest[k] < 0.0 or k in min_pos:
                         break
-                n1 = k + 1
+                if d_interest[k] < 0:
+                    n1 = k + 1
+                else:
+                    n1 = k
                 for k in range(p, len(d_interest)):
                     if d_interest[k] < 0.0 or k in min_pos:
                         break
-                n2 = k
+                if d_interest[k] < 0:
+                    n2 = k
+                else:
+                    n2 = min(k + 1, len(d_interest))
                 # If less than 4 points have been found belonging to the maximum, dont threat
                 #    this maximum
-                if n2 - n1 < 3:
+                if n2 - n1 < half_width:
                     continue
                 # Do inversion
                 # For this the inverse of squared analytic signal should have a linear
