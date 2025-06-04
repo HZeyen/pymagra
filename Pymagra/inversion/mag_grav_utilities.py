@@ -40,8 +40,8 @@ def magnetization_components(sus, rem, inc, dec, earth):
         tx = mag * earth.cdci
         ty = mag * earth.sdci
         tz = mag * earth.sie
-    # The factor 100 comes from the fact that the calculated anomaly in A/m must be
-    # multiplied by mu0/4pi = 10**-7 and again by 10**9 to pass from T to nT.
+# The factor 100 comes from the fact that the calculated anomaly in A/m must be
+# multiplied by mu0/4pi = 10**-7 and again by 10**9 to pass from T to nT.
     if rem != 0:
         rem_gauss = rem * 100.0
         cdr = np.cos(np.radians(dec))
@@ -120,27 +120,23 @@ def matrixExtension(data):
     nx_right = nx_add + nx
     ny_up = ny_add + ny
     edge = np.mean(
-        np.array(
-            list(data[:, 0]) + list(data[0, :]) + list(data[-1, :]) + list(data[:, -1])
-        )
-    )
+        np.array(list(data[:, 0]) + list(data[0, :]) + list(data[-1, :])
+                 + list(data[:, -1])))
     d[ny_add:ny_up, nx_add:nx_right] = data
     fac = (np.sin(np.arange(nx_add) * np.pi / (2 * nx_add))) ** 2
     fac2 = np.flip(fac)
     j = -1
     for i in range(ny_add, ny_up):
         j += 1
-        d[i, :nx_add] = (
-            fac * (data[j, 1] - edge) * np.flip(data[j, 1 : nx_add + 1]) + edge
-        )
-        d[i, nx_right:] = (
-            fac2 * (data[j, -2] - edge) * np.flip(data[j, ix_add_right : nx - 1]) + edge
-        )
+        d[i, :nx_add] = (fac*(data[j, 1]-edge)*np.flip(data[j, 1:nx_add+1])
+                         + edge)
+        d[i, nx_right:] = (fac2*(data[j, -2]-edge)
+                           * np.flip(data[j, ix_add_right:nx-1])+edge)
     fac = (np.sin(np.arange(ny_add) * np.pi / (2 * ny_add))) ** 2
     fac2 = np.flip(fac)
     for i in range(d.shape[1]):
-        d[:ny_add, i] = fac * (d[1, i] - edge) * np.flip(d[1 : ny_add + 1, i]) + edge
-        d[ny_up:, i] = fac2 * (d[-2, i] - edge) * np.flip(d[iy_add_up:-1, i]) + edge
+        d[:ny_add, i] = fac*(d[1, i]-edge)*np.flip(d[1:ny_add+1, i])+edge
+        d[ny_up:, i] = fac2*(d[-2, i]-edge)*np.flip(d[iy_add_up:-1, i])+edge
     return d, (ny_add, nx_add), (ny_add + ny, nx_add + nx)
 
 
@@ -287,8 +283,8 @@ def mag_color_map(vmn, vmx, cif=2):
 
     """
     c = cif
-    # Find number of ciffers equal to or above cif necessary to distinguish
-    # minimum from maximum rounded value
+# Find number of ciffers equal to or above cif necessary to distinguish
+# minimum from maximum rounded value
     while True:
         fac = 10**c
         av = np.round((vmn + vmx) / 2.0, c)
@@ -320,22 +316,9 @@ def mag_color_map(vmn, vmx, cif=2):
     return br_map, norm
 
 
-def data_plot(
-    data,
-    fig,
-    ax,
-    title="",
-    xtitle="Easting [m]",
-    ytitle="Northing [m]",
-    cmap="rainbow",
-    norm=None,
-    extent=None,
-    cbar_title="",
-    vmin=None,
-    vmax=None,
-    font_ax=12,
-    font_tit=14,
-):
+def data_plot(data, fig, ax, title="", xtitle="Easting [m]",
+              ytitle="Northing [m]", cmap="rainbow", norm=None, extent=None,
+              cbar_title="", vmin=None, vmax=None, font_ax=12, font_tit=14):
     """
     Plots a raster image of regularly gridded data
 
@@ -392,52 +375,27 @@ def data_plot(
     if not vmax:
         vmax = np.round(data.max(), 1)
     if norm:
-        im = ax.imshow(
-            np.flip(data, axis=0),
-            norm=norm,
-            cmap=cmap,
-            aspect="equal",
-            extent=extent,
-            rasterized=True,
-        )
+        im = ax.imshow(np.flip(data, axis=0), norm=norm, cmap=cmap,
+                       aspect="equal", extent=extent, rasterized=True)
     else:
-        im = ax.imshow(
-            np.flip(data, axis=0),
-            cmap=cmap,
-            aspect="equal",
-            extent=extent,
-            rasterized=True,
-            vmin=vmin,
-            vmax=vmax,
-        )
+        im = ax.imshow(np.flip(data, axis=0), cmap=cmap, aspect="equal",
+                       extent=extent, rasterized=True, vmin=vmin, vmax=vmax)
     ax.set_title(title, fontsize=font_tit)
     ax.set_xlabel(xtitle, fontsize=font_ax)
     ax.set_ylabel(ytitle, fontsize=font_ax)
     ax.tick_params(labelsize=font_ax)
-    #    cax = ax.inset_axes([0.95, 0.1, 0.05, 0.9])
+    # cax = ax.inset_axes([0.95, 0.1, 0.05, 0.9])
     cax = ax.inset_axes([1.05, 0.05, 0.05, 0.9], transform=ax.transAxes)
     cbar = fig.colorbar(im, shrink=0.9, cax=cax)
     cbar.set_label(cbar_title, fontsize=font_ax - 2)
     cbar.ax.tick_params(labelsize=font_ax - 2)
     cbar.ax.set_ylabel(cbar_title, size=10)
-    cbar.ax.text(
-        0.0,
-        -0.02,
-        f"{vmin}",
-        verticalalignment="top",
-        horizontalalignment="left",
-        transform=cbar.ax.transAxes,
-        fontsize=10,
-    )
-    cbar.ax.text(
-        0.0,
-        1.02,
-        f"{vmax}",
-        verticalalignment="bottom",
-        horizontalalignment="left",
-        transform=cbar.ax.transAxes,
-        fontsize=10,
-    )
+    cbar.ax.text(0.0, -0.02, f"{vmin}", verticalalignment="top",
+                 horizontalalignment="left", transform=cbar.ax.transAxes,
+                 fontsize=10)
+    cbar.ax.text(0.0, 1.02, f"{vmax}", verticalalignment="bottom",
+                 horizontalalignment="left", transform=cbar.ax.transAxes,
+                 fontsize=10)
     return im, cbar
 
 
@@ -468,8 +426,7 @@ def get_extremes(data, width=5):
     if len(data.shape) == 1:
         nx = len(data)
         for ix in range(width, nx, 2 * width):
-            d = data[ix - width : ix + width + 1]
-
+            d = data[ix - width: ix+width+1]
             pos = np.where(d == np.nanmax(d))
             xmax = ix + pos[0][0] - width
             dmax = data[xmax]
@@ -490,7 +447,7 @@ def get_extremes(data, width=5):
     ny, nx = data.shape
     for ix in range(width, nx, 2 * width):
         for iy in range(width, ny, 2 * width):
-            d = data[iy - width : iy + width + 1, ix - width : ix + width + 1]
+            d = data[iy-width: iy+width+1, ix-width: ix+width+1]
             pos = np.where(d == np.nanmax(d))
             ymax = iy + pos[0][0] - width
             xmax = ix + pos[1][0] - width

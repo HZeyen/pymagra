@@ -12,8 +12,7 @@ from PyQt5.QtWidgets import QVBoxLayout, QWidget
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import (
     FigureCanvasQTAgg as FigureCanvas,
-    NavigationToolbar2QT as NavigationToolbar,
-)
+    NavigationToolbar2QT as NavigationToolbar)
 from matplotlib.gridspec import GridSpec
 
 
@@ -60,9 +59,8 @@ class newWindow(QWidget):
         self.layout.addWidget(self.toolbar)
         self.layout.addWidget(self.canvas)
         self.canvas.setFocusPolicy(QtCore.Qt.ClickFocus)
-        self.cid_enter = self.canvas.mpl_connect(
-            "axes_enter_event", self.on_enter_event
-        )
+        self.cid_enter = self.canvas.mpl_connect("axes_enter_event",
+                                                 self.on_enter_event)
         self.canvas.draw()
         self.xsize = xsize
         self.ysize = ysize
@@ -75,36 +73,36 @@ class newWindow(QWidget):
     # def closeEvent(self, event):
     def close_window(self):
         """Override this method to cleanly close the window."""
-        # Disconnect matplotlib events
-        # Explicitly stop any pending drawing operations
-        # Ensure no pending events are trying to access the canvas
+# Disconnect matplotlib events
+# Explicitly stop any pending drawing operations
+# Ensure no pending events are trying to access the canvas
         self.canvas.flush_events()
 
         if hasattr(self, "cid_enter") and self.cid_enter is not None:
             self.canvas.mpl_disconnect(self.cid_enter)
 
-        # Explicitly close the matplotlib figure
+# Explicitly close the matplotlib figure
         plt.close(self.fig)
-        # Disconnect the toolbar events (if any)
+# Disconnect the toolbar events (if any)
         if self.toolbar is not None:
             self.toolbar.clear()
-        # Remove the canvas and toolbar from the layout before deletion
+# Remove the canvas and toolbar from the layout before deletion
         self.layout.removeWidget(self.canvas)
         self.layout.removeWidget(self.toolbar)
 
-        # Ensure that no further actions are performed on the canvas
+# Ensure that no further actions are performed on the canvas
         self.canvas.setParent(None)  # Detach canvas from the parent widget
         self.toolbar.setParent(None)  # Detach toolbar from the parent widget
-        # Delete the canvas and figure
+# Delete the canvas and figure
         self.canvas.deleteLater()
         self.toolbar.deleteLater()
-        # Clear the layout (optional but good hygiene)
+# Clear the layout (optional but good hygiene)
         while self.layout.count():
             item = self.layout.takeAt(0)
             widget = item.widget()
             if widget is not None:
                 widget.deleteLater()
-        # Close the window
+# Close the window
         self.close()
 
     def setHelp(self, text):
@@ -201,7 +199,7 @@ class newWindow(QWidget):
         Left button adds new point. right button finishes. Wheel erases last
         clicked point or, if no points are available, returns
         """
-        # set flags and initialize coordinates
+# set flags and initialize coordinates
         self.released = False
         self.start = []
         self.coor_x = []
@@ -211,7 +209,7 @@ class newWindow(QWidget):
         def onPress(event):
             self.event = event
             self.line_click = False
-            # left mouse button is pressed
+# left mouse button is pressed
             if event.button == 1:
                 if event.xdata is None or event.ydata is None:
                     self.mouse = 1
@@ -220,8 +218,7 @@ class newWindow(QWidget):
                     return
                 if len(self.coor_x) == 0:
                     if (event.xdata < 0 and nleft == 0) or (
-                        event.xdata >= 0 and nright == 0
-                    ):
+                            event.xdata >= 0 and nright == 0):
                         self.start = [0, 0]
                         self.coor_x.append(0)
                         self.coor_y.append(0)
@@ -233,24 +230,23 @@ class newWindow(QWidget):
                         self.side = -1
                     else:
                         self.side = 1
-                    self.background = self.fig.canvas.copy_from_bbox(self.fig.bbox)
-                # set starting point initially also as end point
+                    self.background =\
+                        self.fig.canvas.copy_from_bbox(self.fig.bbox)
+# set starting point initially also as end point
                 self.coor_x.append(event.xdata)
                 self.coor_y.append(event.ydata)
                 self.canvas_follow = self.line.figure.canvas
                 self.axl = self.line.axes
                 self.line.set_data(self.coor_x, self.coor_y)
                 self.axl.draw_artist(self.line)
-                # set action on mouse motion
+# set action on mouse motion
                 self.cidmotion = self.line.figure.canvas.mpl_connect(
-                    "motion_notify_event", onMotion
-                )
-                # set action on mouse release
+                    "motion_notify_event", onMotion)
+# set action on mouse release
                 if release_flag:
                     self.cidrelease = self.line.figure.canvas.mpl_connect(
-                        "button_release_event", onRelease
-                    )
-            # if right button is pressed, finish
+                        "button_release_event", onRelease)
+# if right button is pressed, finish
             elif event.button == 3:
                 self.mouse = 3
                 self.x_event = event.xdata
@@ -268,7 +264,7 @@ class newWindow(QWidget):
                 self.background = None
                 self.released = True
                 return
-            # Wheel is pressed, erase last point
+# Wheel is pressed, erase last point
             else:
                 if len(self.coor_x) > 0:
                     print(f"Erase point ({self.coor_x[-1]},{self.coor_y[-1]})")
@@ -278,10 +274,9 @@ class newWindow(QWidget):
                     self.axl = self.line.axes
                     self.line.set_data(self.coor_x, self.coor_y)
                     self.axl.draw_artist(self.line)
-                    # set action on mouse motion
+# set action on mouse motion
                     self.cidmotion = self.line.figure.canvas.mpl_connect(
-                        "motion_notify_event", onMotion
-                    )
+                        "motion_notify_event", onMotion)
                 else:
                     self.mouse = 2
                     self.x_event = event.xdata
@@ -318,7 +313,7 @@ class newWindow(QWidget):
             None.
 
             """
-            # If line finishes when button is released do this here
+# If line finishes when button is released do this here
             global figure
             self.line.figure.canvas.mpl_disconnect(self.cidpress)
             self.line.figure.canvas.mpl_disconnect(self.cidmotion)
@@ -349,10 +344,10 @@ class newWindow(QWidget):
             self.event = event
             if event.xdata is None or event.ydata is None:
                 return False
-            # set second point of line as actual mouse position
+# set second point of line as actual mouse position
             self.coor_x[-1] = event.xdata
             self.coor_y[-1] = event.ydata
-            # Draw new line
+# Draw new line
             self.line.set_data(self.coor_x, self.coor_y)
             self.line.set_color("k")
             self.canvas_follow = self.line.figure.canvas
@@ -362,36 +357,18 @@ class newWindow(QWidget):
             self.canvas_follow.blit(self.axl.bbox)
             return True
 
-        # set action on mouse motion
+# set action on mouse motion
         self.cidpress = self.line.figure.canvas.mpl_connect(
-            "button_press_event", onPress
-        )
-        # As long as release flag is not set listen to events
+            "button_press_event", onPress)
+# As long as release flag is not set listen to events
         while self.released is not True:
             QtCore.QCoreApplication.processEvents()
-        # Return event information and vector of line coordinates
+# Return event information and vector of line coordinates
         return self.event, self.coor_x, self.coor_y
 
-    def plot_image(
-        self,
-        ax,
-        data,
-        x,
-        y,
-        mincol,
-        maxcol,
-        percent,
-        c,
-        ptitle,
-        xlabel,
-        ylabel,
-        clabel,
-        grid_flag,
-        fontsize,
-        bar_or,
-        nticks,
-        bar_height,
-    ):
+    def plot_image(self, ax, data, x, y, mincol, maxcol, percent, c, ptitle,
+                   xlabel, ylabel, clabel, grid_flag, fontsize, bar_or,
+                   nticks, bar_height):
         """
         Plot one 2D arrays into floating window using matplotlib's imshow.
 
@@ -451,102 +428,56 @@ class newWindow(QWidget):
             min_col = mincol
         dx2 = (x[1] - x[0]) / 2
         dy2 = (y[1] - y[0]) / 2
-        im1 = ax.imshow(
-            np.flip(data, axis=0),
-            cmap=c,
-            aspect="equal",
-            extent=[np.min(x) - dx2, np.max(x) + dx2, np.min(y) - dy2, np.max(y) + dy2],
-            vmin=min_col,
-            vmax=max_col,
-        )
+        im1 = ax.imshow(np.flip(data, axis=0), cmap=c, aspect="equal",
+                        extent=[np.min(x)-dx2, np.max(x)+dx2,
+                                np.min(y)-dy2, np.max(y)+dy2],
+                        vmin=min_col, vmax=max_col)
         ax.set_title(ptitle, fontsize=fontsize)
         ax.set_xlabel(xlabel, fontsize=fontsize - 2)
         ax.set_ylabel(ylabel, fontsize=fontsize - 2)
         ax.tick_params(axis="both", which="major", labelsize=fontsize - 2)
         if bar_or == "vertical":
-            cax = ax.inset_axes([1.015, 0.05, 0.03, bar_height], transform=ax.transAxes)
+            cax = ax.inset_axes([1.015, 0.05, 0.03, bar_height],
+                                transform=ax.transAxes)
         else:
-            cax = ax.inset_axes([0.05, -0.15, bar_height, 0.05], transform=ax.transAxes)
+            cax = ax.inset_axes([0.05, -0.15, bar_height, 0.05],
+                                transform=ax.transAxes)
         smin = np.round(np.nanmin(data), rd)
         smax = np.round(np.nanmax(data), rd)
         ssmin = min_col
         ssmax = max_col
-        ds = (ssmax - ssmin) / nticks
-        ticks = np.round(np.arange(ssmin, ssmax + ds / 2, ds), rd)
+        ds = (ssmax-ssmin)/nticks
+        ticks = np.round(np.arange(ssmin, ssmax+ds/2, ds), rd)
         ticks = list(ticks)
-        cbar = self.fig.colorbar(
-            im1,
-            orientation=bar_or,
-            ax=ax,
-            cax=cax,
-            fraction=0.2,
-            extend="both",
-            ticks=ticks,
-        )
+        cbar = self.fig.colorbar(im1, orientation=bar_or, ax=ax, cax=cax,
+                                 fraction=0.2, extend="both", ticks=ticks)
         if bar_or == "vertical":
             cbar.ax.set_ylabel(clabel, size=fontsize - 2)
-            cbar.ax.text(
-                0.0,
-                -0.075,
-                f"{smin}",
-                verticalalignment="top",
-                horizontalalignment="left",
-                transform=cbar.ax.transAxes,
-                fontsize=fontsize - 2,
-            )
-            cbar.ax.text(
-                0.0,
-                1.075,
-                f"{smax}",
-                verticalalignment="bottom",
-                horizontalalignment="left",
-                transform=cbar.ax.transAxes,
-                fontsize=fontsize - 2,
-            )
+            cbar.ax.text(0.0, -0.075, f"{smin}", verticalalignment="top",
+                         horizontalalignment="left",
+                         transform=cbar.ax.transAxes, fontsize=fontsize-2)
+            cbar.ax.text(0.0, 1.075, f"{smax}", verticalalignment="bottom",
+                         horizontalalignment="left",
+                         transform=cbar.ax.transAxes, fontsize=fontsize-2)
             for lab in cbar.ax.yaxis.get_ticklabels():
                 lab.set_fontsize(fontsize - 2)
         else:
             cbar.ax.set_xlabel(clabel, size=fontsize - 2)
-            cbar.ax.text(
-                0.0,
-                1.0,
-                f"{smin}",
-                verticalalignment="bottom",
-                horizontalalignment="right",
-                transform=cbar.ax.transAxes,
-                fontsize=fontsize - 2,
-            )
-            cbar.ax.text(
-                1.0,
-                1.0,
-                f"{smax}",
-                verticalalignment="bottom",
-                horizontalalignment="left",
-                transform=cbar.ax.transAxes,
-                fontsize=fontsize - 2,
-            )
+            cbar.ax.text(0.0, 1.0, f"{smin}", verticalalignment="bottom",
+                         horizontalalignment="right",
+                         transform=cbar.ax.transAxes, fontsize=fontsize-2)
+            cbar.ax.text(1.0, 1.0, f"{smax}", verticalalignment="bottom",
+                         horizontalalignment="left",
+                         transform=cbar.ax.transAxes, fontsize=fontsize-2)
             for lab in cbar.ax.xaxis.get_ticklabels():
                 lab.set_fontsize(fontsize - 2)
         if grid_flag:
             ax.grid(visible=True)
         ax.set_aspect("equal", adjustable="box")
 
-    def plot_images(
-        self,
-        data,
-        x,
-        y,
-        mincol=0,
-        maxcol=0,
-        percent=0,
-        c="rainbow",
-        ptitle="",
-        xlabel="",
-        ylabel="",
-        clabel="",
-        grid_flag=True,
-        bar_height=0.9,
-    ):
+    def plot_images(self, data, x, y, mincol=0, maxcol=0, percent=0,
+                    c="rainbow", ptitle="", xlabel="", ylabel="", clabel="",
+                    grid_flag=True, bar_height=0.9):
         """
         Plot one or several 2D arrays into floating window
 
@@ -599,19 +530,16 @@ class newWindow(QWidget):
         ax_float: List of Matplot axes
 
         """
-        # Only 2D arrays may be plotted, test if 1D data are passed to the routine
+# Only 2D arrays may be plotted, test if 1D data are passed to the routine
         if data.ndim < 2:
             _ = QtWidgets.QMessageBox.warning(
-                None,
-                "Warning",
+                None, "Warning",
                 "Function plotFloating is not prepared for 1D plots",
-                QtWidgets.QMessageBox.Close,
-                QtWidgets.QMessageBox.Close,
-            )
+                QtWidgets.QMessageBox.Close, QtWidgets.QMessageBox.Close)
             return False
-        # Create figure
+# Create figure
         self.fig.tight_layout(w_pad=15, h_pad=2)
-        # If 2D array is passed create single axis
+# If 2D array is passed create single axis
         ax_float = []
         if data.ndim == 2:
             self.gs = GridSpec(16, 10, self.fig)
@@ -620,13 +548,13 @@ class newWindow(QWidget):
             bar_or = "vertical"
             nticks = 10
             fontsz = 14
-        # If 3D array is passed create 2 or 3 axis depending on the shape of data
+# If 3D array is passed create 2 or 3 axis depending on the shape of data
         else:
             ddx = x.max() - x.min()
             ddy = y.max() - y.min()
             data1 = data[:, :, 0]
-            # If horizontal extension is > 1.5x vertical one, plot axes vertically one
-            #    above the next. If not plot axis in horizontal direction
+# If horizontal extension is > 1.5x vertical one, plot axes vertically one
+#    above the next. If not plot axis in horizontal direction
             if data.shape[2] == 3:
                 facx = self.xsize / (3.0 * ddx)
                 facy = self.ysize / (3.0 * ddy)
@@ -663,7 +591,7 @@ class newWindow(QWidget):
                     bar_or = "horizontal"
                     nticks = 6
                     fontsz = 12
-        # Plot first into axis ax_float[0]
+# Plot first into axis ax_float[0]
         if isinstance(ptitle, list):
             pt = ptitle[0]
             xl = xlabel[0]
@@ -674,68 +602,22 @@ class newWindow(QWidget):
             xl = xlabel
             yl = ylabel
             cl = clabel
-        self.plot_image(
-            ax_float[0],
-            data1,
-            x,
-            y,
-            mincol,
-            maxcol,
-            percent,
-            c,
-            pt,
-            xl,
-            yl,
-            cl,
-            grid_flag,
-            fontsz,
-            bar_or,
-            nticks,
-            bar_height,
-        )
-        # If more than one map has to be plotted, do this now
+        self.plot_image(ax_float[0], data1, x, y, mincol, maxcol, percent, c,
+                        pt, xl, yl, cl, grid_flag, fontsz, bar_or, nticks,
+                        bar_height)
+# If more than one map has to be plotted, do this now
         if data.ndim > 2:
             if data.shape[2] > 1:
-                self.plot_image(
-                    ax_float[1],
-                    data[:, :, 1],
-                    x,
-                    y,
-                    mincol,
-                    maxcol,
-                    percent,
-                    c,
-                    ptitle[1],
-                    xlabel[1],
-                    ylabel[1],
-                    clabel[1],
-                    grid_flag,
-                    fontsz,
-                    bar_or,
-                    nticks,
-                    bar_height,
-                )
-                # If a third plot is to be done, do this now
+                self.plot_image(ax_float[1], data[:, :, 1], x, y, mincol,
+                                maxcol, percent, c, ptitle[1], xlabel[1],
+                                ylabel[1], clabel[1], grid_flag, fontsz,
+                                bar_or, nticks, bar_height)
+# If a third plot is to be done, do this now
                 if data.shape[2] > 2:
-                    self.plot_image(
-                        ax_float[2],
-                        data[:, :, 2],
-                        x,
-                        y,
-                        mincol,
-                        maxcol,
-                        percent,
-                        c,
-                        ptitle[2],
-                        xlabel[2],
-                        ylabel[2],
-                        clabel[2],
-                        grid_flag,
-                        fontsz,
-                        bar_or,
-                        nticks,
-                        bar_height,
-                    )
+                    self.plot_image(ax_float[2], data[:, :, 2], x, y, mincol,
+                                    maxcol, percent, c, ptitle[2],  xlabel[2],
+                                    ylabel[2], clabel[2], grid_flag, fontsz,
+                                    bar_or, nticks, bar_height)
         if len(ax_float) == 1:
             return ax_float[0]
         return ax_float

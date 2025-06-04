@@ -166,9 +166,9 @@ class Dialog(QtWidgets.QDialog):
             if types[i].lower() == "l":
                 if values[i]:
                     if values[i].lower() == "b":
-                        self.dlabels.append(QtWidgets.QLabel("<b>" + lab + "</b>"))
+                        self.dlabels.append(QtWidgets.QLabel("<b>"+lab+"</b>"))
                     elif values[i].lower() == "i":
-                        self.dlabels.append(QtWidgets.QLabel("<i>" + lab + "</i>"))
+                        self.dlabels.append(QtWidgets.QLabel("<i>"+lab+"</i>"))
                     else:
                         self.dlabels.append(QtWidgets.QLabel(lab))
                 else:
@@ -280,56 +280,56 @@ class Dialog(QtWidgets.QDialog):
         None.
 
         """
-        # If a nex box is checked, search the one which has been checked
-        # If self.ckb has None value, the corresponding entry is not a checkbox
+# If a nex box is checked, search the one which has been checked
+# If self.ckb has None value, the corresponding entry is not a checkbox
         if checked == Qt.Checked:
             for i, ck in enumerate(self.ckb):
                 if not ck:
                     continue
-                # If self.ckb.checkState is checked after click, set ckState to True and do
-                #    changes
+# If self.ckb.checkState is checked after click, set ckState to True and do
+#    changes
                 if ck.checkState() == Qt.Checked:
                     self.ckState[i] = True
-                    # If checkbox nr i was not checked, increase the number of checked boxes
-                    #    (n_checked) and store the order of checkin in self.ck_order
+# If checkbox nr i was not checked, increase the number of checked boxes
+#    (n_checked) and store the order of checkin in self.ck_order
                     if self.ck_order[i] == 0:
                         self.n_checked += 1
                         self.ck_order[i] = self.n_checked
-                        # if checkboxes are called from function "False_Color", change the label,
-                        #    indicating the clor which will be used for the corresponding indicator.
-                        self.ckb[i].setText(
-                            f"{self.labels[i]} (" + f"{self.ck_order[i]})"
-                        )
+# if checkboxes are called from function "False_Color", change the label,
+#    indicating the clor which will be used for the corresponding indicator.
+                        self.ckb[i].setText(f"{self.labels[i]} ("
+                                            + f"{self.ck_order[i]})")
                         break
-                # If self.ckb.checkState is still unchecked, set ckState to Falsee
+# If self.ckb.checkState is still unchecked, set ckState to Falsee
                 else:
                     self.ckState[i] = False
-        # If click has unchecked a checkbox, do necessary changes
-        # If self.ckb has None value, the corresponding entry is not a checkbox
+# If click has unchecked a checkbox, do necessary changes
+# If self.ckb has None value, the corresponding entry is not a checkbox
         else:
             for i, ck in enumerate(self.ckb):
                 if not ck:
                     continue
-                # If self.ckb.checkState is still checked, set ckState to True
+# If self.ckb.checkState is still checked, set ckState to True
                 if ck.checkState() == Qt.Checked:
                     self.ckState[i] = True
-                # If checkbox is no longer checked but it was (self?ckState), the unchecked box
-                #    is found
+# If checkbox is no longer checked but it was (self?ckState), the unchecked box
+#    is found
                 else:
                     if self.ckState[i] is True:
                         self.ckState[i] = False
                         n = self.ck_order[i]
-                        # reset ck_order to 0 (indicating also unchecked box)
+# reset ck_order to 0 (indicating also unchecked box)
                         self.ck_order[i] = 0
-                        # Reset label to initial value (changes only for function "False_Color")
+# Reset label to initial value (changes only for function "False_Color")
                         self.ckb[i].setText(self.labels[i])
-                        # For all boxes that were checked later than the unchecked one, reduce their
-                        #    checking order by 1 and, if function is False_Color, indicate the new
-                        #    color uses for plotting
+# For all boxes that were checked later than the unchecked one, reduce their
+#    checking order by 1 and, if function is False_Color, indicate the new
+#    color uses for plotting
                         for j, ck in enumerate(self.ck_order):
                             if ck > n:
                                 ck -= 1
-                                self.ckb[j].setText(f"{self.labels[j]} (" + f"{ck})")
+                                self.ckb[j].setText(f"{self.labels[j]} ("
+                                                    + f"{ck})")
                         self.n_checked -= 1
                         break
         self.show()

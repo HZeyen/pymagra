@@ -59,9 +59,9 @@ class Okabe:
         else:
             self.GM = "G"
         self.galile = 6.674e-6
-        # No idea why in the following magnetization calculation the Earth's field
-        # must be divided by 1000. Comparison of results with analytical formula for a
-        # sphere and with Plouff's program gave this factor.
+# No idea why in the following magnetization calculation the Earth's field
+# must be divided by 1000. Comparison of results with analytical formula for a
+# sphere and with Plouff's program gave this factor.
         self.sus = sus / (4 * np.pi)
         self.rem = rem
         self.inc = np.radians(rem_i)
@@ -255,7 +255,7 @@ class Okabe:
             zfa_pt = self.zfac - alti
             yfa_pt = self.yfac - yp
             xfa_pt = self.xfac - xp
-            # ATTN au passage de coord. ( x <-> y )    ???
+# ATTN au passage de coord. ( x <-> y )    ???
             anom = -self.Okabe1(yfa_pt, xfa_pt, zfa_pt)
             if not np.isfinite(anom):
                 print(f"face {ifac}, point ({xp}, {yp}): {anom}")
@@ -273,9 +273,9 @@ class Okabe:
             self.contra = 0.0
         else:
             self.contra = self.galile * rho
-            # No idea whay, but the results for gravity calculation must be divided by 2
-            # to get the correct result (test e.g. with Bouguer plate, but also comparison
-            # with Nagy program)
+# No idea whay, but the results for gravity calculation must be divided by 2
+# to get the correct result (test e.g. with Bouguer plate, but also comparison
+# with Nagy program)
             self.contra *= 0.5
             self.rim[0] = 0.0
             self.rim[1] = 0.0
@@ -349,13 +349,13 @@ class Okabe:
         # Dimension X(51),Y(51),Z(51)
         # Common /Keps/Deps,Eps
         """
-        # ! FERMETURE DU POLIGONE
+# ! FERMETURE DU POLIGONE
         if len(x) < 3:
             return 0.0
         cosp, sinp, coste, sinte = self.rotation3D(x, y, z)
         if np.isclose(abs(cosp), 0.0):
             return 0.0
-        # Rotations de 'teta' et 'phi' (formule (17) de Okabe)
+# Rotations de 'teta' et 'phi' (formule (17) de Okabe)
         xt, yt, zt = self.rotation2D(x, y, z, cosp, sinp, coste, sinte)
 
         resul = 0.0
@@ -374,10 +374,9 @@ class Okabe:
             z2 = zt[i + 1]
             z1 = zt[i]
             res = self.Okg(cosps, sinps, x2, y2, z2) - self.Okg(
-                cosps, sinps, x1, y1, z1
-            )
+                cosps, sinps, x1, y1, z1)
             resul += res
-        # return resul*cosp
+# return resul*cosp
         return resul * self.contra * cosp
 
     def Okg(self, c, s, x, y, z):
@@ -406,13 +405,12 @@ class Okabe:
         -------
         Magnetic effect of the face
         """
-        # FERMETURE DU POLIGONE
+# FERMETURE DU POLIGONE
         if len(x) < 3:
             return 0.0
         cosp, sinp, coste, sinte = self.rotation3D(x, y, z)
-        cmpeff = (
-            self.rim[0] * sinp * coste + self.rim[1] * sinp * sinte + self.rim[2] * cosp
-        )
+        cmpeff = (self.rim[0]*sinp*coste+self.rim[1]*sinp
+                  * sinte+self.rim[2]*cosp)
         if np.isclose(cmpeff, 0.0):
             return 0.0
         # Rotation des axes magnetiques
@@ -423,7 +421,7 @@ class Okabe:
         xm = at * cosp - zt * sinp
         ym = yt * coste - xt * sinte
         zm = at * sinp + zt * cosp
-        # Rotations de 'teta' et 'phi' (formule (17) de Okabe)
+# Rotations de 'teta' et 'phi' (formule (17) de Okabe)
         xt, yt, zt = self.rotation2D(x, y, z, cosp, sinp, coste, sinte)
 
         resul = 0.0
@@ -441,8 +439,8 @@ class Okabe:
             else:
                 cosps = dx / r
                 sinps = dy / r
-                # Rotation dans le plan de la facette (formule 20)
-                # A partir d'ici  X -> Qsi  et Y -> Eta
+# Rotation dans le plan de la facette (formule 20)
+# A partir d'ici  X -> Qsi  et Y -> Eta
                 x2 = yi1 * sinps + xi1 * cosps
                 y2 = yi1 * cosps - xi1 * sinps
                 x1 = yi * sinps + xi * cosps
@@ -455,8 +453,6 @@ class Okabe:
         return resul * cmpeff
 
     def Okm(self, xm, ym, zm, c, s, x, y, z):
-        #   Real*8 Deps
-        # Common /Keps/ Deps,Eps
         aa = y * y + z * z
         r = np.sqrt(x * x + aa)
         if np.isclose(abs(r), 0.0):

@@ -45,8 +45,8 @@ class Geometrics:
         None.
 
         """
-        # Initialize main frame widget
-        #        super(Geometrics, self).__init__()
+# Initialize main frame widget
+#        super(Geometrics, self).__init__()
         super().__init__()
         self.n_lines = 0
         self.n_data = 0
@@ -99,9 +99,8 @@ class Geometrics:
         self.line_pos = np.array([])
         self.line_choice = "all"
 
-    def fill_dict(
-        self, ntracks, x1, y1, mag1, x2, y2, mag2, mark_samples, dx_seg, dy_seg, d_seg
-    ):
+    def fill_dict(self, ntracks, x1, y1, mag1, x2, y2, mag2, mark_samples,
+                  dx_seg, dy_seg, d_seg):
         """
         Fill in values of dictionary self.segments for a full line.
 
@@ -156,9 +155,8 @@ class Geometrics:
         self.segments[ntracks]["median1"] = np.nanmedian(mag1)
         self.segments[ntracks]["mask"] = True
         self.segments[ntracks]["block"] = self.n_blocks
-        self.segments[ntracks]["mark_samples"] = (
-            np.array(mark_samples, dtype=int) + nshift
-        )
+        self.segments[ntracks]["mark_samples"] = (np.array(mark_samples,
+                                                           dtype=int) + nshift)
         self.segments[ntracks]["dx"] = np.array(dx_seg)
         self.segments[ntracks]["dy"] = np.array(dy_seg)
         self.segments[ntracks]["d"] = np.array(d_seg)
@@ -180,18 +178,17 @@ class Geometrics:
             self.segments[nt1]["mask"] = True
             self.segments[nt1]["block"] = self.n_blocks
             self.segments[nt1]["sensor"] = 2
-            self.segments[nt1]["direction"] = self.segments[ntracks]["direction"]
+            self.segments[nt1]["direction"] =\
+                self.segments[ntracks]["direction"]
             self.segments[nt1]["mark_samples"] = (
                 np.array(mark_samples, dtype=int)
-                + self.segments[ntracks]["mark_samples"][-1]
-            )
+                + self.segments[ntracks]["mark_samples"][-1])
             self.segments[nt1]["dx"] = np.array(dx_seg)
             self.segments[nt1]["dy"] = np.array(dy_seg)
             self.segments[nt1]["d"] = np.array(d_seg)
 
-    def append_data(
-        self, x, y, d, year, month, day, hour, minute, second, time, mark, line
-    ):
+    def append_data(self, x, y, d, year, month, day, hour, minute, second,
+                    time, mark, line):
         """
         Appends date, time, coordinate information of one segment to arrays
 
@@ -222,15 +219,19 @@ class Geometrics:
         line: list of int
             mark numbers
         """
-        self.x = np.concatenate((self.x, np.round(np.array(x, dtype=float), 3)))
-        self.y = np.concatenate((self.y, np.round(np.array(y, dtype=float), 3)))
+        self.x = np.concatenate((self.x, np.round(
+            np.array(x, dtype=float), 3)))
+        self.y = np.concatenate((self.y, np.round(
+            np.array(y, dtype=float), 3)))
         self.sensor1 = np.concatenate((self.sensor1, np.array(d, dtype=float)))
         self.day = np.concatenate((self.day, np.array(day, dtype=int)))
         self.month = np.concatenate((self.month, np.array(month, dtype=int)))
         self.year = np.concatenate((self.year, np.array(year, dtype=int)))
         self.hour = np.concatenate((self.hour, np.array(hour, dtype=int)))
-        self.minute = np.concatenate((self.minute, np.array(minute, dtype=int)))
-        self.second = np.concatenate((self.second, np.array(second, dtype=float)))
+        self.minute = np.concatenate((self.minute, np.array(
+            minute, dtype=int)))
+        self.second = np.concatenate((self.second, np.array(
+            second, dtype=float)))
         tt = (
             np.array(time, dtype=int) * 86400.0
             + np.array(hour, dtype=int) * 3600.0
@@ -241,7 +242,8 @@ class Geometrics:
         self.mark = np.concatenate((self.mark, np.array(mark, dtype=int)))
         self.line = np.concatenate((self.line, np.array(line, dtype=int)))
 
-    def read_stn(self, infile, n_block, h1_sensor=-1.4, h2_sensor=-0.4, dispo=0):
+    def read_stn(self, infile, n_block, h1_sensor=-1.4, h2_sensor=-0.4,
+                 dispo=0):
         """
         Reads a 2-sensor Geometix .stn file
         If other data have already been read from another file, the new ones
@@ -349,7 +351,7 @@ class Geometrics:
               - "y"   N-S coordinates of data points
 
         """
-        # Read magnetic field data ("stn" file)
+# Read magnetic field data ("stn" file)
         self.n_blocks = n_block
         self.d_sensor = h2_sensor - h1_sensor
         self.d_sensor2 = self.d_sensor / 2.0
@@ -396,22 +398,19 @@ class Geometrics:
 
         ntracks = self.n_lines - 1
 
-        # read all lines in magnetic data file
+# read all lines in magnetic data file
         with open(infile, "r", encoding="utf-8") as fh:
             ll = fh.readlines()
         try:
             _ = int(ll[0].split()[0])
+# If none of the above, stop program
         except Exception as e:
-            # If none of the above, stop program
             _ = QtWidgets.QMessageBox.critical(
-                None,
-                "Error",
-                f"Error: {e}\n\n"
+                None, "Error", f"Error: {e}\n\n"
                 + f"File {infile} is not a Geometrics file.\nProgram stops",
-                QtWidgets.QMessageBox.Ok,
-            )
+                QtWidgets.QMessageBox.Ok)
             raise IOError("Wrong file type\n") from e
-        # store reversed order in list "lines"
+# store reversed order in list "lines"
         lines = ll[::-1]
         last_mark = 5
         ndat_seg = 0
@@ -426,24 +425,24 @@ class Geometrics:
         dy_seg = []
         d_seg = []
 
-        # read the lines and get data values and corresponding coordinates
+# read the lines and get data values and corresponding coordinates
         for lin in lines:
             line = lin.split()
-            # if first number in line is 3, it is a mark (including beginning and end of
-            #    line) seg_break_data contains number of data point before which mark is
-            #    located
-            #    id_seg_break contains the type of mark
-            #    seg_break_line contains the line in the data file where mark is located
-            #    line segments contains for every line the position of marks (between
-            #    marks, data positions are interpolated at regular spacing)
-            #    dx_seg contains distance between samples for every segment
+# if first number in line is 3, it is a mark (including beginning and end of
+#    line) seg_break_data contains number of data point before which mark is
+#    located
+#    id_seg_break contains the type of mark
+#    seg_break_line contains the line in the data file where mark is located
+#    line segments contains for every line the position of marks (between
+#    marks, data positions are interpolated at regular spacing)
+#    dx_seg contains distance between samples for every segment
             if int(line[0]) == 3:
                 xx = np.round(float(line[1]), 3)
                 yy = np.round(float(line[2]), 3)
                 line_number = int(line[6])
                 mark_number = int(line[7])
-                # code 36 indicates beginning of a new line
-                # code 4 indicates a mark, 5 is the Endline mark
+# code 36 indicates beginning of a new line
+# code 4 indicates a mark, 5 is the Endline mark
                 if int(line[8]) in (4, 5):
                     if ndat_seg == 0:
                         continue
@@ -455,14 +454,14 @@ class Geometrics:
                         del mark_samples[-1]
                         continue
                     # print(f"nline: {ntracks}: nseg: "+\
-                    #       f"{len(self.segments[ntracks]['mark_samples'])-1},"+\
-                    #       f" ndseg: {ndat_segment}")
-                    # If last mark had code 36, a new line was started and it is
-                    #    the first mark after start. The number of measurement steps
-                    #    is 1 less than the number of data points, if not,
-                    #    both are equal. This means that it is supposed that the
-                    #    mark was pressed atthe position of the measurement just
-                    #    before the mark
+                    #       f"{len(self.segments[ntracks]['mark_samples'])-1},"\
+                    #       + f" ndseg: {ndat_segment}")
+# If last mark had code 36, a new line was started and it is
+#    the first mark after start. The number of measurement steps
+#    is 1 less than the number of data points, if not,
+#    both are equal. This means that it is supposed that the
+#    mark was pressed atthe position of the measurement just
+#    before the mark
                     if nstart:
                         dx = (xx - xx0) / (ndat_segment - 1)
                         dy = (yy - yy0) / (ndat_segment - 1)
@@ -506,57 +505,24 @@ class Geometrics:
                     xx0 = xx
                     yy0 = yy
                     nstart = False
-                if int(line[8]) == 5 or (int(line[8]) == 36 and last_mark != 5):
-                    self.fill_dict(
-                        ntracks,
-                        xpt1,
-                        ypt1,
-                        mag1,
-                        xpt2,
-                        ypt2,
-                        mag2,
-                        mark_samples,
-                        dx_seg,
-                        dy_seg,
-                        d_seg,
-                    )
-                    self.append_data(
-                        xpt1,
-                        ypt1,
-                        mag1,
-                        year_m,
-                        month_m,
-                        day_m,
-                        hour_m,
-                        min_m,
-                        sec_m,
-                        time_m,
-                        mark,
-                        line_nr,
-                    )
+                if int(line[8]) == 5 or (int(line[8]) == 36 and
+                                         last_mark != 5):
+                    self.fill_dict(ntracks, xpt1, ypt1, mag1, xpt2, ypt2, mag2,
+                                   mark_samples, dx_seg, dy_seg, d_seg)
+                    self.append_data(xpt1, ypt1, mag1, year_m, month_m, day_m,
+                                     hour_m, min_m, sec_m, time_m, mark,
+                                     line_nr)
                     if self.dispo:
-                        self.append_data(
-                            xpt2,
-                            ypt2,
-                            mag2,
-                            year_m,
-                            month_m,
-                            day_m,
-                            hour_m,
-                            min_m,
-                            sec_m,
-                            time_m,
-                            mark,
-                            line_nr,
-                        )
+                        self.append_data(xpt2, ypt2, mag2, year_m, month_m,
+                                         day_m, hour_m, min_m, sec_m, time_m,
+                                         mark, line_nr)
                         self.n_lines += 1
                     else:
                         self.sensor2 = np.concatenate(
-                            (self.sensor2, np.array(mag2, dtype=float))
-                        )
+                            (self.sensor2, np.array(mag2, dtype=float)))
                     last_mark = int(line[8])
                     ndat_seg = 0
-                # xpt and ypt contain the coordinates of all data points of the actual line
+# xpt and ypt contain the coordinates of all data points of the actual line
                 if int(line[8]) == 36:
                     xx0 = xx
                     yy0 = yy
@@ -587,11 +553,11 @@ class Geometrics:
                     if self.dispo:
                         self.segments[ntracks + 1] = {}
                     continue
-                # Don't take into account other mark codes (mainly Pause)
+# Don't take into account other mark codes (mainly Pause)
                 continue
-            # if first number in line is 0, it is a data point
-            # mag1 contains data of first sensor, mag 2 of second sensor
-            # In addition, times are stored
+# if first number in line is 0, it is a data point
+# mag1 contains data of first sensor, mag 2 of second sensor
+# In addition, times are stored
             if int(line[0]) == 0:
                 mag1.append(float(line[1]))
                 ic = 2
@@ -607,58 +573,23 @@ class Geometrics:
                 day_m.append(int(t[1]))
                 month_m.append(int(t[0]))
                 year_m.append(int(t[2]))
-                time_m.append(utils.date2julian(day_m[-1], month_m[-1], year_m[-1]))
+                time_m.append(utils.date2julian(day_m[-1], month_m[-1],
+                                                year_m[-1]))
                 line_nr.append(line_number)
                 mark.append(mark_number)
                 ndat_seg += 1
 
         if self.n_lines > 0 and last_mark != 5:
-            self.fill_dict(
-                ntracks,
-                xpt1,
-                ypt1,
-                mag1,
-                xpt2,
-                ypt2,
-                mag2,
-                mark_samples,
-                dx_seg,
-                dy_seg,
-                d_seg,
-            )
-            self.append_data(
-                xpt1,
-                ypt1,
-                mag1,
-                year_m,
-                month_m,
-                day_m,
-                hour_m,
-                min_m,
-                sec_m,
-                time_m,
-                mark,
-                line_nr,
-            )
+            self.fill_dict(ntracks, xpt1, ypt1, mag1, xpt2, ypt2, mag2,
+                           mark_samples, dx_seg, dy_seg, d_seg)
+            self.append_data(xpt1, ypt1, mag1, year_m, month_m, day_m,
+                             hour_m, min_m, sec_m, time_m, mark, line_nr)
             if self.dispo > 0:
-                self.append_data(
-                    xpt2,
-                    ypt2,
-                    mag2,
-                    year_m,
-                    month_m,
-                    day_m,
-                    hour_m,
-                    min_m,
-                    sec_m,
-                    time_m,
-                    mark,
-                    line_nr,
-                )
+                self.append_data(xpt2, ypt2, mag2, year_m, month_m, day_m,
+                                 hour_m, min_m, sec_m, time_m, mark, line_nr)
             else:
                 self.sensor2 = np.concatenate(
-                    (self.sensor2, np.array(mag2, dtype=float))
-                )
+                    (self.sensor2, np.array(mag2, dtype=float)))
         self.n_data += len(mag1)
         if len(self.sensor1) == len(self.sensor2):
             self.grad = (self.sensor1 - self.sensor2) / self.d_sensor
@@ -671,23 +602,21 @@ class Geometrics:
         self.dy = self.segments[0]["dy"][0]
         self.z = np.zeros_like(self.x)
         if first:
-            if abs(self.x[0] - self.x[self.segments[0]["mark_samples"][-1]]) > abs(
-                self.y[0] - self.y[self.segments[0]["mark_samples"][-1]]
-            ):
+            if abs(self.x[0]-self.x[self.segments[0]["mark_samples"][-1]]) >\
+                    abs(self.y[0]-self.y[self.segments[0]
+                                         ["mark_samples"][-1]]):
                 self.direction = 1
                 self.d_lines = np.round(
-                    (self.y.max() - self.y.min()) / (self.n_lines - 1), 1
-                )
+                    (self.y.max() - self.y.min()) / (self.n_lines - 1), 1)
             else:
                 self.direction = 0
                 self.d_lines = np.round(
-                    (self.x.max() - self.x.min()) / (self.n_lines - 1), 1
-                )
-        # Pass certain dictionary data into arrays
+                    (self.x.max() - self.x.min()) / (self.n_lines - 1), 1)
+# Pass certain dictionary data into arrays
         self.mark_samples = []
         for key, val in self.segments.items():
             self.mark_samples.append(val["mark_samples"])
-        # Store original data to arrays xxx_ori
+# Store original data to arrays xxx_ori
         # self.sensor1_ori = np.copy(self.sensor1)
         # self.sensor2_ori = np.copy(self.sensor2)
         # self.grad_ori = np.copy(self.grad)
@@ -777,16 +706,13 @@ class Geometrics:
                     break
         if col_t < 0 or col_d < 0 or col_l < 0:
             _ = QtWidgets.QMessageBox.warning(
-                None,
-                "Warning",
+                None, "Warning",
                 f"File {file}:\n\nTrying to read Geometrics .dat file.\n"
                 + "The file must contain TIME, DATE and LINE columns, but does"
                 + " not\n.As such, the file cannot be read by pymagra.\n"
                 + "Go back to MagMap and export data with timing and line\n"
                 + "information or open .stn file.\n\nPymagra aborted.",
-                QtWidgets.QMessageBox.Close,
-                QtWidgets.QMessageBox.Close,
-            )
+                QtWidgets.QMessageBox.Close, QtWidgets.QMessageBox.Close)
             sys.exit()
         for col, lin in enumerate(val):
             if "X" in lin:
@@ -846,11 +772,9 @@ class Geometrics:
                         fo.write(f"0{d1:12.3f} {time} {date}   0\n")
                 else:
                     if n_lines > 0:
-                        fo.write(
-                            f"3{x:14.3f}{y:13.3f} {time} {date}"
-                            + f"{ndat:11d}{line-1:12d}{int(mark)+1:12d}  "
-                            + "36\n"
-                        )
+                        fo.write(f"3{x:14.3f}{y:13.3f} {time} {date}"
+                                 + f"{ndat:11d}{line-1:12d}{int(mark)+1:12d}  "
+                                 + "36\n")
                     x = float(val[col_x])
                     y = float(val[col_y])
                     time = val[col_t]
@@ -862,21 +786,18 @@ class Geometrics:
                         mark = val[col_m]
                     else:
                         mark = 0
-                    fo.write(
-                        f"3{x:14.3f}{y:13.3f} {time} {date}"
-                        + f"{int(mark):11d}{line:12d}{izero:12d}   5\n"
-                    )
+                    fo.write(f"3{x:14.3f}{y:13.3f} {time} {date}"
+                             + f"{int(mark):11d}{line:12d}{izero:12d}   5\n")
                     if ndat > 0:
                         if self.grad_flag:
                             d2 = float(val[col_2])
-                            fo.write(f"0{d1:12.3f}{d2:11.3f} {time} {date}   " + "0\n")
+                            fo.write(f"0{d1:12.3f}{d2:11.3f} {time} {date}   "
+                                     + "0\n")
                         else:
                             fo.write(f"0{d1:12.3f} {time} {date}   0\n")
                     ndat = 1
-            fo.write(
-                f"3{x:14.3f}{y:13.3f} {time} {date}"
-                + f"{ndat:11d}{line:12d}{int(mark)+1:12d}  36\n"
-            )
+            fo.write(f"3{x:14.3f}{y:13.3f} {time} {date}"
+                     + f"{ndat:11d}{line:12d}{int(mark)+1:12d}  36\n")
         self.read_stn("temp.stn", n_block, h1_sensor, h2_sensor, dispo)
 
     def write_stn(self, file):
@@ -900,55 +821,46 @@ class Geometrics:
                     line0 = self.line[i]
                     mark0 = self.mark[i]
                     if ncount > 0:
-                        fh.write(
-                            f"3{self.x[i+1]:14.3f}{self.y[i+1]:13.3f} "
-                            + f"{self.hour[i+1]:02d}:"
-                            + f"{self.minute[i+1]:02d}:"
-                            + f"{self.second[i+1]:05.2f} "
-                            + f"{self.month[i+1]:02d}/"
-                            + f"{self.day[i+1]:02d}/{self.year[i+1]:02d}"
-                            + f"{ncount:11d}{self.line[i+1]:12d}"
-                            + f"{self.mark[i+1]:12d}  36\n"
-                        )
-                    fh.write(
-                        f"3{self.x[i]:14.3f}{self.y[i]:13.3f} "
-                        + f"{self.hour[i]:02d}:"
-                        + f"{self.minute[i]:02d}:"
-                        + f"{self.second[i]:05.2f} "
-                        + f"{self.month[i]:02d}/"
-                        + f"{self.day[i]:02d}/{self.year[i]:02d}"
-                        + f"{izero:11d}{self.line[i]:12d}"
-                        + f"{self.mark[i]+1:12d}   5\n"
-                    )
+                        fh.write(f"3{self.x[i+1]:14.3f}{self.y[i+1]:13.3f} "
+                                 + f"{self.hour[i+1]:02d}:"
+                                 + f"{self.minute[i+1]:02d}:"
+                                 + f"{self.second[i+1]:05.2f} "
+                                 + f"{self.month[i+1]:02d}/"
+                                 + f"{self.day[i+1]:02d}/{self.year[i+1]:02d}"
+                                 + f"{ncount:11d}{self.line[i+1]:12d}"
+                                 + f"{self.mark[i+1]:12d}  36\n")
+                    fh.write(f"3{self.x[i]:14.3f}{self.y[i]:13.3f} "
+                             + f"{self.hour[i]:02d}:"
+                             + f"{self.minute[i]:02d}:"
+                             + f"{self.second[i]:05.2f} "
+                             + f"{self.month[i]:02d}/"
+                             + f"{self.day[i]:02d}/{self.year[i]:02d}"
+                             + f"{izero:11d}{self.line[i]:12d}"
+                             + f"{self.mark[i]+1:12d}   5\n")
                     ncount = 0
                 elif self.mark[i] != mark0:
                     mark0 = self.mark[i]
-                    fh.write(
-                        f"3{self.x[i]:14.3f}{self.y[i]:13.3f} "
-                        + f"{self.hour[i]:02d}:{self.minute[i]:02d}:"
-                        + f"{self.second[i]:05.2f} "
-                        + f"{self.month[i]:02d}/"
-                        + f"{self.day[i]:02d}/{self.year[i]:02d}"
-                        + f"{ncount:11d}{self.line[i+1]:12d}"
-                        + f"{self.mark[i+1]:12d}   4\n"
-                    )
+                    fh.write(f"3{self.x[i]:14.3f}{self.y[i]:13.3f} "
+                             + f"{self.hour[i]:02d}:{self.minute[i]:02d}:"
+                             + f"{self.second[i]:05.2f} "
+                             + f"{self.month[i]:02d}/"
+                             + f"{self.day[i]:02d}/{self.year[i]:02d}"
+                             + f"{ncount:11d}{self.line[i+1]:12d}"
+                             + f"{self.mark[i+1]:12d}   4\n")
                     ncount = 0
-                fh.write(
-                    f"0 {self.sensor1[i]:11.3f}"
-                    + f"{self.sensor2[i]:11.3f} "
-                    + f"{self.hour[i]:02d}:{self.minute[i]:02d}:"
-                    + f"{self.second[i]:05.2f} {self.month[i]:02d}/"
-                    + f"{self.day[i]:02d}/{self.year[i]:02d}{izero:4d}\n"
-                )
+                fh.write(f"0 {self.sensor1[i]:11.3f}"
+                         + f"{self.sensor2[i]:11.3f} "
+                         + f"{self.hour[i]:02d}:{self.minute[i]:02d}:"
+                         + f"{self.second[i]:05.2f} {self.month[i]:02d}/"
+                         + f"{self.day[i]:02d}/{self.year[i]:02d}{izero:4d}\n")
                 ncount += 1
-            fh.write(
-                f"3{self.x[0]:14.3f}{self.y[0]:13.3f} "
-                + f"{self.hour[0]:02d}:{self.minute[0]:02d}:"
-                + f"{self.second[0]:05.2f} {self.month[0]:02d}/"
-                + f"{self.day[0]:02d}/{self.year[0]:02d}"
-                + f"{ncount:11d}{self.line[0]:12d}"
-                + f"{self.mark[0]:12d}  36\n"
-            )
+                fh.write(
+                    f"3{self.x[0]:14.3f}{self.y[0]:13.3f} "
+                    + f"{self.hour[0]:02d}:{self.minute[0]:02d}:"
+                    + f"{self.second[0]:05.2f} {self.month[0]:02d}/"
+                    + f"{self.day[0]:02d}/{self.year[0]:02d}"
+                    + f"{ncount:11d}{self.line[0]:12d}"
+                    + f"{self.mark[0]:12d}  36\n")
         print(f"\nfile {file} written")
 
     def write_dat(self, file):
@@ -969,40 +881,31 @@ class Geometrics:
         datum = f"{mo:02d}/{d:02d}/{ye:02d}"
         with open(file, "w", encoding="utf-8") as fo:
             if np.isclose(np.std(self.z), 0.0):
-                fo.write(
-                    "           X           Y     TOP_RDG  "
-                    + "BOTTOM_RDG        TIME      DATE         LINE"
-                    + "        MARK\n"
-                )
+                fo.write("           X           Y     TOP_RDG  "
+                         + "BOTTOM_RDG        TIME      DATE         LINE"
+                         + "        MARK\n")
                 for i in counter[::-1]:
-                    fo.write(
-                        f"{self.x[i]:12.3f}{self.y[i]:12.3f}"
-                        + f"{self.sensor1[i]:12.3f}"
-                        + f"{self.sensor2[i]:12.3f} {self.hour[i]:02d}:"
-                        + f"{self.minute[i]:02d}:{self.second[i]:05.2f}  "
-                        + f"{datum}{self.line[i]:13d}"
-                        + f"{self.mark[i]:12d}\n"
-                    )
+                    fo.write(f"{self.x[i]:12.3f}{self.y[i]:12.3f}"
+                             + f"{self.sensor1[i]:12.3f}"
+                             + f"{self.sensor2[i]:12.3f} {self.hour[i]:02d}:"
+                             + f"{self.minute[i]:02d}:{self.second[i]:05.2f}  "
+                             + f"{datum}{self.line[i]:13d}"
+                             + f"{self.mark[i]:12d}\n")
             else:
-                fo.write(
-                    "           X           Y           Z     TOP_RDG "
-                    + " BOTTOM_RDG        TIME      DATE         LINE"
-                    + "        MARK\n"
-                )
+                fo.write("           X           Y           Z     TOP_RDG "
+                         + " BOTTOM_RDG        TIME      DATE         LINE"
+                         + "        MARK\n")
                 for i in counter[::-1]:
-                    fo.write(
-                        f"{self.x[i]:12.3f}{self.y[i]:12.3f}"
-                        + f"{self.z[i]:12.3f}{self.sensor1[1]:12.3f} "
-                        + f"{self.sensor2[i]:12.3f}"
-                        + f"{self.hour[i]:02d}:{self.minute[i]:02d}:"
-                        + f"{self.second[i]:05.2f}  {datum}"
-                        + f"{self.line[i]:13d}{self.mark[i]:12d}\n"
-                    )
+                    fo.write(f"{self.x[i]:12.3f}{self.y[i]:12.3f}"
+                             + f"{self.z[i]:12.3f}{self.sensor1[1]:12.3f} "
+                             + f"{self.sensor2[i]:12.3f}"
+                             + f"{self.hour[i]:02d}:{self.minute[i]:02d}:"
+                             + f"{self.second[i]:05.2f}  {datum}"
+                             + f"{self.line[i]:13d}{self.mark[i]:12d}\n")
         print(f"\nfile {file} written")
 
-    def clean_data(
-        self, min_fix=None, max_fix=None, percent_down=None, percent_up=None
-    ):
+    def clean_data(self, min_fix=None, max_fix=None, percent_down=None,
+                   percent_up=None):
         """
         Set data to np.nan under certain conditions which may be:
 
@@ -1038,10 +941,8 @@ class Geometrics:
             if self.grad_data:
                 vmin2 = np.nanquantile(self.sensor2, percent_down)
                 self.sensor2[self.sensor2 < vmin2] = np.nan
-                print(
-                    f"Clip below {np.round(vmin1, 1)} for sensor 1 and "
-                    + f"{np.round(vmin2, 1)} for sensor 2"
-                )
+                print(f"Clip below {np.round(vmin1, 1)} for sensor 1 and "
+                      + f"{np.round(vmin2, 1)} for sensor 2")
             else:
                 print(f"Clip below {np.round(vmin1, 1)}")
         if percent_up:
@@ -1050,10 +951,8 @@ class Geometrics:
             if self.grad_data:
                 vmax2 = np.nanquantile(self.sensor2, 1 - percent_up)
                 self.sensor2[self.sensor2 > vmax2] = np.nan
-                print(
-                    f"Clip above {np.round(vmax1, 1)} for sensor 1 and "
-                    + f"{np.round(vmax2, 1)} for sensor 2"
-                )
+                print(f"Clip above {np.round(vmax1, 1)} for sensor 1 and "
+                      + f"{np.round(vmax2, 1)} for sensor 2")
             else:
                 print(f"Clip above {np.round(vmax1, 1)}")
         if self.grad_data:
@@ -1118,33 +1017,15 @@ class Geometrics:
         n1 = self.segments[i_line]["mark_samples"][0]
         n2 = self.segments[i_line]["mark_samples"][-1]
         if self.grad_data:
-            return (
-                self.sensor1[n1:n2],
-                self.sensor2[n1:n2],
-                self.x[n1:n2],
-                self.y[n1:n2],
-                self.year[n1:n2],
-                self.month[n1:n2],
-                self.day[n1:n2],
-                self.hour[n1:n2],
-                self.minute[n1:n2],
-                self.second[n1:n2],
-                self.time[n1:n2],
-            )
+            return (self.sensor1[n1:n2], self.sensor2[n1:n2], self.x[n1:n2],
+                    self.y[n1:n2], self.year[n1:n2], self.month[n1:n2],
+                    self.day[n1:n2], self.hour[n1:n2], self.minute[n1:n2],
+                    self.second[n1:n2], self.time[n1:n2])
         dum = np.array([0])
-        return (
-            self.sensor1[n1:n2],
-            dum,
-            self.x[n1:n2],
-            self.y[n1:n2],
-            self.year[n1:n2],
-            self.month[n1:n2],
-            self.day[n1:n2],
-            self.hour[n1:n2],
-            self.minute[n1:n2],
-            self.second[n1:n2],
-            self.time[n1:n2],
-        )
+        return (self.sensor1[n1:n2], dum, self.x[n1:n2], self.y[n1:n2],
+                self.year[n1:n2], self.month[n1:n2], self.day[n1:n2],
+                self.hour[n1:n2], self.minute[n1:n2], self.second[n1:n2],
+                self.time[n1:n2])
 
     def geometrics_lines(self):
         """
@@ -1218,33 +1099,15 @@ class Geometrics:
         n1 = self.segments[i_line]["mark_samples"][i_seg]
         n2 = self.segments[i_line]["mark_samples"][i_seg + 1]
         if self.grad_data:
-            return (
-                self.sensor1[n1:n2],
-                self.sensor2[n1:n2],
-                self.x[n1:n2],
-                self.y[n1:n2],
-                self.year[n1:n2],
-                self.month[n1:n2],
-                self.day[n1:n2],
-                self.hour[n1:n2],
-                self.minute[n1:n2],
-                self.second[n1:n2],
-                self.time[n1:n2],
-            )
+            return (self.sensor1[n1:n2], self.sensor2[n1:n2], self.x[n1:n2],
+                    self.y[n1:n2], self.year[n1:n2], self.month[n1:n2],
+                    self.day[n1:n2], self.hour[n1:n2], self.minute[n1:n2],
+                    self.second[n1:n2], self.time[n1:n2])
         dum = np.array([0])
-        return (
-            self.sensor1[n1:n2],
-            dum,
-            self.x[n1:n2],
-            self.y[n1:n2],
-            self.year[n1:n2],
-            self.month[n1:n2],
-            self.day[n1:n2],
-            self.hour[n1:n2],
-            self.minute[n1:n2],
-            self.second[n1:n2],
-            self.time[n1:n2],
-        )
+        return (self.sensor1[n1:n2], dum, self.x[n1:n2], self.y[n1:n2],
+                self.year[n1:n2], self.month[n1:n2], self.day[n1:n2],
+                self.hour[n1:n2], self.minute[n1:n2], self.second[n1:n2],
+                self.time[n1:n2])
 
     def read_base(self, infile, year=None):
         """
@@ -1337,10 +1200,8 @@ class Geometrics:
                 self.day_base.append(int(nums[1]))
                 self.year_base.append(int(nums[2]))
                 self.jday_base.append(
-                    utils.date2julian(
-                        self.day_base[-1], self.month_base[-1], self.year_base[-1]
-                    )
-                )
+                    utils.date2julian(self.day_base[-1], self.month_base[-1],
+                                      self.year_base[-1]))
                 self.time_base.append(self.jday_base[-1])
         else:
             for k in range(2, nlines):
@@ -1353,10 +1214,8 @@ class Geometrics:
                 self.year_base.append(int(line[2][6:8]))
                 self.hour_base.append(int(line[3][0:2]))
                 self.jday_base.append(
-                    utils.date2julian(
-                        self.day_base[-1], self.month_base[-1], self.year_base[-1]
-                    )
-                )
+                    utils.date2julian(self.day_base[-1], self.month_base[-1],
+                                      self.year_base[-1]))
                 self.minute_base.append(int(line[3][3:5]))
                 self.second_base.append(float(line[3][6:8]))
                 self.time_base.append(self.jday_base[-1])
@@ -1368,11 +1227,9 @@ class Geometrics:
         self.minute_base = np.array(self.minute_base, dtype=int)
         self.second_base = np.array(self.second_base, dtype=float)
         self.base = np.array(self.base, dtype=float)
-        self.time_base = (
-            np.array(self.time_base) * 86400.0
-            + (self.hour_base * 60.0 + self.minute_base) * 60.0
-            + self.second_base
-        )
+        self.time_base = (np.array(self.time_base) * 86400.0
+                          + (self.hour_base * 60.0 + self.minute_base) * 60.0
+                          + self.second_base)
         index = np.argsort(self.time_base)
         self.month_base = self.month_base[index]
         self.day_base = self.day_base[index]
@@ -1397,9 +1254,7 @@ class Geometrics:
             for i, b in enumerate(self.base):
                 if np.isnan(b):
                     continue
-                fo.write(
-                    f"*  0 {self.jday_base[i]:3d} {self.hour_base[i]:02d}"
-                    + f"{self.minute_base[i]:02d}"
-                    + f"{int(self.second_base[i]):02d}"
-                    + f"{i:5d}{int(b*10):7d}\n"
-                )
+                fo.write(f"*  0 {self.jday_base[i]:3d} {self.hour_base[i]:02d}"
+                         + f"{self.minute_base[i]:02d}"
+                         + f"{int(self.second_base[i]):02d}"
+                         + f"{i:5d}{int(b*10):7d}\n")

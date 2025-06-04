@@ -22,8 +22,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import (
     FigureCanvasQTAgg as FigureCanvas,
-    NavigationToolbar2QT as NavigationToolbar,
-)
+    NavigationToolbar2QT as NavigationToolbar)
 from matplotlib.figure import Figure
 from matplotlib.ticker import AutoMinorLocator
 from matplotlib.path import Path as P
@@ -32,8 +31,7 @@ from matplotlib import tri
 from ..inversion import mag_grav_utilities as utils
 
 Ui_MainWindow, QMainWindow = loadUiType(
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "Magnetics.ui")
-)
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "Magnetics.ui"))
 
 
 class mainWindow(QMainWindow, Ui_MainWindow):
@@ -75,9 +73,9 @@ class mainWindow(QMainWindow, Ui_MainWindow):
 
     def __init__(self, main):
         super().__init__()
-        # Set up main window based on file Magnetics.ui created with QT Designer
+# Set up main window based on file Magnetics.ui created with QT Designer
         self.setupUi(self)
-        # create a first figure in central widget
+# create a first figure in central widget
         self.fig = Figure()
         self.fig.tight_layout()
         self.addMPL(self.fig)
@@ -205,15 +203,15 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         clip = np.zeros((len(clip_x), 2))
         clip[:, 0] = np.array(clip_x)
         clip[:, 1] = np.array(clip_y)
-        # Clip contains the coordinates of the clipping path.
-        # Codes will contain the way to connect clipping points (move to the first
-        # point of the path, draw lines to all other points and finally close the path)
+# Clip contains the coordinates of the clipping path.
+# Codes will contain the way to connect clipping points (move to the first
+# point of the path, draw lines to all other points and finally close the path)
         codes = []
         Path = P
         codes += [Path.MOVETO]
         codes += [Path.LINETO] * (len(clip_x) - 2)
         codes += [Path.CLOSEPOLY]
-        # set clipping
+# set clipping
         return Path(clip, codes)
 
     def set_geography_flag(self, option):
@@ -259,29 +257,23 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         """
         xmin, xmax = ax.get_xlim()
         ymin, ymax = ax.get_ylim()
-        # Plot a point
+# Plot a point
         for key in self.main.geography.keys():
             x = np.array(self.main.geography[key]["x"]) * dfac
             y = np.array(self.main.geography[key]["y"]) * dfac
-            # If fpoint outside map don't plot
+# If fpoint outside map don't plot
             if self.main.geography[key]["type"] == "POINT":
                 if x < xmin or x > xmax or y < ymin or y > ymax:
                     continue
-                # Check whether a point has already been plotted. If not, add label to legend
+# Check whether a point has already been plotted. If not, add label to legend
                 if "town" in self.legend:
                     ax.plot(x, y, "o", color="black")
                 else:
                     self.legend.append("town")
                     ax.plot(x, y, "o", color="black", label="town/place")
-                ax.text(
-                    x,
-                    y,
-                    "  " + self.main.geography[key]["name"],
-                    ha="left",
-                    va="center",
-                    fontsize=12,
-                )
-            # Plot a line and check whether a line has already been plotted.
+                ax.text(x, y, "  " + self.main.geography[key]["name"],
+                        ha="left", va="center", fontsize=12)
+# Plot a line and check whether a line has already been plotted.
             else:
                 if "geology" in self.legend:
                     ax.plot(x, y, "k")
@@ -320,9 +312,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
                 ax.plot(x, y, col, ls="--", linewidth=3)
             else:
                 self.legend.append(self.lineaments[key]["type"])
-                ax.plot(
-                    x, y, col, label=self.lineaments[key]["type"], ls="--", linewidth=3
-                )
+                ax.plot(x, y, col, label=self.lineaments[key]["type"],
+                        ls="--", linewidth=3)
 
     def plot_north(self, ax, angle, pos):
         """
@@ -371,61 +362,20 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         else:
             x0 = xmin + (2.5 - 2 * c) * dx
 
-        ax.arrow(
-            x0,
-            y0,
-            dxa,
-            dya,
-            width=dya / 5.0,
-            length_includes_head=True,
-            head_length=radius,
-            head_width=radius / 1.5,
-            shape="left",
-            color="k",
-            edgecolor=None,
-        )
-        ax.arrow(
-            x0,
-            y0,
-            dxa,
-            dya,
-            width=dya / 5.0,
-            length_includes_head=True,
-            head_length=radius,
-            head_width=radius / 1.5,
-            shape="right",
-            facecolor="w",
-            edgecolor="k",
-        )
-        ax.text(
-            x0 + dxa * 0.5,
-            y0 + dya * 0.5,
-            "N",
-            fontsize=20,
-            c="r",
-            horizontalalignment="center",
-            verticalalignment="center_baseline",
-            rotation=alpha - 90.0,
-            rotation_mode="anchor",
-        )
+        ax.arrow(x0, y0, dxa, dya, width=dya/5.0, length_includes_head=True,
+                 head_length=radius, head_width=radius/1.5, shape="left",
+                 color="k", edgecolor=None)
+        ax.arrow(x0, y0, dxa, dya, width=dya/5.0, length_includes_head=True,
+                 head_length=radius, head_width=radius/1.5, shape="right",
+                 facecolor="w", edgecolor="k")
+        ax.text(x0+dxa*0.5, y0+dya*0.5, "N", fontsize=20, c="r",
+                horizontalalignment="center",
+                verticalalignment="center_baseline",
+                rotation=alpha-90.0, rotation_mode="anchor")
 
-    def plot_sensor_triang(
-        self,
-        ax,
-        x,
-        y,
-        s,
-        vmin,
-        vmax,
-        percent,
-        cmap,
-        xlabel,
-        ylabel,
-        title,
-        cbar_title,
-        dec=0.0,
-        dfac=1.0,
-    ):
+    def plot_sensor_triang(self, ax, x, y, s, vmin, vmax, percent, cmap,
+                           xlabel, ylabel, title, cbar_title, dec=0.0,
+                           dfac=1.0):
         """
         Plot map of one sensor by triangulation
 
@@ -469,18 +419,16 @@ class mainWindow(QMainWindow, Ui_MainWindow):
 
         """
         self.legend = []
-        # Define clip paths for both sensors, searching for every line maximum and
-        #    minimum coordinates
+# Define clip paths for both sensors, searching for every line maximum and
+#    minimum coordinates
         xmin = x.min()
         xmax = x.max()
         ymin = y.min()
         ymax = y.max()
         clip_path = self.setClipPath(x, y)
-        rd = (
-            int(np.ceil(-np.log10(np.nanquantile(s, 0.999) - np.nanquantile(s, 0.001))))
-            + 2
-        )
-        # Define collor bar limits and levels
+        rd = (int(np.ceil(-np.log10(np.nanquantile(s, 0.999) -
+                                    np.nanquantile(s, 0.001))))+2)
+# Define collor bar limits and levels
         if vmin == vmax:
             if percent > 0:
                 max_col = np.round(np.nanquantile(s, 1 - percent), rd)
@@ -499,19 +447,12 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         nlev = 51
         ds = np.round((max_col - min_col) / nlev, rd)
         levels = np.arange(min_col, max_col + ds / 2, ds)
-        # Calculate triangulation
+# Calculate triangulation
         triang = tri.Triangulation(x, y)
-        # Do triangulation plot
-        gci = ax.tricontourf(
-            triang,
-            s,
-            extend="both",
-            vmin=min_col,
-            vmax=max_col,
-            levels=levels,
-            cmap=cmap,
-            norm=norm,
-        )
+# Do triangulation plot
+        gci = ax.tricontourf(triang, s, extend="both", vmin=min_col,
+                             vmax=max_col, levels=levels, cmap=cmap,
+                             norm=norm)
         ax.set_clip_on(True)
         for collection in gci.collections:
             collection.set_clip_path(clip_path, transform=ax.transData)
@@ -530,9 +471,11 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         ax.xaxis.set_minor_locator(AutoMinorLocator())
         ax.yaxis.set_minor_locator(AutoMinorLocator())
         if self.bar_or == "vertical":
-            cax = ax.inset_axes([1.05, 0.05, 0.02, 0.9], transform=ax.transAxes)
+            cax = ax.inset_axes([1.05, 0.05, 0.02, 0.9],
+                                transform=ax.transAxes)
         else:
-            cax = ax.inset_axes([0.05, -0.2, 0.9, 0.05], transform=ax.transAxes)
+            cax = ax.inset_axes([0.05, -0.2, 0.9, 0.05],
+                                transform=ax.transAxes)
         smin = np.round(np.nanmin(s), rd)
         smax = np.round(np.nanmax(s), rd)
         ssmin = levels[0]
@@ -540,55 +483,25 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         ds = (ssmax - ssmin) / (self.nticks - 1)
         ticks = np.round(np.arange(ssmin, ssmax + ds / 2, ds), rd)
         ticks = list(ticks)
-        # Plot color bar
-        cbar = plt.colorbar(
-            gci,
-            orientation=self.bar_or,
-            cax=cax,
-            fraction=0.1,
-            ticks=ticks,
-            extend="both",
-        )
+# Plot color bar
+        cbar = plt.colorbar(gci, orientation=self.bar_or, cax=cax,
+                            fraction=0.1, ticks=ticks, extend="both")
         if self.bar_or == "vertical":
             cbar.ax.set_ylabel(cbar_title, size=10)
-            cbar.ax.text(
-                0.0,
-                -0.06,
-                f"{smin}",
-                verticalalignment="top",
-                horizontalalignment="left",
-                transform=cbar.ax.transAxes,
-                fontsize=10,
-            )
-            cbar.ax.text(
-                0.0,
-                1.06,
-                f"{smax}",
-                verticalalignment="bottom",
-                horizontalalignment="left",
-                transform=cbar.ax.transAxes,
-                fontsize=10,
-            )
+            cbar.ax.text(0.0, -0.06, f"{smin}", verticalalignment="top",
+                         horizontalalignment="left",
+                         transform=cbar.ax.transAxes, fontsize=10)
+            cbar.ax.text(0.0, 1.06, f"{smax}", verticalalignment="bottom",
+                         horizontalalignment="left",
+                         transform=cbar.ax.transAxes, fontsize=10)
         else:
             cbar.ax.set_xlabel(cbar_title, size=10)
-            cbar.ax.text(
-                0.0,
-                1.0,
-                f"{smin}",
-                verticalalignment="bottom",
-                horizontalalignment="right",
-                transform=cbar.ax.transAxes,
-                fontsize=10,
-            )
-            cbar.ax.text(
-                1.0,
-                1.0,
-                f"{smax}",
-                verticalalignment="bottom",
-                horizontalalignment="left",
-                transform=cbar.ax.transAxes,
-                fontsize=10,
-            )
+            cbar.ax.text(0.0, 1.0, f"{smin}", verticalalignment="bottom",
+                         horizontalalignment="right",
+                         transform=cbar.ax.transAxes, fontsize=10)
+            cbar.ax.text(1.0, 1.0, f"{smax}", verticalalignment="bottom",
+                         horizontalalignment="left",
+                         transform=cbar.ax.transAxes, fontsize=10)
         ticklabs = cbar.ax.get_yticklabels()
         cbar.ax.set_yticklabels(ticklabs, fontsize=10)
         ticklabs = cbar.ax.get_xticklabels()
@@ -600,22 +513,10 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             ax.legend(bbox_to_anchor=(1, 1), loc="upper right", fontsize=10)
         self.plot_north(ax, -dec, "tl")
 
-    def plot_triang(
-        self,
-        data,
-        title="Measured magnetic data",
-        xlabel="Easting",
-        ylabel="Northing",
-        percent=0.01,
-        c="rainbow",
-        mincol1=0.0,
-        maxcol1=0.0,
-        mincol2=0.0,
-        maxcol2=0.0,
-        mincolg=0.0,
-        maxcolg=0.0,
-        grad_flag=False,
-    ):
+    def plot_triang(self, data, title="Measured magnetic data",
+                    xlabel="Easting", ylabel="Northing", percent=0.01,
+                    c="rainbow", mincol1=0.0, maxcol1=0.0, mincol2=0.0,
+                    maxcol2=0.0, mincolg=0.0, maxcolg=0.0, grad_flag=False):
         """
         Plot maps of not interpolated data (stn format) of both sensors using
         tricontourf
@@ -720,12 +621,11 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         v2 = np.array(v2)
         ddx = x.max() - x.min()
         ddy = y.max() - y.min()
-
         ax = []
-        # Gradient is plotted
+# Gradient is plotted
         ddx = data.xmax - data.xmin
         ddy = data.ymax - data.ymin
-        # Vertical layout
+# Vertical layout
         if self.grad_data:
             if grad_flag:
                 if ddx > 2.0 * ddy:
@@ -736,7 +636,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
                     ax.append(fig.add_subplot(self.gs[1:9, 1:]))
                     ax.append(fig.add_subplot(self.gs[9:17, 1:]))
                     ax.append(fig.add_subplot(self.gs[17:25, 1:]))
-                # Horizontal layout
+# Horizontal layout
                 else:
                     fig = plt.figure(figsize=(26, 12), layout="constrained")
                     self.gs = GridSpec(10, 26, fig)
@@ -745,8 +645,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
                     ax.append(fig.add_subplot(self.gs[1:, 17:25]))
                     self.bar_or = "horizontal"
                     self.nticks = 4
-            # Gradient is not plotted
-            # Vertical layout
+# Gradient is not plotted
+# Vertical layout
             else:
                 if ddx > 2.0 * ddy:
                     fig = plt.figure(figsize=(14, 12), layout="constrained")
@@ -755,7 +655,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
                     ax.append(fig.add_subplot(self.gs[9:17, 1:]))
                     self.bar_or = "vertical"
                     self.nticks = 10
-                # Horizontal layout
+# Horizontal layout
                 else:
                     fig = plt.figure(figsize=(18, 12), layout="constrained")
                     self.gs = GridSpec(10, 18, fig)
@@ -763,7 +663,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
                     ax.append(fig.add_subplot(self.gs[1:, 9:17]))
                     self.bar_or = "horizontal"
                     self.nticks = 5
-        # Only sensor 1 is plotted
+# Only sensor 1 is plotted
         else:
             fig = plt.figure(figsize=(12, 12), layout="constrained")
             self.gs = GridSpec(10, 10, fig)
@@ -775,7 +675,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         plt.rc("xtick", labelsize=self.axfont)
         plt.rc("ytick", labelsize=self.axfont)
 
-        # Eliminate possible nans (coming from function clean_data) for both sensors
+# Eliminate possible nans (coming from function clean_data) for both sensors
         x1 = np.copy(x)
         y1 = np.copy(y)
         s1 = np.copy(v1)
@@ -798,7 +698,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         y1 = np.delete(y1, np.isnan(s1))
         s1 = np.delete(s1, np.isnan(s1))
 
-        # Do plot for sensor 1
+# Do plot for sensor 1
         if self.grad_data:
             if ";" in title[:-1]:
                 t = title.split(";")
@@ -807,90 +707,39 @@ class mainWindow(QMainWindow, Ui_MainWindow):
                 txt = title + " Sensor 1"
         else:
             txt = title
-        self.plot_sensor_triang(
-            ax[0],
-            x1,
-            y1,
-            s1,
-            mincol1,
-            maxcol1,
-            percent,
-            c,
-            xlabel,
-            ylabel,
-            txt,
-            f"Field strength [{self.unit}]",
-            dec=data.line_declination,
-            dfac=dfac,
-        )
-        # Do plot for sensor 2
+        self.plot_sensor_triang(ax[0], x1, y1, s1, mincol1, maxcol1, percent,
+                                c, xlabel, ylabel, txt,
+                                f"Field strength [{self.unit}]",
+                                dec=data.line_declination, dfac=dfac)
+# Do plot for sensor 2
         if self.grad_data:
             if ";" in title[:-1]:
                 t = title.split(";")
                 txt = t[0] + " Sensor 2;" + t[1]
             else:
                 txt = title + " Sensor 2"
-            self.plot_sensor_triang(
-                ax[1],
-                x2,
-                y2,
-                s2,
-                mincol2,
-                maxcol2,
-                percent,
-                c,
-                xlabel,
-                ylabel,
-                txt,
-                f"Field strength [{self.unit}]",
-                dec=data.line_declination,
-                dfac=dfac,
-            )
-            # plot vertical gradient
+            self.plot_sensor_triang(ax[1], x2, y2, s2, mincol2, maxcol2,
+                                    percent, c, xlabel, ylabel, txt,
+                                    f"Field strength [{self.unit}]",
+                                    dec=data.line_declination, dfac=dfac)
+# plot vertical gradient
             if grad_flag:
                 if ";" in title[:-1]:
                     t = title.split(";")
                     txt = t[0] + " Gradient;" + t[1]
                 else:
                     txt = title + " Gradient"
-                self.plot_sensor_triang(
-                    ax[2],
-                    x3,
-                    y3,
-                    s3,
-                    mincolg,
-                    maxcolg,
-                    percent,
-                    c,
-                    xlabel,
-                    ylabel,
-                    txt,
-                    f"Field gradient [{self.unit}/m]",
-                    dec=data.line_declination,
-                    dfac=dfac,
-                )
-        # Erase actual plot in central widget and plot the new one
+                self.plot_sensor_triang(ax[2], x3, y3, s3, mincolg, maxcolg,
+                                        percent, c, xlabel, ylabel, txt,
+                                        f"Field gradient [{self.unit}/m]",
+                                        dec=data.line_declination, dfac=dfac)
+# Erase actual plot in central widget and plot the new one
         self.rmMPL()
         self.addMPL(fig)
         return fig, ax
 
-    def plot_sensor_image(
-        self,
-        ax,
-        x,
-        y,
-        s,
-        vmin,
-        vmax,
-        percent,
-        cmap,
-        xlabel,
-        ylabel,
-        title,
-        cbar_title,
-        dec=0.0,
-        dfac=1.0,
-    ):
+    def plot_sensor_image(self, ax, x, y, s, vmin, vmax, percent, cmap, xlabel,
+                          ylabel, title, cbar_title, dec=0.0, dfac=1.0):
         """
         Plot map of one sensor by triangulation
 
@@ -939,7 +788,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         matplotlib.rcParams.update({"font.size": 16})
         plt.rc("xtick", labelsize=axfont)
         plt.rc("ytick", labelsize=axfont)
-        # Calculate color scale
+# Calculate color scale
         if vmin == vmax:
             if percent > 0:
                 max_col = np.nanquantile(s, 1 - percent)
@@ -959,23 +808,14 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         dy2 = (y[1] - y[0]) / 2
         if cmap == "special mag":
             cmap, norm = utils.mag_color_map(min_col, max_col, cif=2)
-            im1 = ax.imshow(
-                np.flip(s, axis=0),
-                cmap=cmap,
-                norm=norm,
-                extent=[xmin - dx2, xmax + dx2, ymin - dy2, ymax + dy2],
-                aspect="equal",
-            )
+            im1 = ax.imshow(np.flip(s, axis=0), cmap=cmap, norm=norm,
+                            extent=[xmin-dx2, xmax+dx2, ymin-dy2, ymax+dy2],
+                            aspect="equal")
         else:
             norm = "linear"
-        im1 = ax.imshow(
-            np.flip(s, axis=0),
-            cmap=cmap,
-            aspect="equal",
-            extent=[xmin - dx2, xmax + dx2, ymin - dy2, ymax + dy2],
-            vmin=min_col,
-            vmax=max_col,
-        )
+        im1 = ax.imshow(np.flip(s, axis=0), cmap=cmap, aspect="equal",
+                        extent=[xmin-dx2, xmax+dx2, ymin-dy2, ymax+dy2],
+                        vmin=min_col, vmax=max_col)
         if self.main.point_flag:
             ax.plot(self.main.data.x, self.main.data.y, "+", ms=3.0)
         if self.grad_data:
@@ -994,9 +834,11 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         ax.xaxis.set_minor_locator(AutoMinorLocator())
         ax.yaxis.set_minor_locator(AutoMinorLocator())
         if self.bar_or == "vertical":
-            cax = ax.inset_axes([1.05, 0.05, 0.02, 0.9], transform=ax.transAxes)
+            cax = ax.inset_axes([1.05, 0.05, 0.02, 0.9],
+                                transform=ax.transAxes)
         else:
-            cax = ax.inset_axes([0.05, -0.2, 0.9, 0.05], transform=ax.transAxes)
+            cax = ax.inset_axes([0.05, -0.2, 0.9, 0.05],
+                                transform=ax.transAxes)
         smin = np.round(np.nanmin(s), rd)
         smax = np.round(np.nanmax(s), rd)
         ssmin = min_col
@@ -1007,54 +849,24 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         labels = []
         for t in ticks:
             labels.append(f"{t}")
-        cbar = plt.colorbar(
-            im1,
-            orientation=self.bar_or,
-            cax=cax,
-            fraction=0.1,
-            ticks=ticks,
-            extend="both",
-        )
+        cbar = plt.colorbar(im1, orientation=self.bar_or, cax=cax,
+                            fraction=0.1, ticks=ticks, extend="both")
         if self.bar_or == "vertical":
             cbar.ax.set_ylabel(cbar_title, size=10)
-            cbar.ax.text(
-                0.0,
-                -0.06,
-                f"{smin}",
-                verticalalignment="top",
-                horizontalalignment="left",
-                transform=cbar.ax.transAxes,
-                fontsize=10,
-            )
-            cbar.ax.text(
-                0.0,
-                1.06,
-                f"{smax}",
-                verticalalignment="bottom",
-                horizontalalignment="left",
-                transform=cbar.ax.transAxes,
-                fontsize=10,
-            )
+            cbar.ax.text(0.0, -0.06, f"{smin}", verticalalignment="top",
+                         horizontalalignment="left",
+                         transform=cbar.ax.transAxes, fontsize=10)
+            cbar.ax.text(0.0, 1.06, f"{smax}", verticalalignment="bottom",
+                         horizontalalignment="left",
+                         transform=cbar.ax.transAxes, fontsize=10)
         else:
             cbar.ax.set_xlabel(cbar_title, size=10)
-            cbar.ax.text(
-                0.0,
-                1.0,
-                f"{smin}",
-                verticalalignment="bottom",
-                horizontalalignment="right",
-                transform=cbar.ax.transAxes,
-                fontsize=10,
-            )
-            cbar.ax.text(
-                1.0,
-                1.0,
-                f"{smax}",
-                verticalalignment="bottom",
-                horizontalalignment="left",
-                transform=cbar.ax.transAxes,
-                fontsize=10,
-            )
+            cbar.ax.text(0.0, 1.0, f"{smin}", verticalalignment="bottom",
+                         horizontalalignment="right",
+                         transform=cbar.ax.transAxes, fontsize=10)
+            cbar.ax.text(1.0, 1.0, f"{smax}", verticalalignment="bottom",
+                         horizontalalignment="left",
+                         transform=cbar.ax.transAxes, fontsize=10)
         ticklabs = cbar.ax.get_yticklabels()
         cbar.ax.set_yticklabels(ticklabs, fontsize=10)
         ticklabs = cbar.ax.get_xticklabels()
@@ -1066,23 +878,10 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             ax.legend(bbox_to_anchor=(1, 1), loc="upper right", fontsize=10)
         self.plot_north(ax, -dec, "tl")
 
-    def plot_image(
-        self,
-        data,
-        title="Measured magnetic data",
-        xlabel="Easting",
-        ylabel="Northing",
-        percent=0.01,
-        c="rainbow",
-        mincol1=0,
-        maxcol1=0,
-        mincol2=0.0,
-        maxcol2=0.0,
-        mincolg=0.0,
-        maxcolg=0.0,
-        grad_flag=False,
-        dec=0.0,
-    ):
+    def plot_image(self, data, title="Measured magnetic data",
+                   xlabel="Easting", ylabel="Northing", percent=0.01,
+                   c="rainbow", mincol1=0, maxcol1=0, mincol2=0.0, maxcol2=0.0,
+                   mincolg=0.0, maxcolg=0.0, grad_flag=False, dec=0.0):
         """
         Plot maps of interpolated data of both sensors using imshow
 
@@ -1154,8 +953,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             xlabel += f" [{dunit}]"
         if ylabel == "Northing":
             ylabel += f" [{dunit}]"
-        # Gradientplotted
-        # Vertical layout
+# Gradientplotted
+# Vertical layout
         if self.grad_data:
             if grad_flag:
                 if ddx > 2.0 * ddy:
@@ -1165,9 +964,9 @@ class mainWindow(QMainWindow, Ui_MainWindow):
                     ax.append(fig.add_subplot(self.gs[9:17, 1:]))
                     ax.append(fig.add_subplot(self.gs[17:25, 1:]))
                     self.bar_or = "vertical"
-                    #                    anchor = 'E'
+                    # anchor = 'E'
                     self.nticks = 10
-                # Horizontal layout
+# Horizontal layout
                 else:
                     fig = plt.figure(figsize=(26, 12), layout="constrained")
                     self.gs = GridSpec(10, 26, fig)
@@ -1175,10 +974,10 @@ class mainWindow(QMainWindow, Ui_MainWindow):
                     ax.append(fig.add_subplot(self.gs[1:, 9:17]))
                     ax.append(fig.add_subplot(self.gs[1:, 17:25]))
                     self.bar_or = "horizontal"
-                    #                    anchor = 'S'
+                    # anchor = 'S'
                     self.nticks = 4
-            # Gradient not plotted
-            # Vertical layout
+# Gradient not plotted
+# Vertical layout
             else:
                 if ddx > 1.5 * ddy:
                     fig = plt.figure(figsize=(14, 12), layout="constrained")
@@ -1186,26 +985,26 @@ class mainWindow(QMainWindow, Ui_MainWindow):
                     ax.append(fig.add_subplot(self.gs[1:9, 1:]))
                     ax.append(fig.add_subplot(self.gs[9:17, 1:]))
                     self.bar_or = "vertical"
-                    #                    anchor = 'E'
+                    # anchor = 'E'
                     self.nticks = 10
-                # Horizontal layout
+# Horizontal layout
                 else:
                     fig = plt.figure(figsize=(18, 12), layout="constrained")
                     self.gs = GridSpec(10, 18, fig)
                     ax.append(fig.add_subplot(self.gs[1:, 1:9]))
                     ax.append(fig.add_subplot(self.gs[1:, 9:17]))
                     self.bar_or = "horizontal"
-                    #                    anchor = 'S'
+                    # anchor = 'S'
                     self.nticks = 5
         else:
             fig = plt.figure(figsize=(12, 12), layout="constrained")
             self.gs = GridSpec(10, 10, fig)
             ax.append(fig.add_subplot(self.gs[1:, 1:9]))
             self.bar_or = "vertical"
-            #            anchor = 'E'
+            # anchor = 'E'
             self.nticks = 10
 
-        # Do plot for sensor 1
+# Do plot for sensor 1
         if self.grad_data:
             if ";" in title[:-1]:
                 t = title.split(";")
@@ -1214,70 +1013,34 @@ class mainWindow(QMainWindow, Ui_MainWindow):
                 txt = title + " Sensor 1"
         else:
             txt = title
-        self.plot_sensor_image(
-            ax[0],
-            x,
-            y,
-            data.sensor1_inter,
-            mincol1,
-            maxcol1,
-            percent,
-            c,
-            xlabel,
-            ylabel,
-            txt,
-            f"Field strength [{self.unit}]",
-            dec=dec,
-            dfac=dfac,
-        )
+        self.plot_sensor_image(ax[0], x, y, data.sensor1_inter, mincol1,
+                               maxcol1, percent, c, xlabel, ylabel, txt,
+                               f"Field strength [{self.unit}]", dec=dec,
+                               dfac=dfac)
 
-        # Do plot for sensor 2
+# Do plot for sensor 2
         if self.grad_data:
             if ";" in title[:-1]:
                 t = title.split(";")
                 txt = t[0] + " Sensor 2;" + t[1]
             else:
                 txt = title + " Sensor 2"
-            self.plot_sensor_image(
-                ax[1],
-                x,
-                y,
-                data.sensor2_inter,
-                mincol2,
-                maxcol2,
-                percent,
-                c,
-                xlabel,
-                ylabel,
-                txt,
-                f"Field strength [{self.unit}]",
-                dec=dec,
-                dfac=dfac,
-            )
-            # Do plot for gradient
+            self.plot_sensor_image(ax[1], x, y, data.sensor2_inter, mincol2,
+                                   maxcol2, percent, c, xlabel, ylabel, txt,
+                                   f"Field strength [{self.unit}]", dec=dec,
+                                   dfac=dfac)
+# Do plot for gradient
             if grad_flag:
                 if ";" in title[:-1]:
                     t = title.split(";")
                     txt = t[0] + " Gradient;" + t[1]
                 else:
                     txt = title + " Gradient"
-                self.plot_sensor_image(
-                    ax[2],
-                    x,
-                    y,
-                    data.grad_inter,
-                    mincolg,
-                    maxcolg,
-                    percent,
-                    c,
-                    xlabel,
-                    ylabel,
-                    txt,
-                    f"Gradient [{self.unit}/m]",
-                    dec=dec,
-                    dfac=dfac,
-                )
-        # Erase actual plot in central widget and plot the new one
+                self.plot_sensor_image(ax[2], x, y, data.grad_inter, mincolg,
+                                       maxcolg, percent, c, xlabel, ylabel,
+                                       txt, f"Gradient [{self.unit}/m]",
+                                       dec=dec, dfac=dfac)
+# Erase actual plot in central widget and plot the new one
         self.rmMPL()
         self.addMPL(fig)
         return fig, ax

@@ -125,7 +125,8 @@ def data_flatten(data):
     return s1, s2, x, y, z
 
 
-def clean_data(data, min_fix=None, max_fix=None, percent_down=None, percent_up=None):
+def clean_data(data, min_fix=None, max_fix=None, percent_down=None,
+               percent_up=None):
     """
     Set data to np.nan under certain conditions which may be:
 
@@ -195,10 +196,8 @@ def clean_data(data, min_fix=None, max_fix=None, percent_down=None, percent_up=N
                 v[v < vmin2] = np.nan
                 val["s2"] = np.copy(v)
         if grad_data:
-            print(
-                f"Clip below {np.round(vmin1, 1)} for sensor 1 and "
-                + f"{np.round(vmin2, 1)} for sensor 2"
-            )
+            print(f"Clip below {np.round(vmin1, 1)} for sensor 1 and "
+                  + f"{np.round(vmin2, 1)} for sensor 2")
         else:
             print(f"Clip below {np.round(vmin1, 1)}")
     if percent_up:
@@ -216,10 +215,8 @@ def clean_data(data, min_fix=None, max_fix=None, percent_down=None, percent_up=N
                 v[v > vmax2] = np.nan
                 val["s2"] = np.copy(v)
         if grad_data:
-            print(
-                f"Clip above {np.round(vmax1, 1)} for sensor 1 and "
-                + f"{np.round(vmax2, 1)} for sensor 2"
-            )
+            print(f"Clip above {np.round(vmax1, 1)} for sensor 1 and "
+                  + f"{np.round(vmax2, 1)} for sensor 2")
         else:
             print(f"Clip above {np.round(vmax1, 1)}")
     data.sensor1, data.sensor2, _, _, _ = data_flatten(data.data)
@@ -245,7 +242,8 @@ def julian2date(j_day, year):
     month: int
         Month in year
     """
-    day_month = np.array([0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334])
+    day_month = np.array([0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304,
+                          334])
     if year % 4 == 0:
         day_month[2:] += 1
     month = np.where(day_month >= j_day)[0][0]
@@ -273,7 +271,8 @@ def date2julian(day, month, year):
     j_day: int
         Julian day of year
     """
-    day_month = np.array([0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334])
+    day_month = np.array([0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304,
+                          334])
     if year % 4 == 0:
         day_month[2:] += 1
     return day_month[month - 1] + day
@@ -390,11 +389,11 @@ def diurnal_correction(data_c, base, base_flag=True, degree=5):
         This parameter is only used if no base station data exist
 
     """
-    # Test whether base station data have already been read
+# Test whether base station data have already been read
     data = deepcopy(data_c.data)
-    # If no base station data exist, use median values of sensor 1 of every
-    #    line asindicator for diurnal variations.
-    # Add median value at the time of the beginning and the end of every line
+# If no base station data exist, use median values of sensor 1 of every
+#    line asindicator for diurnal variations.
+# Add median value at the time of the beginning and the end of every line
     if not base_flag:
         month_base = []
         day_base = []
@@ -423,7 +422,8 @@ def diurnal_correction(data_c, base, base_flag=True, degree=5):
         tdiurnal = np.array([])
         for d in days_u:
             index = np.where(days == d)
-            fit_parameters, tmn = diurnal_variation(t[index], v[index], degree=degree)
+            fit_parameters, tmn = diurnal_variation(t[index], v[index],
+                                                    degree=degree)
             params.append(fit_parameters)
             tm.append(tmn)
             t0 = t[index].min()
@@ -457,11 +457,9 @@ def diurnal_correction(data_c, base, base_flag=True, degree=5):
             for i, b in enumerate(base_d):
                 if np.isnan(b):
                     continue
-                fo.write(
-                    f"*  0 {jday_base[i]:3d} {hour_base[i]:02d}"
-                    + f"{minute_base[i]:02d}{int(second_base[i]):02d}"
-                    + f"{i:5d}{int(b*10):7d}\n"
-                )
+                fo.write(f"*  0 {jday_base[i]:3d} {hour_base[i]:02d}"
+                         + f"{minute_base[i]:02d}{int(second_base[i]):02d}"
+                         + f"{i:5d}{int(b*10):7d}\n")
         base.read_base("temp.stn", year)
         os.remove("temp.stn")
     else:
@@ -474,16 +472,16 @@ def diurnal_correction(data_c, base, base_flag=True, degree=5):
             time2.append(max(val["time"][0], val["time"][-1]))
         time1 = np.array(time1)
         time2 = np.array(time2)
-        # Check whether base station data cover all measurements.
-        # If not, set base station data to zero and avoid in this way base
-        # corrections
-        if base.time_base.min() > time1.min() or base.time_base.max() < time2.max():
+# Check whether base station data cover all measurements.
+# If not, set base station data to zero and avoid in this way base
+# corrections
+        if base.time_base.min() > time1.min()\
+                or base.time_base.max() < time2.max():
             print("\nWARNING in function  diurnal_correction:")
             print("   Base station data do not cover all measurements.")
             print("           No base station corrections effectuated.\n")
             _ = QtWidgets.QMessageBox.warning(
-                None,
-                "Warning",
+                None, "Warning",
                 "Function utilities.diurnal_correction:\n\n"
                 + "Base station data do not cover all measurements\n"
                 + f"Base station between day {base.time_base.min()/86400.} "
@@ -491,11 +489,9 @@ def diurnal_correction(data_c, base, base_flag=True, degree=5):
                 + "Instrument data between day "
                 + f"{time1.min()/86400.} and {time2.max()/86400.}\n\n"
                 + "No base station corrections effectuated.",
-                QtWidgets.QMessageBox.Close,
-                QtWidgets.QMessageBox.Close,
-            )
+                QtWidgets.QMessageBox.Close, QtWidgets.QMessageBox.Close)
             return False
-    # interpolate base station values at measurement times
+# interpolate base station values at measurement times
     tb, ind = np.unique(base.time_base, return_index=True)
     b = base.base[ind]
     f = interpolate.interp1d(tb, b, kind=1)
@@ -503,7 +499,7 @@ def diurnal_correction(data_c, base, base_flag=True, degree=5):
         if isinstance(key, (str)):
             break
         diurnal = f(val["time"])
-        # Subtract base station data from field data
+# Subtract base station data from field data
         val["s1"] -= diurnal
         val["median1"] = np.nanmedian(val["s1"])
         if data["grad_data"]:
@@ -561,12 +557,10 @@ def interpol_line(data, nsensor, i_line=0, dx=0.2, xmin=0.0, xmax=0.0, k=3):
     """
     kind = ["zero", "slinear", "quadratic", "cubic"]
     if k > 3 or k < 0:
-        print(
-            "\nWARNING Function interpol_line:\n"
-            f"      Given k ({k}) is not allowed. k is set to 3 (cubic)"
-        )
+        print("\nWARNING Function interpol_line:\n"
+              + f"      Given k ({k}) is not allowed. k is set to 3 (cubic)")
         k = 3
-    # Extract data
+# Extract data
     data = data.data
     if nsensor == 1:
         s1 = data[i_line]["s1"]
@@ -578,30 +572,32 @@ def interpol_line(data, nsensor, i_line=0, dx=0.2, xmin=0.0, xmax=0.0, k=3):
     xdat = xdat[index]
     ydat = data[i_line]["y"]
     ydat = ydat[index]
-    # Define coordinates in principal direction along which to interpolate data
+# Define coordinates in principal direction along which to interpolate data
     if data["direction"] in ("N", "S", 0.0, 180.0):
         ddat = np.copy(xdat)
     else:
         ddat = np.copy(ydat)
-    # Define starting and end points
+# Define starting and end points
     if xmin == xmax:
         dmin = np.ceil(np.round(ddat.min(), 2) / dx) * dx
         dmax = np.floor(np.round(ddat.max(), 2) / dx) * dx
     else:
         dmin = xmin
         dmax = xmax
-    # Calculate number of interpolated data and their positions along the principal
-    #   direction
+# Calculate number of interpolated data and their positions along the principal
+#   direction
     nx = np.int((dmax - dmin) / dx + 1)
     d_inter = dx * np.arange(nx) + dmin
-    # Do interpolation for first sensor
+# Do interpolation for first sensor
     f = interpolate.interp1d(ddat, s1, kind=kind[k], fill_value="extrapolate")
     sensor_inter = f(d_inter)
-    # Do interpolation for X-coordinates
-    f = interpolate.interp1d(ddat, xdat, kind=kind[k], fill_value="extrapolate")
+# Do interpolation for X-coordinates
+    f = interpolate.interp1d(ddat, xdat, kind=kind[k],
+                             fill_value="extrapolate")
     x_inter = f(d_inter)
-    # Do interpolation for Y-coordinates
-    f = interpolate.interp1d(ddat, ydat, kind=kind[k], fill_value="extrapolate")
+# Do interpolation for Y-coordinates
+    f = interpolate.interp1d(ddat, ydat, kind=kind[k],
+                             fill_value="extrapolate")
     y_inter = f(d_inter)
     return sensor_inter, x_inter, y_inter, dmin, dmax
 
@@ -675,9 +671,9 @@ def interpol_2D(data_c, dx=0.2, dy=0.2, fill_hole=False):
         nsensor = 2
     else:
         nsensor = 1
-    # search all line positions. If different blocks were joint, it is possible
-    # that pieces of one the same line were measured in different blocks and these
-    # pieces should be joint before interpolation
+# search all line positions. If different blocks were joint, it is possible
+# that pieces of one the same line were measured in different blocks and these
+# pieces should be joint before interpolation
     pos_l = []
     for k in keys:
         if direction == "N":
@@ -687,7 +683,7 @@ def interpol_2D(data_c, dx=0.2, dy=0.2, fill_hole=False):
     pos_l = np.array(pos_l)
     line_positions = np.unique(pos_l)
     nl = len(line_positions)
-    # Define grid area covering the whole measured area
+# Define grid area covering the whole measured area
     xmin = data[key1]["x"].min()
     xmax = data[key1]["x"].max()
     ymin = data[key1]["y"].min()
@@ -707,7 +703,7 @@ def interpol_2D(data_c, dx=0.2, dy=0.2, fill_hole=False):
     y_inter = ymin + np.arange(int((ymax - ymin) / dy) + 1) * dy
     xi, yi = np.meshgrid(x_inter, y_inter)
     ny, nx = xi.shape
-    # set arrays for interpolation and predefine certain values to nan
+# set arrays for interpolation and predefine certain values to nan
     if direction == "N":
         posx = np.zeros((ny, nl))
         p_inter = y_inter
@@ -778,7 +774,7 @@ def interpol_2D(data_c, dx=0.2, dy=0.2, fill_hole=False):
         f = interpolate.interp1d(pi, topo[index], kind="linear")
         tint[n1:n2, iline] = f(p_inter[n1:n2])
 
-        # Check whether there are big holes in data along the line (>10*step size)
+# Check whether there are big holes in data along the line (>10*step size)
         hole = np.where(abs(pi[1:] - pi[:-1]) > 10.0 * dp)[0]
         if len(hole > 0):
             for h in hole:
@@ -854,7 +850,7 @@ def interpol_2D(data_c, dx=0.2, dy=0.2, fill_hole=False):
         else:
             f = interpolate.interp1d(pi, top[i1:i2], kind="linear")
         topo_inter[n1:n2, i] = f(p2_inter[n1:n2])
-        # Check whether there are big holes in data along the line (>3*line distance)
+# Check whether there are big holes in data along the line (>3*line distance)
         if len(index) > 1:
             hole = np.where(pos_ind[1:] - pos_ind[:-1] > n_hole)[0]
             if len(hole > 0):
@@ -885,9 +881,9 @@ def interpol_2D(data_c, dx=0.2, dy=0.2, fill_hole=False):
                 hole = np.where(pos_ind[1:] - pos_ind[:-1] > n_hole)[0]
                 if len(hole > 0):
                     for ih, h in enumerate(hole):
-                        n1 = int((pos[pos_ind[hole[0]]] - p2_inter[0]) / dp2)
-                        n2 = int((pos[pos_ind[hole[0]] + 1] - p2_inter[0]) / dp2)
-                        s2_inter[n1 + 1 : n2, i] = np.nan
+                        n1 = int((pos[pos_ind[hole[0]]]-p2_inter[0])/dp2)
+                        n2 = int((pos[pos_ind[hole[0]]+1]-p2_inter[0])/dp2)
+                        s2_inter[n1+1:n2, i] = np.nan
     if data[key1]["direction"] in ("N", "S", 0.0, 180.0):
         s1_inter = s1_inter.T
         z_inter = z_inter.T
@@ -897,16 +893,8 @@ def interpol_2D(data_c, dx=0.2, dy=0.2, fill_hole=False):
             s2_inter = s2_inter.T
     if nsensor == 2:
         grad_inter = (s2_inter - s1_inter) / data["d_sensor"]
-        return (
-            s1_inter,
-            s2_inter,
-            grad_inter,
-            x_inter,
-            y_inter,
-            z_inter,
-            t_inter,
-            topo_inter,
-        )
+        return (s1_inter, s2_inter, grad_inter, x_inter, y_inter, z_inter,
+                t_inter, topo_inter)
     dum = 0
     return s1_inter, dum, dum, x_inter, y_inter, z_inter, t_inter, topo_inter
 
@@ -938,7 +926,7 @@ def extrapolate(d, x, y):
     n_nearest = 8
     data = np.copy(d)
     XX, YY = np.meshgrid(x, y)
-    # Search all points at the beginning and the end of all rows
+# Search all points at the beginning and the end of all rows
     zlim = []
     xlim = []
     ylim = []
@@ -960,7 +948,7 @@ def extrapolate(d, x, y):
             zlim.append(data[j2, i])
             xlim.append(XX[j2, i])
             ylim.append(YY[j2, i])
-    # Search all points at the beginning and the end of all columns
+# Search all points at the beginning and the end of all columns
     for j in range(len(y)):
         i1 = len(x)
         i2 = 0
@@ -982,15 +970,15 @@ def extrapolate(d, x, y):
     zlim = np.array(zlim)
     xlim = np.array(xlim)
     ylim = np.array(ylim)
-    # Do extrapolation
+# Do extrapolation
     for i, xx in enumerate(x):
         for j, yy in enumerate(y):
             if np.isnan(data[j, i]):
                 dist = 1 / ((xx - xlim) ** 2 + (yy - ylim) ** 2)
                 ind = np.argsort(dist)
-                data[j, i] = np.dot(
-                    dist[ind[-n_nearest:]], zlim[ind[-n_nearest:]]
-                ) / np.sum(dist[ind[-n_nearest:]])
+                data[j, i] = np.dot(dist[ind[-n_nearest:]],
+                                    zlim[ind[-n_nearest:]])\
+                    / np.sum(dist[ind[-n_nearest:]])
     return data
 
 
@@ -1054,21 +1042,17 @@ def justify_lines_median(data_c, just=0, inplace=True):
                 if data["grad_data"]:
                     dm2 = data[key]["median2"] - data[k]["median2"]
             else:
-                for k1 in keys[key + 1 :]:
+                for k1 in keys[key+1:]:
                     if data[k1]["direction"] == d_keep:
                         break
-                for k2 in keys[key - 1 :: -1]:
+                for k2 in keys[key-1::-1]:
                     if data[k2]["direction"] == d_keep:
                         break
-                dm1 = (
-                    data[key]["median1"]
-                    - (data[k1]["median1"] + data[k2]["median1"]) / 2.0
-                )
+                dm1 = (data[key]["median1"]
+                       - (data[k1]["median1"] + data[k2]["median1"]) / 2.0)
                 if data["grad_data"]:
-                    dm2 = (
-                        data[key]["median2"]
-                        - (data[k1]["median2"] + data[k2]["median2"]) / 2.0
-                    )
+                    dm2 = (data[key]["median2"]
+                           - (data[k1]["median2"] + data[k2]["median2"]) / 2.0)
             val["s1"] -= dm1
             val["median1"] -= dm1
             if data["grad_data"]:
@@ -1100,19 +1084,19 @@ def gauss_transform(data_fix, data_move):
         Modified data_move array.
 
     """
-    # For the number of quantiles take the number of data of the smaller data set
+# For the number of quantiles take the number of data of the smaller data set
     n = min(len(data_fix), len(data_move))
-    # It seems that the number of quantiles in
-    # sklearn.preprocessing.QuantileTransformer is limited to 10000.
+# It seems that the number of quantiles in
+# sklearn.preprocessing.QuantileTransformer is limited to 10000.
     n = min(n, 10000)
-    # Do the Gauss-transform of the reference data set
+# Do the Gauss-transform of the reference data set
     GT_fix = QuantileTransformer(n_quantiles=n, output_distribution="normal")
     _ = GT_fix.fit_transform(data_fix)[:, 0]
-    # Do the Gauss-transform of the data set to be modified
+# Do the Gauss-transform of the data set to be modified
     GT_move = QuantileTransformer(n_quantiles=n, output_distribution="normal")
     v_move = GT_move.fit_transform(data_move)
-    # Project data_move onto the Gauss distribution of data_fix and return the
-    #     back-transformed data.
+# Project data_move onto the Gauss distribution of data_fix and return the
+#     back-transformed data.
     return GT_fix.inverse_transform(v_move)[:, 0]
 
 
@@ -1153,19 +1137,19 @@ def justify_lines_gaussian(data, just=0, local=1, inplace=True):
             if data.direction == 0:
                 nlines = data.sensor1_inter.shape[1]
                 for i in range(1, nlines, 2):
-                    data_fix = data.sensor1_inter[:, i - 1 : i + 2 : 2].reshape(-1, 1)
+                    data_fix = data.sensor1_inter[:, i-1:i+2:2].reshape(-1, 1)
                     data_move = data.sensor1_inter[:, i].reshape(-1, 1)
                     s1_justified[:, i] = gauss_transform(data_fix, data_move)
-                    data_fix = data.sensor2_inter[:, i - 1 : i + 2 : 2].reshape(-1, 1)
+                    data_fix = data.sensor2_inter[:, i-1:i+2:2].reshape(-1, 1)
                     data_move = data.sensor2_inter[:, i].reshape(-1, 1)
                     s2_justified[:, i] = gauss_transform(data_fix, data_move)
             else:
                 nlines = data.sensor1_inter.shape[0]
                 for i in range(1, nlines, 2):
-                    data_fix = data.sensor1_inter[i - 1 : i + 2 : 2, :].reshape(-1, 1)
+                    data_fix = data.sensor1_inter[i-1:i+2:2, :].reshape(-1, 1)
                     data_move = data.sensor1_inter[i, :].reshape(-1, 1)
                     s1_justified[i, :] = gauss_transform(data_fix, data_move)
-                    data_fix = data.sensor2_inter[i - 1 : i + 2 : 2, :].reshape(-1, 1)
+                    data_fix = data.sensor2_inter[i-1:i+2:2, :].reshape(-1, 1)
                     data_move = data.sensor2_inter[i, :].reshape(-1, 1)
                     s2_justified[i, :] = gauss_transform(data_fix, data_move)
         else:
@@ -1178,10 +1162,10 @@ def justify_lines_gaussian(data, just=0, local=1, inplace=True):
                 data_move = data.sensor2_inter[:, 0].reshape(-1, 1)
                 s2_justified[:, 0] = gauss_transform(data_fix, data_move)
                 for i in range(2, nlines, 2):
-                    data_fix = data.sensor1_inter[:, i - 1 : i + 2 : 2].reshape(-1, 1)
+                    data_fix = data.sensor1_inter[:, i-1:i+2:2].reshape(-1, 1)
                     data_move = data.sensor1_inter[:, i].reshape(-1, 1)
                     s1_justified[:, i] = gauss_transform(data_fix, data_move)
-                    data_fix = data.sensor2_inter[:, i - 1 : i + 2 : 2].reshape(-1, 1)
+                    data_fix = data.sensor2_inter[:, i-1:i+2:2].reshape(-1, 1)
                     data_move = data.sensor2_inter[:, i].reshape(-1, 1)
                     s2_justified[:, i] = gauss_transform(data_fix, data_move)
             else:
@@ -1193,59 +1177,51 @@ def justify_lines_gaussian(data, just=0, local=1, inplace=True):
                 data_move = data.sensor2_inter[0, :].reshape(-1, 1)
                 s2_justified[0, :] = gauss_transform(data_fix, data_move)
                 for i in range(2, nlines, 2):
-                    data_fix = data.sensor1_inter[i - 1 : i + 2 : 2, :].reshape(-1, 1)
+                    data_fix = data.sensor1_inter[i-1:i+2:2, :].reshape(-1, 1)
                     data_move = data.sensor1_inter[i, :].reshape(-1, 1)
                     s1_justified[i, :] = gauss_transform(data_fix, data_move)
-                    data_fix = data.sensor2_inter[i - 1 : i + 2 : 2, :].reshape(-1, 1)
+                    data_fix = data.sensor2_inter[i-1:i+2:2, :].reshape(-1, 1)
                     data_move = data.sensor2_inter[i, :].reshape(-1, 1)
                     s2_justified[i, :] = gauss_transform(data_fix, data_move)
     else:
         if just == 0:
             if data.direction == 0:
-                s = gauss_transform(
-                    data.sensor1_inter[:, 0::2].reshape(-1, 1),
-                    data.sensor1_inter[:, 1::2].reshape(-1, 1),
-                )
-                s1_justified[:, 1::2] = s.reshape(data.sensor1_inter[:, 1::2].shape)
-                s = gauss_transform(
-                    data.sensor2_inter[:, 0::2].reshape(-1, 1),
-                    data.sensor2_inter[:, 1::2].reshape(-1, 1),
-                )
-                s2_justified[:, 1::2] = s.reshape(data.sensor2_inter[:, 1::2].shape)
+                s = gauss_transform(data.sensor1_inter[:, 0::2].reshape(-1, 1),
+                                    data.sensor1_inter[:, 1::2].reshape(-1, 1))
+                s1_justified[:, 1::2] = s.reshape(
+                    data.sensor1_inter[:, 1::2].shape)
+                s = gauss_transform(data.sensor2_inter[:, 0::2].reshape(-1, 1),
+                                    data.sensor2_inter[:, 1::2].reshape(-1, 1))
+                s2_justified[:, 1::2] = s.reshape(
+                    data.sensor2_inter[:, 1::2].shape)
             else:
-                s = gauss_transform(
-                    data.sensor1_inter[0::2, :].reshape(-1, 1),
-                    data.sensor1_inter[1::2, :].reshape(-1, 1),
-                )
-                s1_justified[1::2, :] = s.reshape(data.sensor1_inter[1::2, :].shape)
-                s = gauss_transform(
-                    data.sensor2_inter[0::2, :].reshape(-1, 1),
-                    data.sensor2_inter[1::2, :].reshape(-1, 1),
-                )
-                s2_justified[1::2, :] = s.reshape(data.sensor1_inter[1::2, :].shape)
+                s = gauss_transform(data.sensor1_inter[0::2, :].reshape(-1, 1),
+                                    data.sensor1_inter[1::2, :].reshape(-1, 1))
+                s1_justified[1::2, :] = s.reshape(
+                    data.sensor1_inter[1::2, :].shape)
+                s = gauss_transform(data.sensor2_inter[0::2, :].reshape(-1, 1),
+                                    data.sensor2_inter[1::2, :].reshape(-1, 1))
+                s2_justified[1::2, :] = s.reshape(
+                    data.sensor1_inter[1::2, :].shape)
         else:
             if data.direction == 0:
-                s = gauss_transform(
-                    data.sensor1_inter[:, 1::2].reshape(-1, 1),
-                    data.sensor1_inter[:, 0::2].reshape(-1, 1),
-                )
-                s1_justified[:, 0::2] = s.reshape(data.sensor1_inter[:, 1::2].shape)
-                s = gauss_transform(
-                    data.sensor2_inter[:, 1::2].reshape(-1, 1),
-                    data.sensor2_inter[:, 0::2].reshape(-1, 1),
-                )
-                s2_justified[:, 0::2] = s.reshape(data.sensor2_inter[:, 1::2].shape)
+                s = gauss_transform(data.sensor1_inter[:, 1::2].reshape(-1, 1),
+                                    data.sensor1_inter[:, 0::2].reshape(-1, 1))
+                s1_justified[:, 0::2] = s.reshape(
+                    data.sensor1_inter[:, 1::2].shape)
+                s = gauss_transform(data.sensor2_inter[:, 1::2].reshape(-1, 1),
+                                    data.sensor2_inter[:, 0::2].reshape(-1, 1))
+                s2_justified[:, 0::2] = s.reshape(
+                    data.sensor2_inter[:, 1::2].shape)
             else:
-                s = gauss_transform(
-                    data.sensor1_inter[1::2, :].reshape(-1, 1),
-                    data.sensor1_inter[0::2, :].reshape(-1, 1),
-                )
-                s1_justified[0::2, :] = s.reshape(data.sensor1_inter[1::2, :].shape)
-                s = gauss_transform(
-                    data.sensor2_inter[1::2, :].reshape(-1, 1),
-                    data.sensor2_inter[0::2, :].reshape(-1, 1),
-                )
-                s2_justified[0::2, :] = s.reshape(data.sensor1_inter[1::2, :].shape)
+                s = gauss_transform(data.sensor1_inter[1::2, :].reshape(-1, 1),
+                                    data.sensor1_inter[0::2, :].reshape(-1, 1))
+                s1_justified[0::2, :] = s.reshape(
+                    data.sensor1_inter[1::2, :].shape)
+                s = gauss_transform(data.sensor2_inter[1::2, :].reshape(-1, 1),
+                                    data.sensor2_inter[0::2, :].reshape(-1, 1))
+                s2_justified[0::2, :] = s.reshape(
+                    data.sensor1_inter[1::2, :].shape)
 
     if inplace:
         data.sensor1_inter = np.copy(s1_justified)
@@ -1357,22 +1333,22 @@ def fit2lines(x, y, n0, n1, n2, n0_flag):
     inter2 = []
     fits = []
     isplits = []
-    # Fit two regression lines to data. For this, search breaking point between
-    #     third and 11th data point for which the fit is best
+# Fit two regression lines to data. For this, search breaking point between
+#     third and 11th data point for which the fit is best
     for i in range(n1, n2):
-        k1 = x[n0 : i + 1].reshape(-1, 1)
+        k1 = x[n0: i+1].reshape(-1, 1)
         k2 = x[i:].reshape(-1, 1)
         if n0_flag:
-            reg1 = LR(fit_intercept=False).fit(k1 - k1[0], y[n0 : i + 1] - y[n0])
-            reg1.intercept_ = y[n0] - k1[0][0] * reg1.coef_[0]
+            reg1 = LR(fit_intercept=False).fit(k1-k1[0], y[n0:i+1]-y[n0])
+            reg1.intercept_ = y[n0]-k1[0][0]*reg1.coef_[0]
         else:
-            reg1 = LR(fit_intercept=True).fit(k1, y[n0 : i + 1])
+            reg1 = LR(fit_intercept=True).fit(k1, y[n0:i+1])
         reg2 = LR(fit_intercept=True).fit(k2, y[i:])
         yy = np.zeros(n3)
-        yy[n0 : i + 1] = k1.flatten() * reg1.coef_[0] + reg1.intercept_ - y[n0 : i + 1]
-        yy[i:] = k2.flatten() * reg2.coef_[0] + reg2.intercept_ - y[i:]
+        yy[n0:i+1] = k1.flatten()*reg1.coef_[0]+reg1.intercept_-y[n0:i+1]
+        yy[i:] = k2.flatten()*reg2.coef_[0]+reg2.intercept_-y[i:]
         fit = np.sum(yy**2)
-        # If fit is better than earlier ones, calculate depths from both slopes
+# If fit is better than earlier ones, calculate depths from both slopes
         slopes1.append(reg1.coef_[0])
         slopes2.append(reg2.coef_[0])
         inter1.append(reg1.intercept_)
@@ -1384,18 +1360,8 @@ def fit2lines(x, y, n0, n1, n2, n0_flag):
             r1_best = reg1
             r2_best = reg2
             isplit = i
-    return (
-        r1_best,
-        r2_best,
-        isplit,
-        qual,
-        slopes1,
-        slopes2,
-        inter1,
-        inter2,
-        fits,
-        isplits,
-    )
+    return (r1_best, r2_best, isplit, qual, slopes1, slopes2, inter1, inter2,
+            fits, isplits)
 
 
 def min_max(data, half_width=3):
@@ -1439,71 +1405,71 @@ def min_max(data, half_width=3):
     """
     N = len(data)
     NN = np.arange(N, dtype="int")
-    # extreme_pos (extreme_neg) will contain the sum of all values <= (>=) the
-    #   central value
-    # half will contain the maximum of the number of
-    #   values < (>) the central value on the left and the right side
-    # A maximum (minimum) is found if extreme_xxx[i]==(2*half_width+1) and if
-    #   half_extreme_xxx[i]==half_width.
+# extreme_pos (extreme_neg) will contain the sum of all values <= (>=) the
+#   central value
+# half will contain the maximum of the number of
+#   values < (>) the central value on the left and the right side
+# A maximum (minimum) is found if extreme_xxx[i]==(2*half_width+1) and if
+#   half_extreme_xxx[i]==half_width.
     extreme_pos = np.zeros(N, dtype=bool)
     extreme_neg = np.zeros(N, dtype=bool)
-    # Start loop over data points
-    # Sum of neigbouring points for which value[i] <= (>=) value[test_point]
+# Start loop over data points
+# Sum of neigbouring points for which value[i] <= (>=) value[test_point]
     for k in range(N):
         dn0 = min(half_width, k)
         dn1 = min(half_width, N - k - 1) + 1
         width = dn0 + dn1
-        ext_pos = sum(data[k] - data[k - dn0 : k + dn1] >= 0) == width
-        # Sum of neighbouring values to the left (half1) and right (half2) < value
-        # [test_point]
-        half1 = sum(data[k] - data[k - dn0 : k] > 0)
-        half2 = sum(data[k] - data[k + 1 : k + dn1] > 0)
+        ext_pos = sum(data[k] - data[k-dn0:k+dn1] >= 0) == width
+# Sum of neighbouring values to the left (half1) and right (half2) < value
+# [test_point]
+        half1 = sum(data[k]-data[k-dn0: k] > 0)
+        half2 = sum(data[k]-data[k+1: k+dn1] > 0)
         half = max(half1, half2) == half_width
         extreme_pos[k] = ext_pos and half
 
-        # Sum of neighbouring values to the left (half1) or right (half2) > value
-        # [test_point]
-        ext_neg = sum(data[k] - data[k - dn0 : k + dn1] <= 0) == width
-        half1 = sum(data[k] - data[k - dn0 : k] < 0)
-        half2 = sum(data[k] - data[k + 1 : k + dn1] < 0)
+# Sum of neighbouring values to the left (half1) or right (half2) > value
+# [test_point]
+        ext_neg = sum(data[k]-data[k-dn0: k+dn1] <= 0) == width
+        half1 = sum(data[k]-data[k-dn0: k] < 0)
+        half2 = sum(data[k]-data[k+1: k+dn1] < 0)
         half = max(half1, half2) == half_width
         extreme_neg[k] = ext_neg and half
-    # Search all points that fulfill the criteria for local maximum and minimum
-    #        max_pos = NN[(extreme_pos==width) & (half_extreme_pos==half_width)]
+# Search all points that fulfill the criteria for local maximum and minimum
+#        max_pos = NN[(extreme_pos==width) & (half_extreme_pos==half_width)]
     max_pos = NN[extreme_pos]
     max_val = data[max_pos]
     min_pos = NN[extreme_neg]
     min_val = data[min_pos]
     del extreme_pos, extreme_neg
-    # mx_sig is a vector with length equal to number of found maxima with +1
-    # mn_sig is a vector with length equal to number of found maxima with -1
-    #   These vectors will be used to know which position is a maximum, which one
-    #   a minimum, once all extrema are concatenated in a single vector in order to
-    #   intercalate maxima and minima and to find places where multiple maxima or
-    #   minima follow each other
+# mx_sig is a vector with length equal to number of found maxima with +1
+# mn_sig is a vector with length equal to number of found maxima with -1
+#   These vectors will be used to know which position is a maximum, which one
+#   a minimum, once all extrema are concatenated in a single vector in order to
+#   intercalate maxima and minima and to find places where multiple maxima or
+#   minima follow each other
     mx_sig = np.ones(len(max_pos))
     mn_sig = -np.ones(len(min_pos))
-    # Concatenate positions, values and signs of maxima and minima into a single
-    #   vector for each of them
+# Concatenate positions, values and signs of maxima and minima into a single
+#   vector for each of them
     signs = np.concatenate((mx_sig, mn_sig))
     positions = np.concatenate((max_pos, min_pos))
     values = np.concatenate((max_val, min_val))
-    # Order the concatenated vectors by positions
+# Order the concatenated vectors by positions
     iord = np.argsort(positions)
     pord = positions[iord]
     vord = values[iord]
     sord = signs[iord]
     ls = len(sord)
-    # Prepare lists that will contain positions, values and signs of alternating
-    #   extreme values (avoiding having several maxima (minima) following each
-    #   other without a minumum (maximum) between them).
+# Prepare lists that will contain positions, values and signs of alternating
+#   extreme values (avoiding having several maxima (minima) following each
+#   other without a minumum (maximum) between them).
     pos = []
     val = []
     sig = []
     i = 1
-    # Start loop over concatenated extreme positions
-    # If sign of position [i] is different from position [i-1] accept position
-    #   [i-1] into a new list
+# Start loop over concatenated extreme positions
+# If sign of position [i] is different from position [i-1] accept position
+#   [i-1] into a new list
     while i < ls:
         if sord[i] != sord[i - 1]:
             pos.append(pord[i - 1])
@@ -1516,18 +1482,18 @@ def min_max(data, half_width=3):
                 sig.append(sord[i])
                 i += 1
             break
-        # if sign of position i is the same as the one of position i-1 search for next
-        #   position where sign changes
+# if sign of position i is the same as the one of position i-1 search for next
+#   position where sign changes
         i1 = i + 1
         for i1 in range(i + 1, ls):
             if sord[i] != sord[i1]:
                 break
         if i1 < i:
             break
-        # Search maximum values of the positions having the same sign
-        #   the chosen position is the average position of all equal maximum (minimum)
-        #   values. If one of the relative maxima (minima) has the strongest value, its
-        #   position and value will be copied into the new list.
+# Search maximum values of the positions having the same sign
+#   the chosen position is the average position of all equal maximum (minimum)
+#   values. If one of the relative maxima (minima) has the strongest value, its
+#   position and value will be copied into the new list.
         if sord[i] > 0:
             mx = np.where(vord[i:i1] == max(vord[i:i1]))
             mpos = int(np.mean(pord[i:i1][mx]))
@@ -1542,11 +1508,11 @@ def min_max(data, half_width=3):
             sig.append(sord[i])
         i = i1 + 1
     del max_pos, max_val, min_pos, min_val, iord, pord, vord, sord
-    # Transform lists to numpy arrays
+# Transform lists to numpy arrays
     pos = np.array(pos)
     val = np.array(val)
     sig = np.array(sig)
-    # Separate again relative maxima from relative minima
+# Separate again relative maxima from relative minima
     max_val = val[sig > 0]
     max_pos = pos[sig > 0]
     min_val = val[sig < 0]
@@ -1592,12 +1558,12 @@ def min_max2D(data, half_width=3):
     ny, nx = data.shape
     extreme_pos = np.zeros((ny, nx), dtype=bool)
     extreme_neg = np.zeros((ny, nx), dtype=bool)
-    # Loop over columns
+# Loop over columns
     for k in range(nx):
         max_pos, _, min_pos, _ = min_max(data[:, k], half_width=half_width)
         extreme_pos[max_pos, k] = True
         extreme_neg[min_pos, k] = True
-    # Loop over columns
+# Loop over columns
     for k in range(ny):
         max_pos, _, min_pos, _ = min_max(data[k, :], half_width=half_width)
         extreme_pos[k, max_pos] = True

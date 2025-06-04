@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 """
 Last modified on Nov 21, 2024
@@ -71,11 +72,14 @@ def matrix_extension(data):
     nx_right = nx_add_left + nx
     ny_up = ny_add_down + ny
     d[ny_add_down:ny_up, nx_add_left:nx_right] = data
-    d[ny_add_down:ny_up, 0:nx_add_left] = np.flip(data[:, 1:ix_add_left], axis=1)
-    d[ny_add_down:ny_up, nx_right:] = np.flip(data[:, ix_add_right : nx - 1], axis=1)
-    d[:ny_add_down, :] = np.flip(d[iy_add_down : iy_add_down + ny_add_down, :], axis=0)
-    d[ny_up:, :] = np.flip(d[iy_add_up : iy_add_up + ny_add_up, :], axis=0)
-    return d, (ny_add_down, nx_add_left), (ny_add_down + ny, nx_add_left + nx)
+    d[ny_add_down:ny_up, 0:nx_add_left] = np.flip(data[:, 1:ix_add_left],
+                                                  axis=1)
+    d[ny_add_down:ny_up, nx_right:] = np.flip(data[:, ix_add_right: nx-1],
+                                              axis=1)
+    d[:ny_add_down, :] = np.flip(d[iy_add_down: iy_add_down+ny_add_down, :],
+                                 axis=0)
+    d[ny_up:, :] = np.flip(d[iy_add_up: iy_add_up+ny_add_up, :], axis=0)
+    return d, (ny_add_down, nx_add_left), (ny_add_down+ny, nx_add_left+nx)
 
 
 def pole_reduction(data, dx, dy, inc, dec):
@@ -243,13 +247,8 @@ def vertical_derivative2(data):
     """
     gz2 = np.zeros_like(data)
     gz2[:, :] = np.nan
-    gz2[1:-1, 1:-1] = (
-        data[:-2, 1:-1]
-        + data[2:, 1:-1]
-        + data[1:1, :-2]
-        + data[1:-1, 2:]
-        - 4 * data[1:-1, 1:-1]
-    )
+    gz2[1:-1, 1:-1] = (data[:-2, 1:-1] + data[2:, 1:-1] + data[1:1, :-2]
+                       + data[1:-1, 2:] - 4 * data[1:-1, 1:-1])
     return gz2
 
 
@@ -359,15 +358,15 @@ def log_spect(data, d, n_coef):
     data = data[index]
     if len(data) < 3:
         return [None], [None]
-    # Calculate Fourier transform
+# Calculate Fourier transform
     FT = np.fft.fft(data)
     FT *= 2 / len(data)
     FT[0] /= 2.0
     Fabs = abs(FT)
     k = np.fft.fftfreq(len(data), d=d) * 2.0 * np.pi
-    # Plot data only up to coefficient (n_coef)
+# Plot data only up to coefficient (n_coef)
     eps = 1e-10
-    # Return log of power spectrum (add epsilon to avoid log(0)), wave numbers
+# Return log of power spectrum (add epsilon to avoid log(0)), wave numbers
     return np.log(Fabs[1:n_coef] ** 2 + eps), k[1:n_coef]
 
 
@@ -419,9 +418,9 @@ def spector_line(data, d, n_coef, half_width, iline):
         index = kk > 0
         dd = dd[index]
         kk = kk[index]
-    # In order to avoid negative depths, the analysis is started at the coefficient
-    #    having the maximum amplitude (excluding the first coefficient which is the
-    #    average value)
+# In order to avoid negative depths, the analysis is started at the coefficient
+#    having the maximum amplitude (excluding the first coefficient which is the
+#    average value)
     max_pos, d, _, _ = utils.min_max(dd, half_width=half_width)
     if len(max_pos) < 8:
         kkk = kk
@@ -433,26 +432,22 @@ def spector_line(data, d, n_coef, half_width, iline):
     n2 = len(d) - 3
     if n2 <= n1:
         return None, None, -1, None, None, None, [None], [None], [None], [None]
-    # Fit two regression lines to data. For this, search breaking point
-    #     between third and 11th data point for which the fit is best
+# Fit two regression lines to data. For this, search breaking point
+#     between third and 11th data point for which the fit is best
     reg1, reg2, isp, fit, slopes1, slopes2, inter1, inter2, fits, isplits = (
-        utils.fit2lines(kkk, d, n0, n1, n2, True)
-    )
+        utils.fit2lines(kkk, d, n0, n1, n2, True))
     if iline == 18:
         with open("test.dat", "w") as fo:
-            fo.write(
-                f"{isp}  {reg1.coef_[0]}  {reg1.intercept_}  "
-                + f"{reg2.coef_[0]}  {reg2.intercept_}  {fit}\n"
-            )
+            fo.write(f"{isp}  {reg1.coef_[0]}  {reg1.intercept_}  "
+                     + f"{reg2.coef_[0]}  {reg2.intercept_}  {fit}\n")
             for i in range(len(fits)):
-                fo.write(
-                    f"{isplits[i]}  {slopes1[i]}  {inter1[i]}"
-                    + f"  {slopes2[i]}  {inter2[i]}   {fits[i]}\n"
-                )
+                fo.write(f"{isplits[i]}  {slopes1[i]}  {inter1[i]}"
+                         + f"  {slopes2[i]}  {inter2[i]}   {fits[i]}\n")
     isplit = np.argmin(abs(kk - kkk[isp]))
     depth1 = -reg1.coef_[0] / 2.0
     depth2 = -reg2.coef_[0] / 2.0
-    return depth1, depth2, isplit, reg1.intercept_, reg2.intercept_, fit, dd, kk, d, kkk
+    return depth1, depth2, isplit, reg1.intercept_, reg2.intercept_, fit, dd, \
+        kk, d, kkk
 
 
 def spector1D(data, direction, half_width):
@@ -496,7 +491,7 @@ def spector1D(data, direction, half_width):
     """
     ndat = np.array([len(data.y_inter), len(data.x_inter)])
     Ny = np.array(ndat / 2, dtype=int)
-    # Set parameters depending on measurement direction
+# Set parameters depending on measurement direction
     dx = data.x_inter[1] - data.x_inter[0]
     dy = data.y_inter[1] - data.y_inter[0]
     if direction == 0:
@@ -506,7 +501,7 @@ def spector1D(data, direction, half_width):
         nlines = len(data.y_inter)
         dsamp = dx
     n_Ny = Ny[direction]
-    # Prepare lists where to store the calculation results
+# Prepare lists where to store the calculation results
     depths1 = []
     depths2 = []
     intercepts1 = []
@@ -514,7 +509,7 @@ def spector1D(data, direction, half_width):
     isplits = []
     lpos = []
     fits = []
-    # Loop over all lines, extract data and define coordinates
+# Loop over all lines, extract data and define coordinates
     for il in range(nlines):
         if direction:
             line_data = data.sensor1_inter[il, :]
@@ -524,10 +519,9 @@ def spector1D(data, direction, half_width):
             pos_line = data.x_inter[il]
         if il == 18:
             pass
-        depth1, depth2, isplit, intercept1, intercept2, fit, _, _, _, _ = spector_line(
-            line_data, dsamp, n_Ny, half_width, il
-        )
-        # Store best fitting depths in list
+        depth1, depth2, isplit, intercept1, intercept2, fit, _, _, _, _ =\
+            spector_line(line_data, dsamp, n_Ny, half_width, il)
+    # Store best fitting depths in list
         if not depth1:
             depths1.append(np.nan)
             depths2.append(np.nan)
@@ -544,17 +538,9 @@ def spector1D(data, direction, half_width):
             isplits.append(isplit)
             lpos.append(pos_line)
             fits.append(fit)
-    return (
-        np.array(lpos),
-        np.array(depths1),
-        np.array(depths2),
-        np.array(intercepts1),
-        np.array(intercepts2),
-        np.array(isplits),
-        np.array(fits),
-        n_Ny,
-        dsamp,
-    )
+    return (np.array(lpos), np.array(depths1), np.array(depths2),
+            np.array(intercepts1), np.array(intercepts2), np.array(isplits),
+            np.array(fits), n_Ny, dsamp)
 
 
 def spector2D(data_c):
@@ -599,58 +585,25 @@ def spector2D(data_c):
     step = d * nfac
     n_Nys = [int(window_len / (2 * dy)), int(window_len / (2 * dx))]
     ret, window_len, step, half_width, n_Ny = comm.get_spector2D(
-        window_len, step, n_Nys
-    )
+        window_len, step, n_Nys)
     if not ret:
         print("No FFT analysis done")
-        return (
-            False,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        )
+        return (False, None, None, None, None, None, None, None, None, None,
+                None, None, None, None)
     n_Nys = [int(window_len / (2 * dy)), int(window_len / (2 * dx))]
-    # Check whether given parameters are compatible
+# Check whether given parameters are compatible
     if n_Ny < 8:
         _ = QtWidgets.QMessageBox.warning(
-            None,
-            "Warning",
+            None, "Warning",
             "For automatic depth determination the number of\n"
             + "FFT coefficients must be >= 8\nActual value: "
             + f"N_coef: {n_Ny}\n\nSpector2D not calculated\n",
-            QtWidgets.QMessageBox.Close,
-            QtWidgets.QMessageBox.Close,
-        )
-        return (
-            False,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        )
+            QtWidgets.QMessageBox.Close, QtWidgets.QMessageBox.Close)
+        return (False, None, None, None, None, None, None, None, None, None,
+                None, None, None, None)
     if n_Ny > n_Nys[0] or n_Ny > n_Nys[1]:
         _ = QtWidgets.QMessageBox.warning(
-            None,
-            "Warning",
+            None, "Warning",
             "For automatic depth determination the number of\n"
             + "FFT coefficients used for depth determination\n"
             + "must be <= nr of Nyquist coefficient\nActual values:\n"
@@ -659,26 +612,10 @@ def spector2D(data_c):
             + f"Nyquist in X direction: {n_Nys[1]}\n\n"
             + "Retry increasing window length or interpolate with smaller"
             + " dy or dx\n\nSpector2D not calculated\n",
-            QtWidgets.QMessageBox.Close,
-            QtWidgets.QMessageBox.Close,
-        )
-        return (
-            False,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        )
-    # Prepare lists where to store the calculation results
+            QtWidgets.QMessageBox.Close, QtWidgets.QMessageBox.Close)
+        return (False, None, None, None, None, None, None, None, None, None,
+                None, None, None, None)
+# Prepare lists where to store the calculation results
     nr, nc = data_c.sensor1_inter.shape
     nstep_x = int(step / dx)
     nwin_x = int(window_len / dx)
@@ -738,18 +675,16 @@ def spector2D(data_c):
             n2y = j + nwiny2
             ypos[jj] = data_c.y_inter[j]
             data = data_c.sensor1_inter[n1y:n2y, i]
-            depth1, depth2, isplit1, intercept1, intercept2, fit1, dd, kk, _, _ = (
-                spector_line(data, dy, n_Ny, half_width, j)
-            )
+            depth1, depth2, isplit1, intercept1, intercept2, fit1, dd, kk, _, \
+                _ = (spector_line(data, dy, n_Ny, half_width, j))
             depths1[jj, ii] = depth1
             depths2[jj, ii] = depth2
             intercepts1[jj, ii] = intercept1
             intercepts2[jj, ii] = intercept2
             isplits1[jj, ii] = isplit1
             data = data_c.sensor1_inter[j, n1x:n2x]
-            depth3, depth4, isplit2, intercept3, intercept4, fit2, dd, kk, _, _ = (
-                spector_line(data, dx, n_Ny, half_width, i)
-            )
+            depth3, depth4, isplit2, intercept3, intercept4, fit2, dd, kk, _, \
+                _ = (spector_line(data, dx, n_Ny, half_width, i))
             depths3[jj, ii] = depth3
             depths4[jj, ii] = depth4
             intercepts3[jj, ii] = intercept3
@@ -774,22 +709,8 @@ def spector2D(data_c):
                 intercepts_1[jj, ii] = intercept3
                 intercepts_2[jj, ii] = intercept4
                 fits[jj, ii] = fit2
-    return (
-        True,
-        xpos,
-        ypos,
-        depths_1,
-        depths_2,
-        intercepts_1,
-        intercepts_2,
-        fits,
-        window_len,
-        nwiny2,
-        nwinx2,
-        step,
-        half_width,
-        n_Ny,
-    )
+    return (True, xpos, ypos, depths_1, depths_2, intercepts_1, intercepts_2,
+            fits, window_len, nwiny2, nwinx2, step, half_width, n_Ny)
 
 
 def gradient(data, dx, dy, filt=5.0):
@@ -820,7 +741,7 @@ def gradient(data, dx, dy, filt=5.0):
     """
     import scipy.ndimage as nd
 
-    # Apply gaussian filter
+# Apply gaussian filter
     if dx > dy:
         sigx = filt
         sigy = sigx * dx / dy

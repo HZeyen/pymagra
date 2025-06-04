@@ -152,29 +152,12 @@ class DataContainer:
         self.unit = ""
         self.gdata = Geometrics()
 
-    def set_values(
-        self,
-        line_declination=None,
-        h_sensor=None,
-        h2_sensor=None,
-        d_sensor=None,
-        dispo=None,
-        block=None,
-        block_name=None,
-        typ=None,
-        inter_flag=None,
-        treatments=None,
-        fconfig=None,
-        file=None,
-        ftype=None,
-        dtype=None,
-        earth=None,
-        lineaments=None,
-        plotLin_flag=None,
-        geography=None,
-        geography_flag=None,
-        grid_flag=None,
-    ):
+    def set_values(self, line_declination=None, h_sensor=None, h2_sensor=None,
+                   d_sensor=None, dispo=None, block=None, block_name=None,
+                   typ=None, inter_flag=None, treatments=None, fconfig=None,
+                   file=None, ftype=None, dtype=None, earth=None,
+                   lineaments=None, plotLin_flag=None, geography=None,
+                   geography_flag=None, grid_flag=None):
         """
         Sets certain attributes of DataContainer from outside.
         Only values not set to None are redefined.
@@ -291,9 +274,8 @@ class DataContainer:
         if grid_flag is not None:
             self.grid_flag = grid_flag
 
-    def read_geometrics(
-        self, file, height1=None, height2=None, disp=None, dec=None, title=None
-    ):
+    def read_geometrics(self, file, height1=None, height2=None, disp=None,
+                        dec=None, title=None):
         """
         Read Geometrics .stn or .dat file (G-858 instrument)
 
@@ -336,24 +318,15 @@ class DataContainer:
         geometrics.py for documentation
 
         """
-        # If values for sensor height and sensor dispodition are not known, open
-        # dialogue box for interactive definition
+# If values for sensor height and sensor dispodition are not known, open
+# dialogue box for interactive definition
         if height1 is None:
-            (
-                ret,
-                self.h1_sensor,
-                self.h2_sensor,
-                self.dispo,
-                self.line_declination,
-                self.title,
-            ) = comm.get_geometry(
-                file,
-                h1=self.h1_sensor,
-                h2=self.h2_sensor,
-                dispo=self.dispo + 1,
-                dec=self.line_declination,
-                title="Magnetic data",
-            )
+            (ret, self.h1_sensor, self.h2_sensor, self.dispo,
+             self.line_declination, self.title) =\
+                comm.get_geometry(file, h1=self.h1_sensor, h2=self.h2_sensor,
+                                  dispo=self.dispo+1,
+                                  dec=self.line_declination,
+                                  title="Magnetic data")
             if not ret:
                 print(f"file {file} not read")
                 return False
@@ -364,23 +337,20 @@ class DataContainer:
             self.dispo = disp
             self.line_declination = dec
             self.title = title
-        # Read geometrics data. Depending on the file name extension,
-        # io.read_geometrics chooses the type of file to be read
-        self.gdata = io.read_geometrics(
-            file, self.n_block, self.d_sensor, self.h1_sensor, self.dispo
-        )
+# Read geometrics data. Depending on the file name extension,
+# io.read_geometrics chooses the type of file to be read
+        self.gdata = io.read_geometrics(file, self.n_block, self.d_sensor,
+                                        self.h1_sensor, self.dispo)
         self.segments = self.gdata.segments
         self.sensor1 = self.gdata.sensor1
         self.sensor2 = self.gdata.sensor2
-        # Check whether gradient data exist. For this, sensor2 must have data with
-        # non-zero variance (not all data are 0.) and dispo must be 0 (if it is 1 or 2,
-        # sensors are horizontally placed).
-        if (
-            len(self.sensor1) == len(self.sensor2)
-            and not np.isclose(np.std(self.sensor2), 0.0)
-            and self.dispo == 0
-        ):
-            self.grad = (self.sensor1 - self.sensor2) / self.d_sensor
+# Check whether gradient data exist. For this, sensor2 must have data with
+# non-zero variance (not all data are 0.) and dispo must be 0 (if it is 1 or 2,
+# sensors are horizontally placed).
+        if (len(self.sensor1) == len(self.sensor2)
+                and not np.isclose(np.std(self.sensor2), 0.0)
+                and self.dispo == 0):
+            self.grad = (self.sensor1 - self.sensor2)/self.d_sensor
             self.grad_data = True
         else:
             self.grad = np.array([0.0])
@@ -472,9 +442,9 @@ class DataContainer:
             ye = now.year
             mo = now.month
             d = now.day
-        # If data have been interpolated onto a rehular grid, their structure should
-        # have changed (number of samples, number of lines etc.). Therefore, the full
-        # space gdata is reconstructed. Time are set to time of data creation.
+# If data have been interpolated onto a rehular grid, their structure should
+# have changed (number of samples, number of lines etc.). Therefore, the full
+# space gdata is reconstructed. Time are set to time of data creation.
         if self.inter_flag:
             if original_fill:
                 self.gdata.year = [ye]
@@ -500,10 +470,8 @@ class DataContainer:
             ye = self.gdata.year[0]
             mo = self.gdata.month[0]
             d = self.gdata.day[0]
-            if (
-                self.gdata.hour[0] * 60 + self.gdata.minute[0]
-                < self.gdata.hour[-1] * 60 + self.gdata.minute[-1]
-            ):
+            if (self.gdata.hour[0] * 60 + self.gdata.minute[0]
+                    < self.gdata.hour[-1] * 60 + self.gdata.minute[-1]):
                 h = self.gdata.hour[0]
                 m = self.gdata.minute[0] - 1
             else:
@@ -517,8 +485,7 @@ class DataContainer:
                     for ix, xx in enumerate(self.x_inter):
                         h, m, s = u.add_time(h, m, s, 0.1)
                         if np.isnan(self.sensor1_inter[iy, ix]) or np.isnan(
-                            self.sensor2_inter[iy, ix]
-                        ):
+                                self.sensor2_inter[iy, ix]):
                             continue
                         x.append(xx)
                         y.append(yy)
@@ -543,8 +510,7 @@ class DataContainer:
                     for iy, yy in enumerate(self.y_inter):
                         h, m, s = u.add_time(h, m, s, 0.1)
                         if np.isnan(self.sensor1_inter[iy, ix]) or np.isnan(
-                            self.sensor2_inter[iy, ix]
-                        ):
+                                self.sensor2_inter[iy, ix]):
                             continue
                         x.append(xx)
                         y.append(yy)
@@ -575,9 +541,9 @@ class DataContainer:
             self.gdata.hour = np.array(hour, dtype=int)
             self.gdata.minute = np.array(minute, dtype=int)
             self.gdata.second = np.array(second, dtype=float)
-        # If data are not interpolated onto a regular grid, it is supposed that their
-        # structure did not change, only the values may have changed due to diural
-        # corrections or others.
+# If data are not interpolated onto a regular grid, it is supposed that their
+# structure did not change, only the values may have changed due to diural
+# corrections or others.
         else:
             self.gdata.sensor1 = np.array([])
             self.gdata.sensor2 = np.array([])
@@ -596,33 +562,34 @@ class DataContainer:
                     second = []
                 if isinstance(key, str):
                     break
-                self.gdata.sensor1 = np.concatenate((self.gdata.sensor1, val["s1"]))
+                self.gdata.sensor1 = np.concatenate((self.gdata.sensor1,
+                                                     val["s1"]))
                 if self.grad_data:
-                    self.gdata.sensor2 = np.concatenate((self.gdata.sensor2, val["s2"]))
+                    self.gdata.sensor2 = np.concatenate((self.gdata.sensor2,
+                                                         val["s2"]))
                 else:
                     self.gdata.sensor2 = np.concatenate(
-                        (self.gdata.sensor2, np.zeros_like(val["s1"]))
-                    )
+                        (self.gdata.sensor2, np.zeros_like(val["s1"])))
                 if original_fill:
                     for _ in val["x"]:
                         h, m, s = u.add_time(h, m, s, 0.1)
                         hour.append(h)
                         minute.append(m)
                         second.append(s)
-                    self.gdata.hour = np.concatenate((self.gdata.hour, np.array(hour)))
-                    self.gdata.minute = np.concatenate(
-                        (self.gdata.minute, np.array(minute))
-                    )
-                    self.gdata.second = np.concatenate(
-                        (self.gdata.second, np.array(second))
-                    )
+                    self.gdata.hour = np.concatenate((self.gdata.hour,
+                                                      np.array(hour)))
+                    self.gdata.minute = np.concatenate((self.gdata.minute,
+                                                        np.array(minute)))
+                    self.gdata.second = np.concatenate((self.gdata.second,
+                                                        np.array(second)))
                     self.gdata.x = np.concatenate((self.gdata.x, val["x"]))
                     self.gdata.y = np.concatenate((self.gdata.y, val["y"]))
                     ones = np.ones_like(val["x"], dtype=int)
-                    self.gdata.line = np.concatenate((self.gdata.line, ones * key))
-                    self.gdata.year = np.ones_like(self.gdata.x, dtype=int) * ye
-                    self.gdata.month = np.ones_like(self.gdata.x, dtype=int) * mo
-                    self.gdata.day = np.ones_like(self.gdata.x, dtype=int) * d
+                    self.gdata.line = np.concatenate(
+                        (self.gdata.line, ones*key))
+                    self.gdata.year = np.ones_like(self.gdata.x, dtype=int)*ye
+                    self.gdata.month = np.ones_like(self.gdata.x, dtype=int)*mo
+                    self.gdata.day = np.ones_like(self.gdata.x, dtype=int)*d
                     self.gdata.mark = np.zeros_like(self.gdata.x, dtype=int)
             if original_fill:
                 self.gdata.z = np.zeros_like(self.gdata.x, dtype=float)
@@ -710,15 +677,11 @@ class DataContainer:
 
         """
         if height1 is None:
-            ret, self.h1_sensor, self.h2_sensor, self.line_declination, self.title = (
-                comm.get_geometry(
-                    file,
-                    h1=self.h1_sensor,
-                    h2=self.h2_sensor,
-                    dec=self.line_declination,
-                    title="Data",
-                )
-            )
+            ret, self.h1_sensor, self.h2_sensor, \
+                self.line_declination, self.title = (
+                    comm.get_geometry(file, h1=self.h1_sensor,
+                                      h2=self.h2_sensor,
+                                      dec=self.line_declination, title="Data"))
             if not ret:
                 print("Program aborted")
                 sys.exit()
@@ -772,13 +735,11 @@ class DataContainer:
             self.segments[line]["dx"].append(abs(self.x[-1] - self.x[-2]))
             self.segments[line]["dy"].append(abs(self.y[-1] - self.y[-2]))
             self.segments[line]["d"].append(
-                np.sqrt(
-                    self.segments[line]["dx"][-1] ** 2
-                    + self.segments[line]["dy"][-1] ** 2
-                )
-            )
+                np.sqrt(self.segments[line]["dx"][-1] ** 2
+                        + self.segments[line]["dy"][-1] ** 2))
             self.segments[line]["median1"] = np.nanmedian(self.sensor1[n1:n2])
-            self.segments[line]["median2"] = np.nanmedian(self.sensor2_inter[n1:n2])
+            self.segments[line]["median2"] =\
+                np.nanmedian(self.sensor2_inter[n1:n2])
             self.segments[line]["x"] = np.nanmedian(self.x[n1:n2])
             self.segments[line]["y"] = np.nanmedian(self.y[n1:n2])
             self.segments[line]["mask"] = True
@@ -796,7 +757,7 @@ class DataContainer:
         self.n_lines = nx
         if grad_flag:
             self.grad = (self.sensor1 - self.sensor2) / self.d_sensor
-        # Store original data to arrays xxx_ori
+# Store original data to arrays xxx_ori
         self.sensor1_ori = np.copy(self.sensor1)
         self.sensor2_ori = np.copy(self.sensor2)
         self.grad_ori = np.copy(self.grad)
@@ -858,9 +819,9 @@ class DataContainer:
                 h1 = 0.0
                 text = "Gravity"
                 self.unit = "mGal"
-            ret, self.h1_sensor, self.line_declination, self.title = comm.get_geometry(
-                infile, h1=h1, dec=self.line_declination, title=text
-            )
+            ret, self.h1_sensor, self.line_declination, self.title =\
+                comm.get_geometry(infile, h1=h1, dec=self.line_declination,
+                                  title=text)
             if not ret:
                 print("Program aborted")
                 sys.exit()
@@ -870,7 +831,7 @@ class DataContainer:
             self.title = title
         with open(infile, "r", encoding="utf-8") as fi:
             lines = fi.readlines()
-        # Read header
+# Read header
         il = -1
         n_rows = 0
         n_cols = 0
@@ -908,7 +869,7 @@ class DataContainer:
         self.direction = 1
         self.x_inter = x_origin + np.arange(n_cols) * self.dx
         self.y_inter = y_origin + np.arange(n_rows) * self.dy
-        # Read data
+# Read data
         c2 = 0
         for ir in range(n_rows):
             c1 = c2
@@ -929,7 +890,8 @@ class DataContainer:
             c2 = c1 + len(d)
             self.sensor1.extend(list(d))
             self.x.extend(list(self.x_inter[index]))
-            self.y.extend(list(np.ones_like(self.x_inter[index]) * self.y_inter[ir]))
+            self.y.extend(list(np.ones_like(self.x_inter[index])
+                               * self.y_inter[ir]))
             self.segments[ir]["mark_samples"] = [c1, c2]
             self.segments[ir]["dx"] = [self.dx]
             self.segments[ir]["dy"] = [0]
@@ -953,7 +915,7 @@ class DataContainer:
         self.z = np.ones_like(self.x) * self.h1_sensor
         self.topo = np.zeros_like(self.x)
         self.sensor1 = np.array(self.sensor1)
-        # Store original data to arrays xxx_ori
+# Store original data to arrays xxx_ori
         self.sensor1_ori = np.copy(self.sensor1)
         self.sensor1_inter = np.copy(data)
         self.time = np.arange(len(self.x))
@@ -1045,8 +1007,7 @@ class DataContainer:
         """
         if not title:
             ret, self.title = comm.get_geometry(
-                file, dx=1000, topo=True, title="Magnetic"
-            )
+                file, dx=1000, topo=True, title="Magnetic")
             if not ret:
                 print("Program aborted")
                 sys.exit()
@@ -1151,7 +1112,7 @@ class DataContainer:
         dx_line = np.median(abs(x_line[1:] - x_line[:-1]))
         for key, val in self.segments.items():
             val["dx"] = dx_line
-        # Store original data to arrays xxx_ori
+# Store original data to arrays xxx_ori
         self.sensor1_ori = np.copy(self.sensor1)
         self.time = np.arange(len(self.x))
         self.data = self.lines()
@@ -1213,37 +1174,23 @@ class DataContainer:
         n1 = self.segments[i_line]["mark_samples"][0]
         n2 = self.segments[i_line]["mark_samples"][-1]
         if self.grad_data:
-            return (
-                self.sensor1[n1:n2],
-                self.sensor2[n1:n2],
-                self.x[n1:n2],
-                self.y[n1:n2],
-                self.z[n1:n2],
-                self.topo[n1:n2],
-                self.time[n1:n2],
+            return (self.sensor1[n1:n2], self.sensor2[n1:n2], self.x[n1:n2],
+                    self.y[n1:n2], self.z[n1:n2], self.topo[n1:n2],
+                    self.time[n1:n2], self.segments[i_line]["mask"],
+                    self.segments[i_line]["direction"],
+                    self.segments[i_line]["sensor"],
+                    self.segments[i_line]["median1"],
+                    self.segments[i_line]["median2"],
+                    self.segments[i_line]["block"])
+        dum = np.array([0])
+        return (self.sensor1[n1:n2], dum, self.x[n1:n2], self.y[n1:n2],
+                self.z[n1:n2], self.topo[n1:n2], self.time[n1:n2],
                 self.segments[i_line]["mask"],
                 self.segments[i_line]["direction"],
                 self.segments[i_line]["sensor"],
                 self.segments[i_line]["median1"],
                 self.segments[i_line]["median2"],
-                self.segments[i_line]["block"],
-            )
-        dum = np.array([0])
-        return (
-            self.sensor1[n1:n2],
-            dum,
-            self.x[n1:n2],
-            self.y[n1:n2],
-            self.z[n1:n2],
-            self.topo[n1:n2],
-            self.time[n1:n2],
-            self.segments[i_line]["mask"],
-            self.segments[i_line]["direction"],
-            self.segments[i_line]["sensor"],
-            self.segments[i_line]["median1"],
-            self.segments[i_line]["median2"],
-            self.segments[i_line]["block"],
-        )
+                self.segments[i_line]["block"])
 
     def lines(self):
         """
@@ -1279,7 +1226,8 @@ class DataContainer:
         """
         data = {}
         for i, _ in self.segments.items():
-            s1, s2, x, y, z, topo, t, m, d, s, med1, med2, block = self.get_line(i)
+            s1, s2, x, y, z, topo, t, m, d, s, med1, med2, block =\
+                self.get_line(i)
             data[i] = {}
             data[i]["s1"] = s1
             data[i]["s2"] = s2
@@ -1357,33 +1305,24 @@ class DataContainer:
         None.
 
         """
-        # Calculate proposal for grid steps: inline as average sample interval along
-        # first line, cross-line as distance between first two lines.
+# Calculate proposal for grid steps: inline as average sample interval along
+# first line, cross-line as distance between first two lines.
         if self.data[0]["direction"] in ("N", "S", 0.0, 180.0):
-            ddy = np.round(
-                abs(self.data[0]["y"][-1] - self.data[0]["y"][0])
-                / (len(self.data[0]["y"]) - 1),
-                2,
-            )
-            ddx = np.round(abs(self.data[0]["x"][0] - self.data[1]["x"][0]), 2)
+            ddy = np.round(abs(self.data[0]["y"][-1]-self.data[0]["y"][0])
+                           / (len(self.data[0]["y"])-1), 2)
+            ddx = np.round(abs(self.data[0]["x"][0]-self.data[1]["x"][0]), 2)
         else:
-            ddx = np.round(
-                abs(self.data[0]["x"][-1] - self.data[0]["x"][0])
-                / (len(self.data[0]["x"]) - 1),
-                2,
-            )
-            ddy = np.round(abs(self.data[0]["y"][0] - self.data[1]["y"][0]), 2)
+            ddx = np.round(abs(self.data[0]["x"][-1]-self.data[0]["x"][0])
+                           / (len(self.data[0]["x"])-1), 2)
+            ddy = np.round(abs(self.data[0]["y"][0]-self.data[1]["y"][0]), 2)
 
-        # Open dialogue box and ask for grid steps.
-        # The while loop gives the opportunity to modify settings if the number of
-        # grid points becomes too large
+# Open dialogue box and ask for grid steps.
+# The while loop gives the opportunity to modify settings if the number of
+# grid points becomes too large
         while True:
             results, okButton = dialog(
                 ["dx [m]", "dy [m]", "fill holes"],
-                ["e", "e", "c"],
-                [ddx, ddy, 1],
-                "Interpolation parameters",
-            )
+                ["e", "e", "c"], [ddx, ddy, 1], "Interpolation parameters")
             if okButton:
                 self.dx = float(results[0])
                 self.dy = float(results[1])
@@ -1392,63 +1331,45 @@ class DataContainer:
                 print("\nInterpolation cancelled")
                 return False
 
-            # Check size of grid. If more than one million data points are expected, give
-            # a warning message
+# Check size of grid. If more than one million data points are expected, give
+# a warning message
             n_inter_x = int((self.xmax - self.xmin) / self.dx)
             n_inter_y = int((self.ymax - self.ymin) / self.dy)
             if n_inter_x * n_inter_y > 1000000:
                 answer = QtWidgets.QMessageBox.warning(
-                    None,
-                    "Warning",
+                    None, "Warning",
                     f"dx/dy={self.dx}/{self.dy} produces huge grid "
                     + f"({n_inter_x}x{n_inter_y} points)\n "
                     + "Ignore and continue or\n  close and try again\n",
                     QtWidgets.QMessageBox.Ignore | QtWidgets.QMessageBox.Close,
-                    QtWidgets.QMessageBox.Close,
-                )
-                # If user wand to change setting, go béck to beginning of while loop
+                    QtWidgets.QMessageBox.Close)
+# If user wand to change setting, go béck to beginning of while loop
                 if answer == QtWidgets.QMessageBox.Close:
                     continue
                 break
             break
 
-        # do interpolation
+# do interpolation
         self.inter_flag = True
         if self.grad_data:
-            (
-                self.sensor1_inter,
-                self.sensor2_inter,
-                self.grad_inter,
-                self.x_inter,
-                self.y_inter,
-                self.z_inter,
-                self.t_inter,
-                self.topo_inter,
-            ) = u.interpol_2D(self, dx=self.dx, dy=self.dy, fill_hole=self.hole_flag)
+            (self.sensor1_inter, self.sensor2_inter, self.grad_inter,
+             self.x_inter, self.y_inter, self.z_inter, self.t_inter,
+             self.topo_inter) = u.interpol_2D(self, dx=self.dx, dy=self.dy,
+                                              fill_hole=self.hole_flag)
         else:
-            (
-                self.sensor1_inter,
-                _,
-                _,
-                self.x_inter,
-                self.y_inter,
-                self.z_inter,
-                self.t_inter,
-                self.topo_inter,
-            ) = u.interpol_2D(self, dx=self.dx, dy=self.dy, fill_hole=self.hole_flag)
+            (self.sensor1_inter, _, _, self.x_inter, self.y_inter,
+             self.z_inter, self.t_inter, self.topo_inter,) = u.interpol_2D(
+                 self, dx=self.dx, dy=self.dy, fill_hole=self.hole_flag)
         self.mask1 = np.isnan(self.sensor1_inter)
-        self.sensor1_fill = u.extrapolate(
-            self.sensor1_inter, self.x_inter, self.y_inter
-        )
+        self.sensor1_fill = u.extrapolate(self.sensor1_inter, self.x_inter,
+                                          self.y_inter)
         self.z_fill = u.extrapolate(self.z_inter, self.x_inter, self.y_inter)
         if self.data["grad_data"]:
             self.mask2 = np.isnan(self.sensor2_inter)
-            self.sensor2_fill = u.extrapolate(
-                self.sensor2_inter, self.x_inter, self.y_inter
-            )
-            self.grad_fill = (self.sensor2_fill - self.sensor1_fill) / self.data[
-                "d_sensor"
-            ]
+            self.sensor2_fill = u.extrapolate(self.sensor2_inter, self.x_inter,
+                                              self.y_inter)
+            self.grad_fill = (self.sensor2_fill-self.sensor1_fill)/self.data[
+                "d_sensor"]
         self.treatments["interpol"] = True
 
     def nan_fill(self):
@@ -1468,17 +1389,14 @@ class DataContainer:
         self.nan_flag = not self.nan_flag
         if self.nan_flag:
             self.sensor1_back = np.copy(self.sensor1_inter)
-            self.sensor1_inter = u.extrapolate(
-                self.sensor1_inter, self.x_inter, self.y_inter
-            )
+            self.sensor1_inter = u.extrapolate(self.sensor1_inter,
+                                               self.x_inter, self.y_inter)
             if self.grad_data:
                 self.sensor2_back = np.copy(self.sensor2_inter)
-                self.sensor2_inter = u.extrapolate(
-                    self.sensor2_inter, self.x_inter, self.y_inter
-                )
-                self.grad_inter = (
-                    self.sensor2_inter - self.sensor1_inter
-                ) / self.d_sensor
+                self.sensor2_inter = u.extrapolate(self.sensor2_inter,
+                                                   self.x_inter, self.y_inter)
+                self.grad_inter = (self.sensor2_inter - self.sensor1_inter)\
+                    / self.d_sensor
             self.treatments["nan_fill"] = True
         else:
             self.sensor1_inter = np.copy(self.sensor1_back)
@@ -1502,27 +1420,23 @@ class DataContainer:
         None.
 
         """
-        # Get extreme values where to clip values
-        ret, min_fix, max_fix, percent_down, percent_up, histo = comm.clip_parameters()
+# Get extreme values where to clip values
+        ret, min_fix, max_fix, percent_down, percent_up, histo =\
+            comm.clip_parameters()
         if not ret:
             print("\nclipping cancelled")
             return
-        # If extreme values should be chosen manually in histogram, do this now
-        # Plot 1 or 2 histograms depending on the number of sensors used
+# If extreme values should be chosen manually in histogram, do this now
+# Plot 1 or 2 histograms depending on the number of sensors used
         if histo is True:
             min_fix, max_fix = FP.histo_plot(self)
             if min_fix is not None:
                 percent_down = None
             if max_fix is not None:
                 percent_up = None
-        # Delet data outside limits
-        u.clean_data(
-            self,
-            min_fix=min_fix,
-            max_fix=max_fix,
-            percent_down=percent_down,
-            percent_up=percent_up,
-        )
+# Delet data outside limits
+        u.clean_data(self, min_fix=min_fix, max_fix=max_fix,
+                     percent_down=percent_down, percent_up=percent_up)
         self.treatments["clip"] = True
 
     def justify_median(self):
@@ -1610,17 +1524,8 @@ class DataContainer:
                 if self.grad_data:
                     median2_odd.append(val["median2"])
                 nline_odd.append(key + 1)
-        FP.median_plot(
-            self.data,
-            median1_even,
-            median1_odd,
-            median2_even,
-            median2_odd,
-            nline_even,
-            nline_odd,
-            txt_even,
-            txt_odd,
-        )
+        FP.median_plot(self.data, median1_even, median1_odd, median2_even,
+                       median2_odd, nline_even, nline_odd, txt_even, txt_odd)
 
     def reduce_pole(self):
         """
@@ -1634,18 +1539,20 @@ class DataContainer:
         """
         self.treatments["pole"] = True
         self.sensor1_inter = trans.pole_reduction(
-            self.sensor1_fill, self.dx, self.dy, self.inclination, self.declination
-        )
+            self.sensor1_fill, self.dx, self.dy, self.inclination,
+            self.declination)
         self.sensor1_fill = np.copy(self.sensor1_inter)
         self.sensor1_inter[self.mask1] = np.nan
         if self.grad_data:
             self.sensor2_inter = trans.pole_reduction(
-                self.sensor2_fill, self.dx, self.dy, self.inclination, self.declination
-            )
+                self.sensor2_fill, self.dx, self.dy, self.inclination,
+                self.declination)
             self.sensor2_fill = np.copy(self.sensor2_inter)
             self.sensor2_inter[self.mask2] = np.nan
-            self.grad_inter = (self.sensor2_inter - self.sensor1_inter) / self.d_sensor
-            self.grad_fill = (self.sensor1_fill - self.sensor2_fill) / self.d_sensor
+            self.grad_inter = (self.sensor2_inter - self.sensor1_inter)\
+                / self.d_sensor
+            self.grad_fill = (self.sensor1_fill - self.sensor2_fill)\
+                / self.d_sensor
         self.inclination = 90.0
         self.declination = 0.0
         self.earth.inc = 90.0
@@ -1661,19 +1568,16 @@ class DataContainer:
         Results of all lines are saved in file spector.dat.
 
         """
-        # Check whether data are interpolated
+# Check whether data are interpolated
         if not self.inter_flag:
             _ = QtWidgets.QMessageBox.warning(
-                None,
-                "Warning",
+                None, "Warning",
                 "Data are not yet interpolated.\nYou should do this "
                 + "before calling FFT.",
-                QtWidgets.QMessageBox.Close,
-                QtWidgets.QMessageBox.Close,
-            )
+                QtWidgets.QMessageBox.Close, QtWidgets.QMessageBox.Close)
             return
-        # Wait for mouse click to choose line for which the result will be shown on
-        #   screen
+# Wait for mouse click to choose line for which the result will be shown on
+#   screen
         max_len_x = self.x_inter.max() - self.x_inter.min()
         max_len_y = self.y_inter.max() - self.y_inter.min()
         max_len = [max_len_y, max_len_x]
@@ -1685,28 +1589,24 @@ class DataContainer:
         if not ret:
             print("No spectral analysis done")
             return
-        lpos, depths1, depths2, intercepts1, intercepts2, isplits, fits, n_Ny, dsamp = (
-            trans.spector1D(self, direction, half_width)
-        )
-        # Pot results and allow manual modification
+        lpos, depths1, depths2, intercepts1, intercepts2, isplits, fits, \
+            n_Ny, dsamp = (trans.spector1D(self, direction, half_width))
+# Pot results and allow manual modification
         depths1, intercepts1 = FP.spector1D_plot(
-            self, depths1, intercepts1, depths2, intercepts2, direction, half_width
-        )
-        # Store all calculated depths into file "spector.dat
+            self, depths1, intercepts1, depths2, intercepts2, direction,
+            half_width)
+# Store all calculated depths into file "spector.dat
         if direction == 0:
             name = f"N-S_{self.data['type']}.dat"
         else:
             name = f"E-W_{self.data['type']}.dat"
         file = u.file_name("spector", name)
         with open(file, "w", encoding="utf-8") as fo:
-            fo.write(
-                "Line nr  position [m]    depth1 [m]    depth2 [m]   " + " misfit\n"
-            )
+            fo.write("Line nr  position [m]    depth1 [m]    depth2 [m]   "
+                     + " misfit\n")
             for i, lp in enumerate(lpos):
-                fo.write(
-                    f"{i:7d}{lp:10.2f}{depths1[i]:10.2f}"
-                    + f"{depths2[i]:10.2f}    {fits[i]:0.5f}\n"
-                )
+                fo.write(f"{i:7d}{lp:10.2f}{depths1[i]:10.2f}"
+                         + f"{depths2[i]:10.2f}    {fits[i]:0.5f}\n")
 
     def spector2D(self):
         """
@@ -1719,62 +1619,32 @@ class DataContainer:
         """
         if not self.inter_flag:
             _ = QtWidgets.QMessageBox.warning(
-                None,
-                "Warning",
-                "Data are not yet interpolated.\n"
+                None, "Warning", "Data are not yet interpolated.\n"
                 + "You should do this before calling FFT.",
-                QtWidgets.QMessageBox.Close,
-                QtWidgets.QMessageBox.Close,
-            )
+                QtWidgets.QMessageBox.Close, QtWidgets.QMessageBox.Close)
             return False
 
-        (
-            ok,
-            xpos,
-            ypos,
-            depths1,
-            depths2,
-            intercepts1,
-            intercepts2,
-            fits,
-            window_len,
-            nwiny,
-            nwinx,
-            step,
-            half_width,
-            n_Ny,
-        ) = trans.spector2D(self)
+        (ok, xpos, ypos, depths1, depths2, intercepts1, intercepts2, fits,
+         window_len, nwiny, nwinx, step, half_width, n_Ny) =\
+            trans.spector2D(self)
         if not ok:
             return
         depths1, intercepts1 = FP.spector2D_plot(
-            self,
-            depths1,
-            intercepts1,
-            depths2,
-            intercepts2,
-            xpos,
-            ypos,
-            half_width,
-            n_Ny,
-            window_len,
-            nwiny,
-            nwinx,
-            "rainbow",
-        )
+            self, depths1, intercepts1, depths2, intercepts2, xpos, ypos,
+            half_width, n_Ny, window_len, nwiny, nwinx, "rainbow")
 
-        with open(f"spector2D_{self.data_type}.dat", "w", encoding="utf-8") as fo:
-            fo.write(
-                "Line nr  X [m]      Y[m]    depth1 [m]    depth2 [m]    " + "misfit\n"
-            )
+        with open(f"spector2D_{self.data_type}.dat", "w",
+                  encoding="utf-8") as fo:
+            fo.write("Line nr  X [m]      Y[m]    depth1 [m]    depth2 [m]    "
+                     + "misfit\n")
             nr, nc = depths1.shape
             for i in range(nc):
                 for j in range(nr):
                     if np.isfinite(depths1[j, i]):
-                        fo.write(
-                            f"{i:7d}{xpos[i]:10.1f}{ypos[j]:10.1f}"
-                            + f"{depths1[j, i]:10.2f}{depths2[j, i]:10.2f}"
-                            + f"    {fits[j, i]:0.5f}\n"
-                        )
+                        fo.write(f"{i:7d}{xpos[i]:10.1f}{ypos[j]:10.1f}"
+                                 + f"{depths1[j, i]:10.2f}"
+                                 + "{depths2[j, i]:10.2f}"
+                                 + f"    {fits[j, i]:0.5f}\n")
         return True
 
     def tilt(self):
@@ -1788,13 +1658,11 @@ class DataContainer:
         """
         if self.data["grad_data"]:
             self.tilt_ang, self.vgrad, self.vgrad2, self.hgrad = trans.tilt(
-                self.sensor1_fill, self.dx, self.dy, self.grad_fill
-            )
+                self.sensor1_fill, self.dx, self.dy, self.grad_fill)
         else:
             self.tilt_ang, self.vgrad, self.vgrad2, self.hgrad = trans.tilt(
-                self.sensor1_fill, self.dx, self.dy, None
-            )
-        self.tilt_grd = trans.gradient(self.tilt_ang, self.dx, self.dy) * 1000.0
+                self.sensor1_fill, self.dx, self.dy, None)
+        self.tilt_grd = trans.gradient(self.tilt_ang, self.dx, self.dy)*1000.0
         max_pos, _ = u.min_max2D(self.tilt_grd, half_width=3)
         self.tilt_grd[:, :] = 0.0
         self.tilt_grd[max_pos[0], max_pos[1]] = 1.0
@@ -1816,9 +1684,8 @@ class DataContainer:
                 fo.write("    X       Y     angle\n")
                 for i, x in enumerate(self.x_inter):
                     for j, y in enumerate(self.y_inter):
-                        fo.write(
-                            f"{x:0.2f} {y:0.2f} " + f"{self.tilt_ang[j, i]:0.3f}\n"
-                        )
+                        fo.write(f"{x:0.2f} {y:0.2f} "
+                                 + f"{self.tilt_ang[j, i]:0.3f}\n")
         return self.lineaments
 
     def analytic_signal(self):
@@ -1830,16 +1697,15 @@ class DataContainer:
         None.
 
         """
-        # Calculate analytic signal of first sensor
+# Calculate analytic signal of first sensor
         d = self.data[0]["direction"]
         if d in ("N", "S", 0.0, 180.0):
             direction = 0
         else:
             direction = 1
-        self.analytic_signal1 = trans.analytic_signal(
-            self.sensor1_fill, self.dx, self.dy
-        )
-        # Calculate instataneous phase and frequency
+        self.analytic_signal1 = trans.analytic_signal(self.sensor1_fill,
+                                                      self.dx, self.dy)
+# Calculate instataneous phase and frequency
         self.inst_phase1 = np.unwrap(np.angle(self.analytic_signal1))
         if direction:
             add = self.inst_phase1[-1, :].reshape(1, -1)
@@ -1847,19 +1713,19 @@ class DataContainer:
         else:
             add = self.inst_phase1[:, -1].reshape(-1, 1)
             self.inst_freq1 = np.diff(self.inst_phase1, append=add)
-        # Set areas without measured data to nan
+# Set areas without measured data to nan
         self.analytic_signal1[self.mask1] = np.nan
         self.inst_phase1[self.mask1] = np.nan
         self.inst_freq1[self.mask1] = np.nan
-        # The following commented lines allow computation of instantaneous phases and
-        #     frequencies of the analytic signal. Since the results were not
-        #     convincing, I commented the plotting of these data, but maybe with other
-        #     data it would be worthwhile looking at them again. In this case, indent
-        #     the first line following the commented "else"
-        #
-        # N.B. :  Meanwhile, the program has been strongly modified. Certainly, this
-        # part si no longer compatible in its actual state and some reprogramming will
-        # have to be done.
+# The following commented lines allow computation of instantaneous phases and
+#     frequencies of the analytic signal. Since the results were not
+#     convincing, I commented the plotting of these data, but maybe with other
+#     data it would be worthwhile looking at them again. In this case, indent
+#     the first line following the commented "else"
+#
+# N.B. :  Meanwhile, the program has been strongly modified. Certainly, this
+# part si no longer compatible in its actual state and some reprogramming will
+# have to be done.
         # if self.grad_data:
         #     analytic_signal2 = trans.analytic_signal(self.sensor2_fill,
         #                                              self.dx, self.dy)
@@ -1917,28 +1783,28 @@ class DataContainer:
             Distance by which to continue filed (positive = upward)
         """
         results, okButton = dialog(
-            ["Continuation_height [m] (>0: upward)"],
-            ["e"],
-            [10.0],
-            "Field continuation",
-        )
+            ["Continuation_height [m] (>0: upward)"], ["e"], [10.0],
+            "Field continuation")
         if okButton:
             self.dz = float(results[0])
         else:
             print("\nUpward continuation cancelled")
             return
-        pro_data1 = trans.continuation(self.sensor1_fill, self.dx, self.dy, self.dz)
+        pro_data1 = trans.continuation(self.sensor1_fill, self.dx, self.dy,
+                                       self.dz)
         self.sensor1_fill = np.copy(pro_data1)
         pro_data1[self.mask1] = np.nan
         self.sensor1_inter = np.copy(pro_data1)
         self.data["height"] += self.dz
         self.h1_sensor += self.dz
         if self.grad_data:
-            pro_data2 = trans.continuation(self.sensor2_fill, self.dx, self.dy, self.dz)
+            pro_data2 = trans.continuation(self.sensor2_fill, self.dx, self.dy,
+                                           self.dz)
             self.sensor2_fill = np.copy(pro_data2)
             pro_data2[self.mask1] = np.nan
-            pro_datag = (pro_data1 - pro_data2) / self.d_sensor
-            self.grad_fill = (self.sensor1_fill - self.sensor2_fill) / self.d_sensor
+            pro_datag = (pro_data1-pro_data2)/self.d_sensor
+            self.grad_fill = (self.sensor1_fill -
+                              self.sensor2_fill)/self.d_sensor
             self.sensor2_inter = np.copy(pro_data2)
             self.grad_inter = np.copy(pro_datag)
             self.data["height2"] += self.dz
@@ -1946,9 +1812,8 @@ class DataContainer:
         self.treatments["up"] = True
         return self.dz
 
-    def delete_data(
-        self, pos, s1, s2, x0, x1, sensor_flag, lin, line_keys, index_sort, direction
-    ):
+    def delete_data(self, pos, s1, s2, x0, x1, sensor_flag, lin, line_keys,
+                    index_sort, direction):
         """
         Set all data in a vector to nan that are located between coordinates
         ]x0,x1[
@@ -2067,7 +1932,7 @@ class DataContainer:
         line_positions : Numpy 1D float array
             Median coordinates of all lines
         """
-        # If left mouse click, plot line in Y direction
+# If left mouse click, plot line in Y direction
         if self.inter_flag:
             line_keys = [None]
             if button == 1:
@@ -2084,14 +1949,14 @@ class DataContainer:
                 if self.grad_data:
                     s2 = self.sensor2_inter[:, lin]
                     s2 = s2[index_sort]
-                    z_line2 = z_line1 - self.data["height"] + self.data["height2"]
+                    z_line2 = z_line1-self.data["height"]+self.data["height2"]
                 else:
                     s2 = np.array([None])
                     z_line2 = np.copy(z_line1)
                 pos = pos[index_sort]
                 pos_line = self.x_inter[lin]
                 direction = "N"
-            # If right mouse click or wheel, plot line in X direction
+# If right mouse click or wheel, plot line in X direction
             else:
                 lin = np.argmin(np.abs(self.y_inter - ym))
                 s1 = self.sensor1_inter[lin, :]
@@ -2111,7 +1976,7 @@ class DataContainer:
                 pos = pos[index_sort]
                 pos_line = self.y_inter[lin]
                 direction = "E"
-        # Do the same if original data are to be used
+# Do the same if original data are to be used
         else:
             key0 = list(self.data.keys())[0]
             direction = self.data[key0]["direction"]
@@ -2173,20 +2038,8 @@ class DataContainer:
             z_line2 = z_line1 + self.data["height2"] - self.data["height"]
         else:
             z_line2 = np.copy(z_line1)
-        return (
-            pos,
-            pos_line,
-            topo_line,
-            z_line1,
-            z_line2,
-            s1,
-            s2,
-            lin,
-            direction,
-            index_sort,
-            line_keys,
-            line_positions,
-        )
+        return (pos, pos_line, topo_line, z_line1, z_line2, s1, s2, lin,
+                direction, index_sort, line_keys, line_positions)
 
     def plot_line(self, plot_flag, event0, title=""):
         """
@@ -2236,39 +2089,29 @@ class DataContainer:
         ym = event0.ydata
         button = event0.button
         fig_line_flag = False
-        # Get data along the chosen line
+# Get data along the chosen line
         while True:
-            (
-                pos,
-                pos_line,
-                topo_line,
-                z_line1,
-                z_line2,
-                s1,
-                s2,
-                lin,
-                direction,
-                index_sort,
-                line_keys,
-                line_positions,
-            ) = self.get_linedata(xm, ym, button)
+            (pos, pos_line, topo_line, z_line1, z_line2, s1, s2, lin,
+             direction, index_sort, line_keys, line_positions,) =\
+                self.get_linedata(xm, ym, button)
             lmax = len(line_positions) - 1
-            # If plot_flag is False, return line data
+# If plot_flag is False, return line data
             if not plot_flag:
-                return pos, pos_line, topo_line, z_line1, z_line2, s1, s2, direction
-            # If read_flag is True, plot the line and wait for keyboard or mouse event
-            # Create figure for line plot in floating window
+                return pos, pos_line, topo_line, z_line1, z_line2, s1, s2, \
+                    direction
+# If read_flag is True, plot the line and wait for keyboard or mouse event
+# Create figure for line plot in floating window
             if not fig_line_flag:
                 self.fig_line = newWindow("Single line", 1500, 1100)
-            # If 2 sensors have been read in, create two subplots, if not, only one.
+# If 2 sensors have been read in, create two subplots, if not, only one.
             if self.grad_data:
                 self.ax_line = self.fig_line.fig.subplots(2, 1)
                 ax = None
             else:
                 ax = self.fig_line.fig.subplots(1, 1)
-                # For simpler programming in the following part, copy single axis into a list
+# For simpler programming in the following part, copy single axis into a list
                 self.ax_line = [ax]
-            # Plot sensor1 values into first axis
+# Plot sensor1 values into first axis
             self.ax_line[0].plot(pos, s1)
             self.ax_line[0].set_title(f"{title}:\nLine at {pos_line:0.2f}")
             if self.data["type"] == "magnetic":
@@ -2278,35 +2121,37 @@ class DataContainer:
                     self.ax_line[0].set_ylabel("Magnetic field [nT]")
             else:
                 if self.grad_data:
-                    self.ax_line[0].set_ylabel("Gravity field [mGal]\nsensor 1")
+                    self.ax_line[0].set_ylabel(
+                        "Gravity field [mGal]\nsensor 1")
                 else:
                     self.ax_line[0].set_ylabel("Gravity field [mGal]")
-            # if two sensors were used, plot values of second sensor into second axis
+# if two sensors were used, plot values of second sensor into second axis
             if self.grad_data:
                 self.ax_line[1].plot(pos, s2)
                 self.ax_line[1].set_xlabel("Distance [m]")
                 if self.data["type"] == "magnetic":
                     self.ax_line[1].set_ylabel("Magnetic field [nT]\nsensor 2")
                 else:
-                    self.ax_line[1].set_ylabel("Gravity field [mGal]\nsensor 2")
+                    self.ax_line[1].set_ylabel(
+                        "Gravity field [mGal]\nsensor 2")
             self.fig_line.setHelp(
                 "Click left/right or press keypoard arrows for next line "
                 + "to left/right, move mouse to point and press DEL or d to "
                 + "erase data (2 points, start&end), press ENTER to stop "
-                + "(move mouse a little before)"
-            )
+                + "(move mouse a little before)")
             self.fig_line.show()
-            # Wait for mouse click in order to determine the next step:
-            #      Right click: plot next line to the East or North
-            #      Left click: plot next line to the West or South
+# Wait for mouse click in order to determine the next step:
+#      Right click: plot next line to the East or North
+#      Left click: plot next line to the West or South
             event = self.fig_line.get_event()
             next_flag = 0
-            # Catch keyboard press event
+# Catch keyboard press event
             if event.name == "key_press_event":
                 if event.key == "enter":
                     self.fig_line.close_window()
                     del self.fig_line
-                    return pos, pos_line, topo_line, z_line1, z_line2, s1, s2, direction
+                    return pos, pos_line, topo_line, z_line1, z_line2, s1, \
+                        s2, direction
                 if event.key == "right":
                     next_flag = 1
                 elif event.key == "left":
@@ -2322,21 +2167,11 @@ class DataContainer:
                     sensor_flag = 1
                     if "sensor 2" in event.inaxes.get_ylabel():
                         sensor_flag = 2
-                    self.delete_data(
-                        pos,
-                        s1,
-                        s2,
-                        x0,
-                        x1,
-                        sensor_flag,
-                        lin,
-                        line_keys,
-                        index_sort,
-                        direction,
-                    )
-                    # Data between the two mouse clicks are muted.
-                    # If the mouse click was detected at y > 200, mouse was in the upper subplot
-                    #    and data of sensor 1 are muted. Else data of sensor 2 are muted.
+                    self.delete_data(pos, s1, s2, x0, x1, sensor_flag, lin,
+                                     line_keys, index_sort, direction)
+# Data between the two mouse clicks are muted.
+# If the mouse click was detected at y > 200, mouse was in the upper subplot
+#    and data of sensor 1 are muted. Else data of sensor 2 are muted.
                     index = np.where((pos > min(x0, x1)) & (pos < max(x0, x1)))
                     sensor_flag = 1
                     if "sensor 2" in event.inaxes.get_ylabel():
@@ -2374,18 +2209,18 @@ class DataContainer:
                     self.fig_line.close_window()
                 else:
                     continue
-            # Click was outside axes
+# Click was outside axes
             elif event.name == "button_press_event":
                 if not event.inaxes:
                     continue
-                # Left click inside an axis
+# Left click inside an axis
                 if event.button == 1:
                     next_flag = -1
-                # Right click inside an axis
+# Right click inside an axis
                 elif event.button == 3:
                     next_flag = 1
-                # Wheel was clicked. The click is interpreted as one of the limits of the
-                #       zone to be muted
+# Wheel was clicked. The click is interpreted as one of the limits of the
+#       zone to be muted
                 else:
                     continue
             if next_flag < 0:
