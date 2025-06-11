@@ -49,7 +49,7 @@ class inversion:
         - write_parameters
     """
 
-    def __init__(self, data_class, data, x, y, z, topo=None, earth=None,
+    def __init__(self, data_class, data_ori, x, y, z, topo=None, earth=None,
                  data_type="m", line_pos=None, direction="N", dim=3, act="I"):
         """
         Initialization of inversion.
@@ -88,9 +88,9 @@ class inversion:
 
         """
         self.data_class = data_class
-        self.data_shape = data[0].shape
-        self.data1_shape = data[0].shape
-        self.data = data[0].flatten()
+        self.data_shape = data_ori[0].shape
+        self.data1_shape = data_ori[0].shape
+        self.data = data_ori[0].flatten()
         self.line_pos = line_pos
         self.direction = direction
         self.xo1 = x[0].flatten()
@@ -151,7 +151,7 @@ class inversion:
                 self.topo_inter = interpolate.NearestNDInterpolator(
                     list(zip(self.x, self.y)), self.topo[index_topo])
 # If only one data set is to be inverted, set values of second one to None
-        if len(data) == 1:
+        if len(data_ori) == 1:
             self.data2 = None
             self.x2 = None
             self.y2 = None
@@ -161,8 +161,9 @@ class inversion:
 # If two data sets are available, copy data and coordinates into their
 # respective arrays
         else:
-            self.data2_shape = data[1].shape
-            self.data2 = data[1].flatten()
+            self.data2_shape = data_ori[1].shape
+            self.data2 = data_ori[1].flatten()
+            self.datao2 = np.copy(self.data2)
             self.index_data2 = np.where(np.isfinite(self.data2))
             self.xo2 = x[1].flatten()
             self.zo2 = -z[1].flatten()
@@ -2085,10 +2086,10 @@ class inversion:
             z = z[self.index_data]
             self.n_data1 = len(data)
             if self.n_sensor == 2:
-                d = np.copy(self.datao2)
-                x2 = np.copy(self.xo2)
-                y2 = np.copy(self.yo2)
-                z2 = np.copy(self.zo2)
+                d2 = self.datao2.reshape(self.data2_shape)
+                x2 = self.xo2.reshape(self.data2_shape)
+                y2 = self.yo2.reshape(self.data2_shape)
+                z2 = self.zo2.reshape(self.data2_shape)
                 xcol = np.unique(self.x2)
                 yrow = np.unique(self.y2)
                 nx1 = np.where(xcol >= xdata_min)[0][0]
@@ -2103,14 +2104,16 @@ class inversion:
                                       nx1: nx2: self.data_reduction])
                 self.zo2 = np.copy(z2[ny1: ny2: self.data_reduction,
                                       nx1: nx2: self.data_reduction])
-                self.datao2 = np.copy(x2[ny1: ny2: self.data_reduction,
+                self.datao2 = np.copy(d2[ny1: ny2: self.data_reduction,
                                          nx1: nx2: self.data_reduction])
                 self.data2_shape = self.datao2.shape
-                self.index_data2 = np.where(np.isifinte(self.data2.flatten()))
+                self.index_data2 = np.where(np.isfinite(
+                    self.datao2.flatten()))[0]
                 self.x2 = self.xo2.flatten()[self.index_data2]
                 self.y2 = self.yo2.flatten()[self.index_data2]
                 self.z2 = self.zo2.flatten()[self.index_data2]
                 self.data2 = self.datao2.flatten()[self.index_data2]
+                self.datao2 = self.datao2.flatten()
                 x = np.concatenate((x, self.x2))
                 y = np.concatenate((y, self.y2))
                 z = np.concatenate((z, self.z2))

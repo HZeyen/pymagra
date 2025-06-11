@@ -436,13 +436,13 @@ def spector_line(data, d, n_coef, half_width, iline):
 #     between third and 11th data point for which the fit is best
     reg1, reg2, isp, fit, slopes1, slopes2, inter1, inter2, fits, isplits = (
         utils.fit2lines(kkk, d, n0, n1, n2, True))
-    if iline == 18:
-        with open("test.dat", "w") as fo:
-            fo.write(f"{isp}  {reg1.coef_[0]}  {reg1.intercept_}  "
-                     + f"{reg2.coef_[0]}  {reg2.intercept_}  {fit}\n")
-            for i in range(len(fits)):
-                fo.write(f"{isplits[i]}  {slopes1[i]}  {inter1[i]}"
-                         + f"  {slopes2[i]}  {inter2[i]}   {fits[i]}\n")
+    # if iline == 18:
+    #     with open("test.dat", "w") as fo:
+    #         fo.write(f"{isp}  {reg1.coef_[0]}  {reg1.intercept_}  "
+    #                  + f"{reg2.coef_[0]}  {reg2.intercept_}  {fit}\n")
+    #         for i in range(len(fits)):
+    #             fo.write(f"{isplits[i]}  {slopes1[i]}  {inter1[i]}"
+    #                      + f"  {slopes2[i]}  {inter2[i]}   {fits[i]}\n")
     isplit = np.argmin(abs(kk - kkk[isp]))
     depth1 = -reg1.coef_[0] / 2.0
     depth2 = -reg2.coef_[0] / 2.0

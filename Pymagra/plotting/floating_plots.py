@@ -1016,10 +1016,10 @@ def plot_analytic(data, color="rainbow"):
         else:
             file = "Analytic-signal-solutions_E-W-lines.dat"
         with open(file, "w", encoding="utf-8") as fo:
-            fo.write("     X        Y    Depth[m]   Alpha    Fit\n")
+            fo.write("       X         Y       Depth[m]   Alpha    Fit\n")
             for i, d in enumerate(depth):
-                fo.write(f"{x_center[i]:0.1f} {y_center[i]:0.1f} "
-                         + f"{d:0.2f} {alpha[i]:0.3f} {fit[i]:0.6f}\n")
+                fo.write(f"{x_center[i]:10.1f} {y_center[i]:10.1f} "
+                         + f"{d:11.2f} {alpha[i]:0.3f} {fit[i]:0.6f}\n")
         fig_sig.setHelp("Click any mouse button or ENTER to close window")
         fig_sig.show()
 # Wait for click within results window to close it

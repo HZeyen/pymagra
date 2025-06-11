@@ -1605,8 +1605,8 @@ class DataContainer:
             fo.write("Line nr  position [m]    depth1 [m]    depth2 [m]   "
                      + " misfit\n")
             for i, lp in enumerate(lpos):
-                fo.write(f"{i:7d}{lp:10.2f}{depths1[i]:10.2f}"
-                         + f"{depths2[i]:10.2f}    {fits[i]:0.5f}\n")
+                fo.write(f"{i:7d}{lp:14.2f}{depths1[i]:14.2f}"
+                         + f"{depths2[i]:14.2f}    {fits[i]:0.5f}\n")
 
     def spector2D(self):
         """
@@ -1635,16 +1635,16 @@ class DataContainer:
 
         with open(f"spector2D_{self.data_type}.dat", "w",
                   encoding="utf-8") as fo:
-            fo.write("Line nr  X [m]      Y[m]    depth1 [m]    depth2 [m]    "
+            fo.write("Line nr     X [m]      Y[m] depth1 [m] depth2 [m]     "
                      + "misfit\n")
             nr, nc = depths1.shape
             for i in range(nc):
                 for j in range(nr):
                     if np.isfinite(depths1[j, i]):
                         fo.write(f"{i:7d}{xpos[i]:10.1f}{ypos[j]:10.1f}"
-                                 + f"{depths1[j, i]:10.2f}"
-                                 + "{depths2[j, i]:10.2f}"
-                                 + f"    {fits[j, i]:0.5f}\n")
+                                 + f"{depths1[j, i]:11.2f}"
+                                 + f"{depths2[j, i]:11.2f}"
+                                 + f"{fits[j, i]:11.5f}\n")
         return True
 
     def tilt(self):
