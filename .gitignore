@@ -39,3 +39,5 @@ Example/ReadMe_examples.docx
 /doc/
 pymagra_old_snippets.py
 /utilities/
+.pre-commit-config_autopep8.yaml
+.pre-commit-config_Ruff.yaml
