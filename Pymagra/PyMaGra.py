@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-last modified on May 01, 2025
+last modified on June 16, 2025
 
 @author: Hermann Zeyen <hermann.zeyen@universite-paris-saclay.fr>
          University Paris-Saclay, France
@@ -150,7 +150,7 @@ class Main(QtWidgets.QWidget):
         self.treatments["clip"] = False
         self.treatments["justify_median"] = False
         self.treatments["justify_Gauss"] = False
-        self.treatments["interpol"] = False
+        self.treatments["gridded"] = False
         self.treatments["nan_fill"] = False
         self.treatments["pole"] = False
         self.treatments["odd lines"] = False
@@ -301,11 +301,11 @@ class Main(QtWidgets.QWidget):
         self.w.gaussJustify.triggered.connect(self.justify_gauss)
         self.w.interpolate.triggered.connect(self.interpol)
         self.w.poleReduction.triggered.connect(self.reduce_pole)
-        self.w.lineFFT.triggered.connect(self.spector)
-        self.w.Spector_2D.triggered.connect(self.spector2D)
         self.w.tiltAngle.triggered.connect(self.tilt)
         self.w.prolongation.triggered.connect(self.continuation)
         self.w.analytic.triggered.connect(self.analytic_signal)
+        self.w.lineFFT.triggered.connect(self.spector)
+        self.w.Spector_2D.triggered.connect(self.spector2D)
 # Actions for menu Inversion
         self.w.inv2D.triggered.connect(self.inver2D)
         self.w.inv3D.triggered.connect(self.inver3D)
@@ -382,7 +382,10 @@ class Main(QtWidgets.QWidget):
                 self.line_dec = float(lines[3])
                 self.height_sens1 = -float(lines[4])
                 self.height_sens2 = -float(lines[5])
-                self.sensor_disposition = int(lines[6][0])
+                if lines[6][0] in ("v", "V", "0"):
+                    self.sensor_disposition = 0
+                else:
+                    self.sensor_disposition = 1
                 self.strength = float(lines[7])
                 self.inclination = float(lines[8])
                 self.declination = float(lines[9])
@@ -454,7 +457,6 @@ class Main(QtWidgets.QWidget):
             if tcorr_flag:
                 self.dat[-1].correct_time(dt=tcorr)
                 self.w.timeCorrect.setEnabled(False)
-            self.dat_ori.append(deepcopy(self.dat[-1]))
             self.check_data(self.dat[-1].data, f)
 # If data are magnetic, no configuration file exits and Earth's field
 #   properties were not yet read, ask now for these properties
@@ -479,6 +481,7 @@ class Main(QtWidgets.QWidget):
             self.declination_ori = self.declination
             self.earth_ori = deepcopy(self.earth)
             self.dat[-1].set_values(earth=self.earth)
+            self.dat_ori.append(deepcopy(self.dat[-1]))
 # If the configuration file did not yet exist, create it now with the data
 #   read in via the dialog boxes
             if not self.config_flag:
@@ -487,7 +490,7 @@ class Main(QtWidgets.QWidget):
                     fo.write(f"{self.data_types[i]}\n")
                     fo.write(f'{self.dat[-1].data["title"]}\n')
                     fo.write(f'{self.dat[-1].data["line_declination"]}\n')
-                    fo.write(f'{self.dat[-1].data["height"]}\n')
+                    fo.write(f'{-self.dat[-1].data["height"]}\n')
                     if self.dat[-1].data["grad_data"]:
                         self.height2 = self.dat[-1].data["height2"]
                         self.dist_sensors = self.dat[-1].data["height"] -\
@@ -495,8 +498,12 @@ class Main(QtWidgets.QWidget):
                     else:
                         self.height2 = self.dat[-1].data["height"]
                         self.dist_sensors = 0.0
-                    fo.write(f"{self.height2}\n")
-                    fo.write(f'{self.dat[-1].data["dispo"]}\n')
+                    if self.dat[-1].data["dispo"]:
+                        fo.write(f"{self.dat[-1].d_sensor}\n")
+                        fo.write('h\n')
+                    else:
+                        fo.write(f"{-self.height2}\n")
+                        fo.write('v\n')
                     fo.write(f"{self.earth.f}\n")
                     fo.write(f"{self.earth.inc}\n")
                     dec = self.earth.dec
@@ -1085,7 +1092,7 @@ class Main(QtWidgets.QWidget):
         self.w.analytic.setEnabled(False)
         self.w.gaussJustify.setEnabled(False)
         self.w.saveGXF.setEnabled(False)
-        self.treatments["interpol"] = False
+        self.treatments["gridded"] = False
         self.treatments["nan_fill"] = False
         self.treatments["pole"] = False
         self.treatments["up"] = False
@@ -1109,7 +1116,7 @@ class Main(QtWidgets.QWidget):
         None.
 
         """
-        data = self.dat_ori[self.actual_plotted_file].data
+        data = self.dat_ori[self.actual_plotted_file]
         self.fig, self.ax = self.w.plot_triang(
             data, title=f"{self.data.data['title']}, ", percent=self.percent,
             mincol1=self.mincol1, maxcol1=self.maxcol1, mincol2=self.mincol2,
@@ -1149,7 +1156,7 @@ class Main(QtWidgets.QWidget):
             self.w.setHelp(" ")
         else:
             for t in self.data.treatments.items():
-                if t[0] in ("interpol", "nan_fill", "pole", "up"):
+                if t[0] in ("gridded", "nan_fill", "pole", "up"):
                     continue
                 if t[1]:
                     title += " " + t[0] + ","
@@ -1361,7 +1368,22 @@ class Main(QtWidgets.QWidget):
                 [None, self.percent, self.mincol1, self.maxcol1, 0],
                 "Color scale limits")
         if okButton:
-            self.percent = float(results[1])
+            per = float(results[1])
+            if per > 0.4:
+                answer = QtWidgets.QMessageBox.warning(
+                    None, "Warning",
+                    f"Quantile is set to {per}.\n\n"
+                    + "This may lead to an error due to not enough data in the"
+                    + f"range {per} to {1.-per:0.3f}\nThe value will be set "
+                    + "to 0.4:\n\nPress Ok to accept or Cancel to return and"
+                    + "try again",
+                    QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel,
+                    QtWidgets.QMessageBox.Ok)
+                if answer == QtWidgets.QMessageBox.Cancel:
+                    return
+                else:
+                    per = 0.4
+            self.percent = per
             self.mincol1 = float(results[2])
             self.maxcol1 = float(results[3])
             if self.w.grad_data:
@@ -1442,7 +1464,7 @@ class Main(QtWidgets.QWidget):
         of time.
 
         """
-        if self.treatments["interpol"]:
+        if self.treatments["gridded"]:
             _ = QtWidgets.QMessageBox.warning(
                 None, "Warning",
                 "Since during interpolation timing information is lost,\n "
@@ -1523,7 +1545,7 @@ class Main(QtWidgets.QWidget):
         """
         self.data.interpol()
         self.dat[self.actual_plotted_file] = deepcopy(self.data)
-        self.treatments["interpol"] = True
+        self.treatments["gridded"] = True
         if "m" in self.data.data_type:
             self.w.poleReduction.setEnabled(True)
         self.w.tiltAngle.setEnabled(True)
@@ -1695,6 +1717,7 @@ class Main(QtWidgets.QWidget):
         ret = inv.get_area2D()
         if not ret:
             return
+        inv.write_parameters(os.path.join(inv.folder, "parameters.dat"))
         while True:
             inv.run_inversion()
             ret = inv.show_results2D(file)
@@ -1760,6 +1783,7 @@ class Main(QtWidgets.QWidget):
             if not ret:
                 return
 # Do inversion
+            inv.write_parameters(os.path.join(inv.folder, "parameters.dat"))
             while True:
                 inv.run_inversion()
                 ret = inv.show_results3D()
@@ -1960,6 +1984,7 @@ class Main(QtWidgets.QWidget):
         if height1 == height2:
             dat.store_gxf(os.path.join(inv.folder, "synthetic_data.gxf"),
                           inv.data_mod.reshape(d_shape), xmin, ymin, dx, dy)
+            type_txt = "GXF"
         else:
             dat.inter_flag = True
             dat.sensor1_inter = inv.data_mod[:ndat1].reshape(d_shape)
@@ -1969,19 +1994,20 @@ class Main(QtWidgets.QWidget):
             dat.y_inter = yy
             dat.grad_data = True
             dat.write_dat(os.path.join(inv.folder, "synthetic_data.dat"), True)
-            with open(os.path.join(inv.folder,
-                                   "synthetic_data.config"), "w") as fo:
-                fo.write("MGWIN\n")
-                fo.write(f"{data_type}\n")
-                fo.write("synthetic model\n")
-                fo.write(f'{self.dat[-1].data["line_declination"]}\n')
-                fo.write(f"{-height1}\n")
-                fo.write(f"{-height2}\n")
-                fo.write("0\n")
-                fo.write(f"{self.earth.f}\n")
-                fo.write(f"{self.earth.inc}\n")
-                dec = self.earth.dec
-                fo.write(f'{dec+self.dat[-1].data["line_declination"]}\n')
+            type_txt = "MGWIN"
+        with open(os.path.join(inv.folder,
+                               "synthetic_data.config"), "w") as fo:
+            fo.write(f"{type_txt}\n")
+            fo.write(f"{data_type}\n")
+            fo.write("synthetic model\n")
+            fo.write(f'{self.dat[-1].data["line_declination"]}\n')
+            fo.write(f"{-height1}\n")
+            fo.write(f"{-height2}\n")
+            fo.write("0\n")
+            fo.write(f"{self.earth.f}\n")
+            fo.write(f"{self.earth.inc}\n")
+            dec = self.earth.dec
+            fo.write(f'{dec+self.dat[-1].data["line_declination"]}\n')
         inv.show_synthetic()
 
     def Handler(self, signal_received, frame):

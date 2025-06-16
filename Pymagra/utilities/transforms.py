@@ -1,7 +1,7 @@
 
 # -*- coding: utf-8 -*-
 """
-Last modified on Nov 21, 2024
+Last modified on June 15, 2025
 
 @author: Hermann Zeyen <hermann.zeyen@universite-paris-saclay.fr>
          Université Paris-Saclay, France
@@ -422,7 +422,7 @@ def spector_line(data, d, n_coef, half_width, iline):
 #    having the maximum amplitude (excluding the first coefficient which is the
 #    average value)
     max_pos, d, _, _ = utils.min_max(dd, half_width=half_width)
-    if len(max_pos) < 8:
+    if len(max_pos) < 8 or np.max(max_pos) < int(len(dd/2.)):
         kkk = kk
         d = dd
     else:

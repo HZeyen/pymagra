@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Last modified on Apr 21, 2025
+Last modified on June 16, 2025
 
 @author: Hermann Zeyen University Paris-Saclay, France
 """
@@ -219,30 +219,28 @@ class Geometrics:
         line: list of int
             mark numbers
         """
-        self.x = np.concatenate((self.x, np.round(
-            np.array(x, dtype=float), 3)))
-        self.y = np.concatenate((self.y, np.round(
-            np.array(y, dtype=float), 3)))
+        self.x = np.concatenate((self.x,
+                                 np.round(np.array(x, dtype=float), 3)))
+        self.y = np.concatenate((self.y,
+                                 np.round(np.array(y, dtype=float), 3)))
         self.sensor1 = np.concatenate((self.sensor1, np.array(d, dtype=float)))
         self.day = np.concatenate((self.day, np.array(day, dtype=int)))
         self.month = np.concatenate((self.month, np.array(month, dtype=int)))
         self.year = np.concatenate((self.year, np.array(year, dtype=int)))
         self.hour = np.concatenate((self.hour, np.array(hour, dtype=int)))
-        self.minute = np.concatenate((self.minute, np.array(
-            minute, dtype=int)))
-        self.second = np.concatenate((self.second, np.array(
-            second, dtype=float)))
-        tt = (
-            np.array(time, dtype=int) * 86400.0
-            + np.array(hour, dtype=int) * 3600.0
-            + np.array(minute, dtype=int) * 60.0
-            + np.array(second, dtype=float)
-        )
+        self.minute = np.concatenate(
+            (self.minute, np.array(minute, dtype=int)))
+        self.second = np.concatenate(
+            (self.second, np.array(second, dtype=float)))
+        tt = (np.array(time, dtype=int) * 86400.0
+              + np.array(hour, dtype=int) * 3600.0
+              + np.array(minute, dtype=int) * 60.0
+              + np.array(second, dtype=float))
         self.time = np.concatenate((self.time, tt))
         self.mark = np.concatenate((self.mark, np.array(mark, dtype=int)))
         self.line = np.concatenate((self.line, np.array(line, dtype=int)))
 
-    def read_stn(self, infile, n_block, h1_sensor=-1.4, h2_sensor=-0.4,
+    def read_stn(self, infile, n_block, h1_sensor=-1.4, d_sensor=1.,
                  dispo=0):
         """
         Reads a 2-sensor Geometix .stn file
@@ -258,16 +256,17 @@ class Geometrics:
         n_block : int
             Number of block (file) of this data set within all files to be read
         h1_sensor : float. Optional, default: -1.4 m.
-            Height over ground of sensors 1 [m]. Usually, this is the upper
+            Height over ground of sensor 1 [m]. Usually, this is the upper
             sensor. Coordinate system is positive downwards, therefore, this
             value is normally negative
-        h2_sensor : float, optional, default: -0.4 m.
-            Hight over ground of sensor 2 (lower sensor) [m].
+        d_sensor : float, optional, default: 1 m.
+            Distance between sensors [m]
+            For vertical disposition: positive: sensor 1 above sensor 2.
+            For horizontal disposition: positive: sensor 1 left of sensor2.
         dispo : int, optional
             If two sensors were used, dispo indicates there relative position:
-            - If dispo == 0: vertical disposition, sensor 2 above sensor 1.
-            - If dispo == 1: horizontal disposition, sensor 2 to the right of
-            sensor 1.
+            - If dispo == 0: vertical disposition.
+            - If dispo == 1: horizontal disposition.
 
         Data are stored in the following arrays:
 
@@ -353,9 +352,14 @@ class Geometrics:
         """
 # Read magnetic field data ("stn" file)
         self.n_blocks = n_block
-        self.d_sensor = h2_sensor - h1_sensor
+        if dispo:
+            h2_sensor = h1_sensor
+        else:
+            h2_sensor = h1_sensor+d_sensor
+        self.d_sensor = d_sensor
         self.d_sensor2 = self.d_sensor / 2.0
-        self.h_sensor = h2_sensor
+        self.h_sensor = h1_sensor
+        self.h2_sensor = h2_sensor
         self.dispo = dispo
         self.infile = infile
         mag1 = []
@@ -578,7 +582,6 @@ class Geometrics:
                 line_nr.append(line_number)
                 mark.append(mark_number)
                 ndat_seg += 1
-
         if self.n_lines > 0 and last_mark != 5:
             self.fill_dict(ntracks, xpt1, ypt1, mag1, xpt2, ypt2, mag2,
                            mark_samples, dx_seg, dy_seg, d_seg)

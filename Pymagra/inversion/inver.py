@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Last modified on Apr 23, 2025
+Last modified on June 15, 2025
 
 @author: Hermann Zeyen <hermann.zeyen@universite-paris-saclay.fr>
          Université Paris-Saclay, France
@@ -798,8 +798,8 @@ class inversion:
         while True:
             self.plot_2D(file, inv_flag=True)
 # Save inversion control parameters to file parameters.dat
-            file_name = os.path.join(self.folder, "parameters.dat")
-            self.write_parameters(file_name)
+            # file_name = os.path.join(self.folder, "parameters.dat")
+            # self.write_parameters(file_name)
             if self.equal_flag:
                 fil = os.path.join(self.folder, file + "_scaled.png")
             else:
@@ -942,7 +942,7 @@ class inversion:
 
         self.fig_par.setHelp("Press ENTER to finish, R to continue iterations")
         self.fig_par.show()
-        self.write_parameters(os.path.join(self.folder, "parameters.dat"))
+#        self.write_parameters(os.path.join(self.folder, "parameters.dat"))
         self.fig_par.fig.savefig(os.path.join(self.folder,
                                               f"{txt}_distribution.png"))
 
@@ -1456,10 +1456,15 @@ class inversion:
             self.fig_syn.fig.savefig(plt_file)
             self.fig_syn.show()
             print("\nClick to close window and finish synthetic calculation")
+            self.fig_syn.setHelp(
+                "Press ENTER or left click to finish")
             while True:
                 event = self.fig_syn.get_event()
                 if event.name == "button_press_event":
                     break
+                if event.name == "key_press_event":
+                    if event.key == "enter":
+                        break
             self.fig_syn.close_window()
         with open(os.path.join(self.folder, "synthetic_data.dat"), "w") as fo:
             ny, nx = self.data1_shape

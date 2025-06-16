@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Last modified on Apr 18, 2025
+Last modified on June 16, 2025
 
 @author: Hermann Zeyen <hermann.zeyen@universite-paris-saclay.fr>
          University Paris-Saclay, France
@@ -127,9 +127,9 @@ def get_files(dir0=None, ftype=None):
             types.append("l")
             labels.append(["Magnetic", "Gravity"])
             if "gra" in f.lower() or "bou" in f.lower():
-                values.append("2")
-            else:
                 values.append("1")
+            else:
+                values.append("0")
             types.append("r")
             labels.append("\nfile type:")
             values.append(None)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Last modified May 01, 2025
+Last modified June 16, 2025
 
 @author: Hermann Zeyen <hermann.zeyen@universite-paris-saclay.fr>
          University Paris-Saclay, France
@@ -139,7 +139,7 @@ class DataContainer:
         self.treatments["clip"] = False
         self.treatments["justify_median"] = False
         self.treatments["justify_Gauss"] = False
-        self.treatments["interpol"] = False
+        self.treatments["gridded"] = False
         self.treatments["nan_fill"] = False
         self.treatments["pole"] = False
         self.treatments["odd lines"] = False
@@ -193,7 +193,7 @@ class DataContainer:
               medians)
             - "justify_Gauss" (directional effects were reduced adjusting
               Gaussian statistics)
-            - "interpol" (Date were interpolated onto a regular grid)
+            - "gridded" (Date were interpolated onto a regular grid)
             - "nan_fill" (Nans in big holes or in corners were filled by
               extrapolation)
             - "pole" (Magnetic data were reduced to pole)
@@ -321,7 +321,7 @@ class DataContainer:
 # If values for sensor height and sensor dispodition are not known, open
 # dialogue box for interactive definition
         if height1 is None:
-            (ret, self.h1_sensor, self.h2_sensor, self.dispo,
+            (ret, self.dispo, self.h1_sensor, self.h2_sensor,
              self.line_declination, self.title) =\
                 comm.get_geometry(file, h1=self.h1_sensor, h2=self.h2_sensor,
                                   dispo=self.dispo+1,
@@ -330,17 +330,24 @@ class DataContainer:
             if not ret:
                 print(f"file {file} not read")
                 return False
+            if self.dispo:
+                self.d_sensor = -self.h2_sensor
+                self.h2_sensor = self.h1_sensor
         else:
             self.h1_sensor = height1
-            self.h2_sensor = height2
-            self.d_sensor = height2 - height1
+            if disp:
+                self.h2_sensor = height1
+                self.d_sensor = height2
+            else:
+                self.h2_sensor = height2
+                self.d_sensor = height2 - height1
             self.dispo = disp
             self.line_declination = dec
             self.title = title
 # Read geometrics data. Depending on the file name extension,
 # io.read_geometrics chooses the type of file to be read
-        self.gdata = io.read_geometrics(file, self.n_block, self.d_sensor,
-                                        self.h1_sensor, self.dispo)
+        self.gdata = io.read_geometrics(file, self.n_block, self.h1_sensor,
+                                        self.d_sensor, self.dispo)
         self.segments = self.gdata.segments
         self.sensor1 = self.gdata.sensor1
         self.sensor2 = self.gdata.sensor2
@@ -1370,7 +1377,7 @@ class DataContainer:
                                               self.y_inter)
             self.grad_fill = (self.sensor2_fill-self.sensor1_fill)/self.data[
                 "d_sensor"]
-        self.treatments["interpol"] = True
+        self.treatments["gridded"] = True
 
     def nan_fill(self):
         """

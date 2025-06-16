@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Last modified on Apr 23, 2025
+Last modified on June 15, 2025
 
 @author: Hermann Zeyen <hermann.zeyen@universite-paris-saclay.fr>
          Université Paris-Saclay, France
@@ -454,8 +454,9 @@ class mainWindow(QMainWindow, Ui_MainWindow):
                              vmax=max_col, levels=levels, cmap=cmap,
                              norm=norm)
         ax.set_clip_on(True)
-        for collection in gci.collections:
-            collection.set_clip_path(clip_path, transform=ax.transData)
+        # for collection in gci.collections:
+        #     collection.set_clip_path(clip_path, transform=ax.transData)
+        gci.set_clip_path(clip_path, transform=ax.transData)
         ax.set_title(title, fontsize=self.axfont + 2)
         ax.set_xlabel(xlabel, fontsize=self.axfont)
         ax.set_ylabel(ylabel, fontsize=self.axfont)

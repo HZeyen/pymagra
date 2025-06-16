@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Last modified on Feb 24, 2025
+Last modified on June 16, 2025
 
 @author: Hermann Zeyen <hermann.zeyen@gmail.com>
          Université Paris-Saclay
@@ -41,6 +41,10 @@ def get_geometry(file, h1=None, h2=None, dispo=None, dec=None, dx=None,
     labels = [file]
     types = ["l"]
     values = ["None"]
+    if dispo is not None:
+        labels.append(["Vertical disposition", "Horizontal disposition"])
+        types.append("r")
+        values.append(dispo)
     if h1 is not None:
         if h2 is not None:
             labels.append("Height of sensor 1 above ground [m]")
@@ -49,13 +53,11 @@ def get_geometry(file, h1=None, h2=None, dispo=None, dec=None, dx=None,
         types.append("e")
         values.append(h1)
     if h2 is not None:
-        labels.append("Height of sensor 2 above ground [m]")
+        labels.append("If vertical: height of sensor 2 above ground [m]\n"
+                      + "If horizontal: distance between sensors [m]\n"
+                      + "(positive: sensor 1 at left side)")
         types.append("e")
         values.append(h2)
-    if dispo is not None:
-        labels.append(["Vertical disposition", "Horizontal disposition"])
-        types.append("r")
-        values.append(dispo)
     if dec is not None:
         labels.append("Direction of Y-axis [degrees from N to E]")
         types.append("e")
@@ -80,15 +82,15 @@ def get_geometry(file, h1=None, h2=None, dispo=None, dec=None, dx=None,
         return ret
     ret = [True]
     i = 0
+    if dispo is not None:
+        i += 1
+        ret.append(int(results[i]))
     if h1 is not None:
         i += 1
         ret.append(-float(results[i]))
     if h2 is not None:
         i += 1
         ret.append(-float(results[i]))
-    if dispo is not None:
-        i += 1
-        ret.append(int(results[i]))
     if dec is not None:
         i += 1
         ret.append(float(results[i]))
